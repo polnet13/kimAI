@@ -16,6 +16,7 @@ class DetectorBike():
         # 이미지 초기화
         self.base = path
         self.img_path = os.path.join(path, 'rsc/init.jpg')
+        # C:\Users\prude\OneDrive\Documents\kimAI\rsc\init.jpg
         self.model_bike_path = os.path.join(path, 'rsc/models/yolov8n.pt')
         self.model_nbp_path = os.path.join(path, 'rsc/models/motobike_e300_b8_s640.pt')
         
@@ -144,7 +145,10 @@ class DetectorBike():
                 continue
             bike_img = frame[ymin:ymax, xmin:xmax]
             nbp_img = self.make_nbp_img(bike_img)
-            nbp_img = self.nbp_transform(nbp_img)
+            try:
+                nbp_img = self.nbp_transform(nbp_img)
+            except:
+                return frame
             # ocr 처리
             if nbp_img is not None:
                 ocr_text = self.reader.readtext(nbp_img, detail=0)

@@ -86,7 +86,7 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         # 리스트뷰 
         self.tableView.clicked.connect(self.on_item_clicked)
         # 원본이미지
-        self.img = None
+        self.img = cv2.imread(self.init_img_path)
         # 영상관련 정보 
         self.width = 0
         self.height = 0
@@ -133,9 +133,14 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
     ## 슬롯함수 ##
     ##############
     def slot_btn_fileopen(self):
+        '''
+        파일 입력 받고 
+        현재 선택된 모델 초기화
+        '''
         self.fileName, _ = QFileDialog.getOpenFileName(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
         self.selected_model = self.dropdown_models.currentText()
         self.detector_init()
+        
 
     def slot_btn_open_complete(self):
         path = os.path.join(self.base, 'output')
@@ -147,6 +152,9 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
             self.detector = DetectorBike(self.base)
         else:
             self.detector = DetectorCCTV(self.base, self.model_path) 
+        self.detector_fileopen()
+
+    def detector_fileopen(self):
         # 이미지 처리
         self.img, self.width, self.height = self.detector.fileopen(self.fileName)
         self.reset_roi(self.img)
@@ -203,12 +211,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         if self.curent_frame == self.total_frames:
             self.timer.stop()
             self.play_status = False
-            # if self.recording is True:
-            #     self.video.release()
-            #     self.recording = False
-            #     result = QMessageBox.information(self, "똥집", "녹화 파일 생성 완료 폴더 바로가기")
-            #     if result == QMessageBox.Ok:
-            #         os.startfile(os.path.dirname(self.fileName))
 
 
     def slot_btn_multi_open(self):
@@ -528,6 +530,7 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         
     # 드롭다운 메뉴가 변경되었을 때 Yolo 모델을 변경 
     def slot_dropdown_model_changed(self):
+        
         text = self.dropdown_models.currentText() 
         if not self.selected_mode == text:
             self.selected_model = text
@@ -537,6 +540,7 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         '''
         선택된 모델을 변경하는 함수
         '''
+        print('체인지 모델')
         if self.selected_model == '이륜차 번호판 감지':
             self.detector = DetectorBike(self.base)
         else:

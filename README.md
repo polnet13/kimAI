@@ -41,7 +41,7 @@ python manage.py makemigrations model_setting
 # 2. 모델 마이그레이트
 python manage.py migrate
 
-***
 #### Using Pyinstaller
 python manage.py deploy
 
+test
