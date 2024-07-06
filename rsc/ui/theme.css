@@ -1,0 +1,77 @@
+/* QMainWindow {
+    background-color:#f80202;
+}  */
+QFrame {
+    border-width: 1px;
+}
+
+
+/* QLabel {
+    color:#333333;
+    font-size: 20px;
+    padding:10px;
+    border-radius: 5px;
+    background-color:#E0E0E0;
+} */
+
+QLineEdit { 
+    background-color: rgb(71, 71, 67);
+    color: #0a0a0a;
+}
+
+/* 그냥 냅뒀을 때 */
+QLineEdit:active { 
+    color: #51923e;
+}
+
+/* 입력할 때 */
+QLineEdit:focus {
+    color: #ffffff;
+
+}
+
+QLineEdit:disabled {
+    color: #daff08;
+}
+
+
+
+/* QMenu {
+    font-size: 16px;
+    font-family: "Microsoft YaHei UI";
+    font-weight: light;
+    color:white;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-style: solid;
+    border-width: 0px;
+    border-color: rgba(255, 255, 255, 255);
+    border-radius: 3px;
+    background-color: rgba(200, 200, 200,50);
+} */
+
+/* QPushButton {
+    background-color: rgb(209, 187, 187);
+    border-radius: 10px;
+    border-style: outset;
+    border-width: 1px;
+    border-color: beige;
+    font: bold 14px;
+    min-width: 5em;
+    padding: 6px;
+} */
+
+/* QPushButton:pressed {
+    background-color: rgb(165, 149, 149);
+    border-style: inset;
+} */
+
+/* apply_stylesheet(app, theme=theme[1], invert_secondary=False, extra=extra)
+base = os.path.dirname(__file__)
+css_path = os.path.join(base, 'rsc', 'theme.css')
+# 커스텀 css 읽어서 기존 시트와 합치기
+stylesheet = app.styleSheet()
+with open(css_path, encoding='utf-8') as file:
+    app.setStyleSheet(stylesheet + file.read().format(**os.environ))
