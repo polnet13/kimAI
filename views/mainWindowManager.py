@@ -508,8 +508,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         '''
         최종적으로 roi를 표시한 이미지를 출력하는 함수
         '''
-        if self.checkbox_displayoff is True:
-            return
         if img is None:
             plot_img = self.img.copy()
         else:
@@ -540,10 +538,11 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         '''
         선택된 모델을 변경하는 함수
         '''
-        print('체인지 모델')
         if self.selected_model == '이륜차 번호판 감지':
+            self.checkbox_yolo.setChecked(True)
             self.detector = DetectorBike(self.base)
         else:
+            self.checkbox_yolo.setChecked(False)
             self.model_path = os.path.join(self.base, 'rsc/models', self.selected_model)
             self.detector = DetectorCCTV(self.base, self.model_path)
         if self.fileName:

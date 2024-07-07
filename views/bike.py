@@ -101,10 +101,9 @@ class DetectorBike():
         
     def detect_move(self, roi_img, region_status, thr):
         '''
-        바이크 탐지에서는 사용하지 않음
+        바이크 탐지에서는 사용하지 않음                    
         '''
         return roi_img, True, thr
-    
 
     
     # yolo 이미지 디텍션 함수
@@ -120,19 +119,13 @@ class DetectorBike():
         img: cv2 이미지(바운딩 박스 처리된 이미지)
         track_id: 추적된 객체의 id값
         ''' 
-        frame_x, frame_y = frame.shape[1], frame.shape[0]
-        ocr_result = []
-        # frame의 가로 사이즈가 640을 초과 하면 640으로 세로 사이즈는 맞춰서 resize
-        if frame.shape[1] > 640:
-            aspect_ratio = frame.shape[0] / frame.shape[1]  # 세로/가로 비율 0.5=1/2            
-            new_height = int(640 * aspect_ratio)
-            _frame = cv2.resize(frame, (640, new_height))
-            _detections = self.model.track(_frame, persist=True)[0]
+        detections = self.model.track(frame, persist=True)[0]
+            
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
-        for data in _detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
+        for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
             _cap_number = 0
             _xmin, _ymin, _xmax, _ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
-            xmin, ymin, xmax, ymax = tools.to_original_shape(frame.shape, _frame.shape, _xmin, _ymin, _xmax, _ymax) # 원본
+            xmin, ymin, xmax, ymax = tools.to_original_shape(frame.shape, frame.shape, _xmin, _ymin, _xmax, _ymax) # 원본
             try:
                 _track_id, _confidence, _label_number = int(data[4]), float(data[5]), int(data[6])
             except IndexError:
@@ -152,13 +145,13 @@ class DetectorBike():
             # ocr 처리
             if nbp_img is not None:
                 ocr_text = self.reader.readtext(nbp_img, detail=0)
+                ocr_text = ' '.join(ocr_text)
                 # 번호판 이미지 원본이미지에 삽입
                 # nbp_img = cv2.resize(nbp_img, (int(frame_x/5), int(frame_y/5)))
                 frame[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img
                 # nbp_img_color = np.stack((nbp_img,)*3, axis=-1)
                 # frame[0:nbp_img_color.shape[0], 0:nbp_img_color.shape[1]] = nbp_img_color
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 2)
-            cv2.putText(frame, f'{_track_id} : {ocr_text}', (xmin, ymin-20), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
+            # cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 2)
             # track_ids 딕셔너리 추가: 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있을 때
             if _track_id not in self.track_ids:
                 _cap_number = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
@@ -191,13 +184,10 @@ class DetectorBike():
     def reorderPts(self, pts):
         idx = np.lexsort((pts[:, 1], pts[:, 0]))  # 칼럼0 -> 칼럼1 순으로 정렬한 인덱스를 반환
         pts = pts[idx]  # x좌표로 정렬
-
         if pts[0, 1] > pts[1, 1]:
             pts[[0, 1]] = pts[[1, 0]]
-
         if pts[2, 1] < pts[3, 1]:
             pts[[2, 3]] = pts[[3, 2]]
-
         return pts
 
     def nbp_transform(self, frame):
@@ -207,14 +197,11 @@ class DetectorBike():
         srcQuad = np.array([[0, 0], [0, 0], [0, 0], [0, 0]], np.float32)
         dstQuad = np.array([[0, 0], [0, dh], [dw, dh], [dw, 0]], np.float32)
         dst = np.zeros((dh, dw), np.uint8)
-
         frame = cv2.GaussianBlur(frame, (3,3), 7)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         th, frame = cv2.threshold(frame, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-
         # 외곽선 검출 및 명함 검출
         contours, _ = cv2.findContours(frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
         for pts in contours:
             # 너무 작은 객체는 제외
             if cv2.contourArea(pts) < 10:
