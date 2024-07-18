@@ -38,15 +38,15 @@ class DetectorBike():
         # AI 모델 생성
         self.model = YOLO(self.model_bike_path)
         self.model_nbp = YOLO(self.model_nbp_path)
-        self.reader = easyocr.Reader(['ko'], gpu=False)
+        self.reader = easyocr.Reader(lang_list=['ko'], model_storage_directory=r'C:\Users\prude\OneDrive\Documents\kimAI\rsc\models_ocr', gpu=False)
         try:
             bike_img = cv2.imread(self.img_path)
             detection = self.model(bike_img)[0]
             print(detection.names.items())
+            self.labels = [ v for _ , v in detection.names.items() ]
         except:
             print("모델 초기화 중 디텍션 오류 발생")
         # 라벨을 초기화 하는 함수 작성        
-        self.labels = [ v for _ , v in detection.names.items() ]
 
 
         

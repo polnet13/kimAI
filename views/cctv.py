@@ -40,10 +40,10 @@ class DetectorCCTV():
         self.model = YOLO(model_path)
         try:
             detection = self.model(self.img)[0]
+            self.labels = [ v for _ , v in detection.names.items() ]
         except:
             print("모델 초기화 중 디텍션 오류 발생")
         # 라벨을 초기화 하는 함수 작성        
-        self.labels = [ v for _ , v in detection.names.items() ]
  
             
             
