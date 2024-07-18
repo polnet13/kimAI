@@ -6,6 +6,7 @@ from multiprocessing import Process
 from views.control import tools
 import easyocr
 import numpy as np
+from .run_ocr import OcrReader
 
 class DetectorBike():
     '''
@@ -38,7 +39,7 @@ class DetectorBike():
         # AI 모델 생성
         self.model = YOLO(self.model_bike_path)
         self.model_nbp = YOLO(self.model_nbp_path)
-        self.reader = easyocr.Reader(lang_list=['ko'], model_storage_directory=r'C:\Users\prude\OneDrive\Documents\kimAI\rsc\models_ocr', gpu=False)
+        self.reader = OcrReader()
         try:
             bike_img = cv2.imread(self.img_path)
             detection = self.model(bike_img)[0]
@@ -144,8 +145,8 @@ class DetectorBike():
                 return frame
             # ocr 처리
             if nbp_img is not None:
-                ocr_text = self.reader.readtext(nbp_img, detail=0)
-                ocr_text = ' '.join(ocr_text)
+                ocr_text = self.reader.read(nbp_img)
+                # ocr_text = ' '.join(ocr_text)
                 # 번호판 이미지 원본이미지에 삽입
                 # nbp_img = cv2.resize(nbp_img, (int(frame_x/5), int(frame_y/5)))
                 frame[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img
@@ -153,10 +154,10 @@ class DetectorBike():
                 # frame[0:nbp_img_color.shape[0], 0:nbp_img_color.shape[1]] = nbp_img_color
             # cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 2)
             # track_ids 딕셔너리 추가: 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있을 때
-            if _track_id not in self.track_ids:
-                _cap_number = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
-                self.track_ids[_track_id] = [_cap_number, ocr_text]
-            self.track_ids[_track_id] = [_cap_number, ocr_text]
+            # if _track_id not in self.track_ids:
+            #     _cap_number = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
+            #     self.track_ids[_track_id] = [_cap_number, ocr_text]
+            # self.track_ids[_track_id] = [_cap_number, ocr_text]
         return frame
 
 

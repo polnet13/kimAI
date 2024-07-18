@@ -4,7 +4,25 @@ import numpy as np
 import torch.nn.functional as F
 
 
+ 
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+class AttnLabelConverter(object):
+    """ Convert between text-label and text-index """
+
+    def __init__(self, character):
+        # character (str): set of the possible characters.
+        # [GO] for the start token of the attention decoder. [s] for end-of-sentence token.
+        list_token = ['[GO]', '[s]']  # ['[s]','[UNK]','[PAD]','[GO]']
+        list_character = list(character)
+        self.character = list_token + list_character
+
+        self.dict = {}
+        for i, char in enumerate(self.character):
+            # print(i, char)
+            self.dict[char] = i
+
 
 class Model(nn.Module):
 
@@ -12,9 +30,10 @@ class Model(nn.Module):
     def __init__(self, input_channel, output_channel, hidden_size, num_class):
         super(Model, self).__init__()
 
+        print('num_class: ', num_class)
         """ TPS """
         num_fiducial = 20  # 예시 값, 실제 사용하는 네트워크에 맞게 조정 필요
-        self.Transformation = TPS_SpatialTransformerNetwork(F=num_fiducial, I_size=(32, 32), I_r_size=(32, 32), I_channel_num=input_channel)
+        self.Transformation = TPS_SpatialTransformerNetwork(F=num_fiducial, I_size=(32, 100), I_r_size=(32, 100), I_channel_num=input_channel)
 
         """ ResNet """
         self.FeatureExtraction = ResNet_FeatureExtractor(input_channel, output_channel)
@@ -27,13 +46,12 @@ class Model(nn.Module):
             BidirectionalLSTM(hidden_size, hidden_size, hidden_size))
         self.SequenceModeling_output = hidden_size
 
-        """ Attn """
-        self.Prediction = Attention(self.SequenceModeling_output, hidden_size, num_class)
+        """ CTC """
+        self.Prediction = nn.Linear(self.SequenceModeling_output, num_class)
 
     def forward(self, input, text, is_train=True):
         """ Transformation stage """
-        if not self.stages['Trans'] == "None":
-            input = self.Transformation(input)
+        input = self.Transformation(input)
 
         """ Feature extraction stage """
         visual_feature = self.FeatureExtraction(input)
@@ -41,16 +59,11 @@ class Model(nn.Module):
         visual_feature = visual_feature.squeeze(3)
 
         """ Sequence modeling stage """
-        if self.stages['Seq'] == 'BiLSTM':
-            contextual_feature = self.SequenceModeling(visual_feature)
-        else:
-            contextual_feature = visual_feature  # for convenience. this is NOT contextually modeled by BiLSTM
+        contextual_feature = self.SequenceModeling(visual_feature)
 
         """ Prediction stage """
-        if self.stages['Pred'] == 'CTC':
-            prediction = self.Prediction(contextual_feature.contiguous())
-        else:
-            prediction = self.Prediction(contextual_feature.contiguous(), text, is_train, batch_max_length=self.opt.batch_max_length)
+        # prediction = self.Prediction(contextual_feature.contiguous())
+        prediction = self.Prediction(contextual_feature.contiguous())
 
         return prediction
 
@@ -111,7 +124,10 @@ class BidirectionalLSTM(nn.Module):
         input : visual feature [batch_size x T x input_size]
         output : contextual feature [batch_size x T x output_size]
         """
-        self.rnn.flatten_parameters()
+        try:
+            self.rnn.flatten_parameters()
+        except:
+            pass
         recurrent, _ = self.rnn(input)  # batch_size x T x input_size -> batch_size x T x (2*hidden_size)
         output = self.linear(recurrent)  # batch_size x T x output_size
         return output
@@ -415,7 +431,10 @@ class ResNet(nn.Module):
         x = self.relu(x)
 
         return x
-    
+
+
+
+
 
 class BasicBlock(nn.Module):
     expansion = 1
