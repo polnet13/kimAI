@@ -7,6 +7,7 @@ from views.control import tools
 import easyocr
 import numpy as np
 from .run_ocr import OcrReader
+import pandas as pd
 
 class DetectorBike():
     '''
@@ -70,6 +71,7 @@ class DetectorBike():
             self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             # track_ids 초기화
             self.track_ids = {}
+            
             # 프레임 관련 정보 초기화
             self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))  
             self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
@@ -99,13 +101,6 @@ class DetectorBike():
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, 1)
             play_status = False
             return self.img, self.curent_frame, play_status
-        
-    def detect_move(self, roi_img, region_status, thr):
-        '''
-        바이크 탐지에서는 사용하지 않음                    
-        '''
-        return roi_img, True, thr
-
     
     # yolo 이미지 디텍션 함수
     def detect_yolo_track(self, frame, thr):
@@ -138,7 +133,9 @@ class DetectorBike():
             if _confidence < thr/100:
                 continue
             bike_img = frame[ymin:ymax, xmin:xmax]
-            nbp_img = self.make_nbp_img(bike_img)
+            # 번호판 이미지 검출
+            nbp_img = self.detect_nbp_img(bike_img)
+            # 휘어진 번호판 이미지 처리
             try:
                 nbp_img = self.nbp_transform(nbp_img)
             except:
@@ -159,10 +156,17 @@ class DetectorBike():
             #     self.track_ids[_track_id] = [_cap_number, ocr_text]
             # self.track_ids[_track_id] = [_cap_number, ocr_text]
         return frame
+        
+    def detect_move(self, roi_img, region_status, thr):
+        '''
+        바이크 탐지에서는 사용하지 않음                    
+        '''
+        return roi_img, True, thr
 
 
 
-    def make_nbp_img(self, bike_img):
+
+    def detect_nbp_img(self, bike_img):
         '''
         return 
         성공: 번호판 이미지
@@ -217,6 +221,23 @@ class DetectorBike():
             pers = cv2.getPerspectiveTransform(srcQuad, dstQuad)
             dst = cv2.warpPerspective(img, pers, (dw, dh), flags=cv2.INTER_CUBIC)
         return dst
+
+class DataPD():
+    
+    def __init__(self):
+            # 자료 정리
+        data = {
+            "track_ID": [],
+            "cap": [],
+            "bike_thr": [],
+            "ocr_si_thr": [],
+            "ocr_giho_thr": [],
+            "ocr_number_thr": [],
+            "ocr_si": [],
+            "ocr_giho": [],
+            "ocr_number": []
+        }
+        self.df = pd.DataFrame(data)  # 트랙ID, cap넘버, bike_thr, ocr_si_thr, ocr_giho_thr, ocr_number_thr, ocr_si, ocr_giho, ocr_number
 
 
 class MultiBike():
