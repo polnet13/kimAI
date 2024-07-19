@@ -349,7 +349,10 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
             return
         # ROI 부분만 욜로 디텍션
         if self.checkbox_yolo.isChecked():
-            roi_img  = self.detector.detect_yolo_track(roi_img, self.yolo_thr)
+            roi_img, text  = self.detector.detect_yolo_track(roi_img, self.yolo_thr)
+            if text:
+                self.textBrowser.append(text)
+                self.textBrowser.setFocus()
             # 이것 때문에 오류 발생
             # bike:  track_ids[n] = [_cap_number, ocr_text] 
             # cctv:  track_ids[n] = cap 

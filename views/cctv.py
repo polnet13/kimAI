@@ -166,7 +166,8 @@ class DetectorCCTV():
             # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
             if track_id not in self.track_ids:
                 self.track_ids[track_id] = [self.cap.get(cv2.CAP_PROP_POS_FRAMES)]
-        return frame
+            text = None
+        return frame, text
 
 
     

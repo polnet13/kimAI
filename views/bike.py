@@ -21,9 +21,10 @@ class DetectorBike():
         # C:\Users\prude\OneDrive\Documents\kimAI\rsc\init.jpg
         self.model_bike_path = os.path.join(path, 'rsc/models/yolov8n.pt')
         self.model_nbp_path = os.path.join(path, 'rsc/models/motobike_e300_b8_s640.pt')
-        
+        # 데이터 프레임
+        self.df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
+        # 이미지 읽기
         self.img = cv2.imread(self.img_path)
-        
         # 탐지 영역 설정 활성화 상태
         self.region_status = False
         # GPU 사용하는 YOLO 모델 불러오기
@@ -97,6 +98,9 @@ class DetectorBike():
                 return self.img, self.curent_frame, play_status
             return self.img, self.curent_frame, play_status
         else:
+            print(self.df['si'].value_counts()[:3])
+            print(self.df['giho'].value_counts()[:3])
+            print(self.df['num'].value_counts()[:3])
             self.curent_frame = 1
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, 1)
             play_status = False
@@ -106,17 +110,15 @@ class DetectorBike():
     def detect_yolo_track(self, frame, thr):
         '''
         이 함수에서 실질적인 탐지 작업을 수행함
-        input: origin_img
-        output: 원본해상도 욜로 이미지,
-        검출된 객체에 대한 bbox와 텍스트를 생성하여 이미지에 출력
-        개인정보 가리기와 bbox 생성을 선택할 수 있음
-        
+        input: origin_img, thr
+
+        output
         frame: 원본 해상도의 욜로 처리된 이미지
         img: cv2 이미지(바운딩 박스 처리된 이미지)
         track_id: 추적된 객체의 id값
         ''' 
         detections = self.model.track(frame, persist=True)[0]
-            
+        text = None
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
             _cap_number = 0
@@ -139,10 +141,12 @@ class DetectorBike():
             try:
                 nbp_img = self.nbp_transform(nbp_img)
             except:
-                return frame
+                return frame, None
             # ocr 처리
             if nbp_img is not None:
-                ocr_text = self.reader.read(nbp_img)
+                si, giho, num = self.reader.read(nbp_img)
+                _df = pd.DataFrame({'si':[si], 'giho':[giho], 'num':[num]})
+                self.df = pd.concat([self.df, _df], ignore_index=True)
                 # ocr_text = ' '.join(ocr_text)
                 # 번호판 이미지 원본이미지에 삽입
                 # nbp_img = cv2.resize(nbp_img, (int(frame_x/5), int(frame_y/5)))
@@ -155,7 +159,15 @@ class DetectorBike():
             #     _cap_number = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
             #     self.track_ids[_track_id] = [_cap_number, ocr_text]
             # self.track_ids[_track_id] = [_cap_number, ocr_text]
-        return frame
+        try:
+            s = self.df['si'].value_counts().idxmax()
+            g = self.df['giho'].value_counts().idxmax()
+            n = self.df['num'].value_counts().idxmax()
+            print(f'인식: {s} {g} {n}')
+            text = f'{s} {g} {n}'
+        except:
+            pass
+        return frame, text
         
     def detect_move(self, roi_img, region_status, thr):
         '''

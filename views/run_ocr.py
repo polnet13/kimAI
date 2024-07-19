@@ -14,6 +14,30 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 custom_model = os.path.join(base, 'rsc', 'user_network')
 
+# 텍스트 리스트
+text_list = []
+서울 = '강남 강동 강북 강서 관악 광진 구로 금천 노원 도봉 동대문 동작 마포 서대문 서초 성동 성북 송파 양천 영등포 용산 은평 종로 중 중랑'
+부산 = '강서 금정 기장 남 동 동래 부산진 북 사상 사하 서 수영 연제 영도 중 해운대'
+대구 = '남 달서 달성 동 북 서 수성 중'
+인천 = '강화 계양 남 남동 미추홀 동 부평 북 서 연수 옹진 중'
+울산 = '남 동 북 울주 중'
+광주 = '광산 남 동 북 서'
+대전 = '대덕 동 서 유성 중'
+경기 = '가평 강화 고양 과천 광명 광주 구리 군포 김포 남양주 동두천 부천 성남 송탄 수원 시흥 안산 안성 안양 양주 양평 여주 연천 오산 옹진 용인 의왕 의정부 이천 파주 평택 평택시 포천 하남 화성'
+강원 = '강릉 고성 동해 명주 삼척 삼척군 삼척시 속초 양구 양양 영월 원성 원성군 원주 원주군 원주시 인제 정선 철원 춘성 춘성군 춘천 춘천군 춘천시 태백 평창 홍천 화천 횡성'
+충북 = '공주 공주군 괴산 단양 대천 보령 보은 영동 옥천 음성 제원 제천 제천군 증원 증평 진천 청원 청원군 청주 충주'
+충남 = '계룡 공주 공주시 금산 논산 당진 대덕 대전 대천시 보령시 보령 부여 서산 서산군 서산시 서천 아산 아산군 아산시 연기 예산 온양 천안 천안군 천안시 천원 천원군 청양 태안 홍성'
+전북 = '고창 군산 김제 김제시 남원 남원시 무주 부안 순창 옥구 완주 이리 익산 임실 장수 전주 정읍 정주 진안'
+전남 = '강진 고흥 곡성 광양 광주 구례 금성 나주 나주시 담양 동광양 목포 무안 보성 순천 승주 승천 신안 여수 여수시 여천 여천군 여천시 영광 영암 완도 장성 장흥 진도 진도군 천원군 함평 해남 화순'
+경북 = '경산 경산군 경주 경주군 경주시 고령 구미 군위 금릉 김천 문경 문경군 봉화 상주 상주군 상주시 선산 성주 안동 안동군 안동시 영덕 영양 영일 영주 영천 영천군 영천시 영풍 예천 울릉 울진군 울진 의성 청도 청송 칠곡 포항'
+경남 = '거제 거창 고성 김해 김해시 남해 밀양 밀양시 마산 사천 산청 삼천포 양산 울산 울주 의령 의창 의창군 장승포 진양 진주 진해 창녕 창원 창원군 창원시 충무 통영 하동 함안 함양 합천'
+제주 = '남제주 북제주 서귀포 제주'
+val_name = ['서울', '부산', '대구', '인천', '울산', '광주', '대전', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
+for row in val_name:
+    globals()[row] = [ row+i for i in globals()[row].split(' ')]
+text_list = 서울 + 부산 + 대구 + 인천 + 울산 + 광주 + 대전 + 경기 + 강원 + 충북 + 충남 + 전북 + 전남 + 경북 + 경남 + 제주
+giho = ['가', '나', '다', '라', '마', '바', '사', '아', '자', '차', '카', '타', '파', '하', '거', '너', '더', '러', '머', '버', '서', '어', '저', '처', '커', '터', '퍼', '허']
+
 class OcrReader:
 
     def __init__(self, model_name='best_accuracy'):
@@ -24,39 +48,60 @@ class OcrReader:
                 recog_network= model_name)
         # easyocr reader 생성, easyocr 기본모델로 실행
         self.reader2 = Reader(['ko'])
-        self.text_list = []
-        self.si = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
-        self.gu = ['종로', '중', '용산', '성동', '광진', '동대문', '중랑', '성북', '강북', '도봉', '노원', '은평', '서대문', '마포', '양천', '강서', '구로', '금천', '영등포', '동작', '관악', '서초', '강남', '송파', '강동', '중', '서', '동', '영도', '부산진', '동래', '남', '북', '해운대', '사하', '금정', '강서', '연제', '수영', '사상', '기장', '중', '동', '서', '남', '북', '수성', '달서', '달성', '군위', '중', '동', '미추홀', '연수', '남동', '부평', '계양', '서', '강화', '옹진', '동', '서', '남', '북', '광산', '동', '중', '서', '유성', '대덕', '수원', '수원', '수원', '수원', '성남', '성남', '성남', '의정부', '안양', '안양', '부천', '광명', '평택', '동두천', '안산', '안산', '고양', '고양', '고양', '과천', '구리', '남양주', '오산', '시흥', '군포', '의왕', '하남', '용인', '용인', '용인', '파주', '이천', '안성', '김포', '화성', '광주', '양주', '포천', '여주', '연천', '가평', '양평', '춘천', '원주', '강릉', '동해', '태백', '속초', '삼척', '홍천', '횡성', '영월', '평창', '정선', '철원', '화천', '양구', '인제', '고성', '양양', '청주', '청주', '청주', '청주', '충주', '제천', '보은', '옥천', '영동', '증평', '진천', '괴산', '음성', '단양', '천안', '천안', '공주', '보령', '아산', '서산', '논산', '계룡', '당진', '금산', '부여', '서천', '청양', '홍성', '예산', '태안', '전주', '전주', '군산', '익산', '정읍', '남원', '김제', '완주', '진안', '무주', '장수', '임실', '순창', '고창', '부안', '목포', '여수', '순천', '나주', '광양', '담양', '곡성', '구례', '고흥', '보성', '화순', '장흥', '강진', '해남', '영암', '무안', '함평', '영광', '장성', '완도', '진도', '신안', '포항', '포항', '경주', '김천', '안동', '구미', '영주', '영천', '상주', '문경', '경산', '군위', '의성', '청송', '영양', '영덕', '청도', '고령', '성주', '칠곡', '예천', '봉화', '울진', '울릉', '창원', '창원', '창원', '창원', '창원', '진주', '통영', '사천', '김해', '밀양', '거제', '양산', '의령', '함안', '창녕', '고성', '남해', '하동', '산청', '함양', '거창', '합천', '제주', '서귀포']
-        self.giho = ['가', '나', '다', '라', '마', '바', '사', '아', '자', '차', '카', '타', '파', '하', '거', '너', '더', '러', '머', '버', '서', '어', '저', '처', '커', '터', '퍼', '허']
-        for s in set(self.si):
-            for g in set(self.gu):
-                self.text_list.append(s+g)
-        
-        self.text_list = self.text_list + self.giho
-        print(self.text_list)
+        self.text_list = text_list
+        self.giho = giho
 
     def read(self, img):
-        result1 =  self.reader1.readtext(img)
-        result2 =  self.reader2.readtext(img)
-        # 결과 출력1
-        if len(result1) == 0:
-            print('노 디텍션 result1')
-        else:
-            for (bbox, string, confidence) in result1:
-                print('커스텀')
-                print(f"{string}({confidence}) {bbox}")
-                # # bbox 그려진 이미지 만들기
-                # img1 = cv2.rectangle(img1, (int(bbox[0][0]), int(bbox[0][1])), (int(bbox[2][0]), int(bbox[2][1])), (0, 255, 0), 2)
-                # img1 = cv2.putText(img1, string, (int(bbox[0][0]), int(bbox[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+        '''
+        input: 이미지
+        output: result2_si, result2_giho, result2_num
+        '''
+        # 이미지 전처리
+        y = img.shape[0]
+        x = img.shape[1]
+        img_si = img.copy()[:int(y*0.33),:]
+        img_giho = img.copy()[:,:int(x*0.26)]
+        img_num = img.copy()[int(y*0.31):,int(x*0.19):]
+        # result1 =  self.reader1.readtext(img)
+        # # 결과 출력1
+        # if len(result1) == 0:
+        #     print('노 디텍션 result1')
+        # else:
+        #     for (bbox, string, confidence) in result1:
+        #         print('커스텀')
+        #         print(f"{string}({confidence}) {bbox}")
+        #         # # bbox 그려진 이미지 만들기
+        #         # img1 = cv2.rectangle(img1, (int(bbox[0][0]), int(bbox[0][1])), (int(bbox[2][0]), int(bbox[2][1])), (0, 255, 0), 2)
+        #         # img1 = cv2.putText(img1, string, (int(bbox[0][0]), int(bbox[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
         # 결과 출력2
-        if len(result2) == 0:
-            print('노 디텍션 result2')
+        result2_si =  self.reader2.readtext(img_si)
+        result2_giho =  self.reader2.readtext(img_giho)
+        result2_num =  self.reader2.readtext(img_num)
+        # 시
+        if len(result2_si) == 0:
+            print('시: 노 디텍션')
+            result2_si = None
         else:
-            for (bbox, string, confidence) in result2:
-                print('노말')
-                print(f"{string}({confidence}) {bbox}")
-                self.matching(string, self.text_list)
-                self.jacad_match(string, self.text_list)
+            for (bbox, string, confidence) in result2_si:
+                print(f"시: {string}({confidence}) {bbox}")
+                result2_si = self.matching(string, self.text_list)
+        # 기호
+        if len(result2_giho) == 0:
+            print('기호: 노 디텍션')
+            result2_giho = None
+        else:
+            for (bbox, string, confidence) in result2_giho:
+                print(f"기호: {string}({confidence}) {bbox}")
+                result2_giho = self.matching(string, self.giho)
+        # 숫자      
+        try:
+            print('넘: ', result2_num[0][1][:4], result2_num[0])
+            result2_num = int(result2_num[0][1][:4])
+        except:
+            print(result2_num)
+            result2_num = None
+        return result2_si, result2_giho, result2_num
+
 
     # 유사도 매칭
     def matching(self, text, text_list):
@@ -76,8 +121,11 @@ class OcrReader:
         # 결과 출력
         if matched_string:
             print(f"{text} => {matched_string} (유사도: {max_score}% 매칭)")
+            text = matched_string
         else:
             print(f"{text} : 일치하는 단어가 없습니다.")
+            text = None
+        return text
 
     def jacad_match(self, text, text_list):
         max_score = 0  # 최대 점수 초기화
