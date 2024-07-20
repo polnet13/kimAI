@@ -119,6 +119,7 @@ class DetectorBike():
         ''' 
         detections = self.model.track(frame, persist=True)[0]
         text = None
+        font_scale = int(frame.shape[0]/30)
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
             _cap_number = 0
@@ -147,24 +148,12 @@ class DetectorBike():
                 si, giho, num = self.reader.read(nbp_img)
                 _df = pd.DataFrame({'si':[si], 'giho':[giho], 'num':[num]})
                 self.df = pd.concat([self.df, _df], ignore_index=True)
-                # ocr_text = ' '.join(ocr_text)
-                # 번호판 이미지 원본이미지에 삽입
-                # nbp_img = cv2.resize(nbp_img, (int(frame_x/5), int(frame_y/5)))
                 frame[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img
-                # nbp_img_color = np.stack((nbp_img,)*3, axis=-1)
-                # frame[0:nbp_img_color.shape[0], 0:nbp_img_color.shape[1]] = nbp_img_color
-            # cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 2)
-            # track_ids 딕셔너리 추가: 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있을 때
-            # if _track_id not in self.track_ids:
-            #     _cap_number = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
-            #     self.track_ids[_track_id] = [_cap_number, ocr_text]
-            # self.track_ids[_track_id] = [_cap_number, ocr_text]
         try:
             s = self.df['si'].value_counts().idxmax()
             g = self.df['giho'].value_counts().idxmax()
             n = self.df['num'].value_counts().idxmax()
-            print(f'인식: {s} {g} {n}')
-            text = f'{s} {g} {n}'
+            text = f'{s} {g} {n}'  # 누적 인식
         except:
             pass
         return frame, text
