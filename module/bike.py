@@ -1,13 +1,14 @@
-import torch
 import cv2
 from ultralytics import YOLO
-import os, random, time
-from multiprocessing import Process
-from views.control import tools
-import easyocr
+import os
+from control import tools
+from control.run_ocr import OcrReader
 import numpy as np
-from .run_ocr import OcrReader
 import pandas as pd
+
+# class definition:
+
+
 
 class DetectorBike():
     '''

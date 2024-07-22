@@ -10,9 +10,9 @@ from PySide6 import QtGui
 from PySide6.QtGui import QKeySequence, QShortcut  
 from PySide6.QtCore import Qt
 # 사용자
-from views.control import tools
-from views.cctv import DetectorCCTV, MultiCCTV
-from views.bike import DetectorBike
+from control import tools
+from module.cctv import DetectorCCTV, MultiCCTV
+from module.bike import DetectorBike
 from rsc.ui.untitled_ui import Ui_MainWindow
 # 외부 모듈
 import os, time, random
@@ -33,11 +33,10 @@ class Worker(Process):
         self.obj.multi_process()
 
 
-# 머니북 ui 클래스
+
 class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWindow   
 
     def __init__(self):
-        print('메인창 실행')
         super().__init__()
         self.base = os.path.dirname(os.path.dirname(__file__))
         self.setupUi(self)
@@ -52,9 +51,10 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
             if filename.endswith('.pt'):
                 self.dropdown_models.addItem(filename)
         self.dropdown_models.addItem('이륜차 번호판 감지')
-        # 기본 값을 "두 번째 항목"으로 설정
-        index = self.dropdown_models.findText("yolov8x.pt")
+        # 기본 값을 "이륜차 번호판 감지"으로 설정
+        index = self.dropdown_models.findText("이륜차 번호판 감지")
         self.dropdown_models.setCurrentIndex(index)
+        self.checkbox_yolo.setChecked(True)
         # 움직임 감지 임계값
         self.move_thr = 5
         # yolo 모델 선택 및 경로
@@ -108,9 +108,15 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         ## 단축키 함수 ##
         ################
         print('단축키 설정 시작')
+        # A키 눌렀을 때 설정
+        self.s_key = QShortcut(QKeySequence(Qt.Key_A), self)
+        self.s_key.activated.connect(self.slot_btn_minusOneFrame) 
         # S키 눌렀을 때 설정
         self.s_key = QShortcut(QKeySequence(Qt.Key_S), self)
-        self.s_key.activated.connect(self.slot_btn_play)    
+        self.s_key.activated.connect(self.slot_btn_play) 
+        # D키 눌렀을 때 설정
+        self.s_key = QShortcut(QKeySequence(Qt.Key_D), self)
+        self.s_key.activated.connect(self.slot_btn_plusOneFrame)    
         # O키 눌렀을 때 설정
         self.d_key = QShortcut(QKeySequence(Qt.Key_O), self)
         self.d_key.activated.connect(self.slot_btn_fileopen)   
@@ -141,6 +147,15 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         self.selected_model = self.dropdown_models.currentText()
         self.detector_init()
         
+    def slot_btn_minusOneFrame(self):
+        self.curent_frame = self.detector.cap.get(cv2.CAP_PROP_POS_FRAMES)-2
+        self.playSlider.setValue(self.curent_frame)
+        
+
+    def slot_btn_plusOneFrame(self):
+        self.curent_frame = self.detector.cap.get(cv2.CAP_PROP_POS_FRAMES)+1
+        self.playSlider.setValue(self.curent_frame)
+
 
     def slot_btn_open_complete(self):
         path = os.path.join(self.base, 'output')

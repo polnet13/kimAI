@@ -2,7 +2,7 @@ import torch
 import cv2
 from ultralytics import YOLO
 import os
-from views.control import tools
+from control import tools
 
 
 class DetectorCCTV():
