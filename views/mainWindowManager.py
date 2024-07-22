@@ -11,8 +11,8 @@ from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtCore import Qt
 # 사용자
 from control import tools
-from module.cctv import DetectorCCTV, MultiCCTV
-from module.bike import DetectorBike
+from module.enrolled.cctv import DetectorCCTV, MultiCCTV
+from module.enrolled.bike import DetectorBike
 from rsc.ui.untitled_ui import Ui_MainWindow
 # 외부 모듈
 import os, time, random

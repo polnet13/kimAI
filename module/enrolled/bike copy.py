@@ -5,6 +5,7 @@ from control import tools
 from control.run_ocr import OcrReader
 import numpy as np
 import pandas as pd
+from module import generic 
 
 # class definition:
 

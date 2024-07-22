@@ -1,20 +1,22 @@
-import torch
-import cv2
-from ultralytics import YOLO
 import os
+import cv2
+import torch
+from ultralytics import YOLO
 from control import tools
+from control.run_ocr import OcrReader
+import numpy as np
+import pandas as pd
 
 
-class DetectorCCTV():
+class CustomBaseClass():
     '''
-    cv2, YOLO를 이용한 이미지 처리
+    커스텀 모듈의 기본기능을 정의한 클래스
     '''
     def __init__(self, path, model_path, multiMode = False) -> None:
-        print('Detector_CCTV 생성')
         # GPU 사용 
         self.gpu = torch.cuda.is_available()
         # 이미지 초기화
-        self.base = path
+        self.base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.img_path = os.path.join(path, 'rsc/init.jpg')
         self.img = cv2.imread(self.img_path)
         
@@ -45,7 +47,8 @@ class DetectorCCTV():
             print("모델 초기화 중 디텍션 오류 발생")
         # 라벨을 초기화 하는 함수 작성        
  
-            
+    def __str__(self) -> str:
+        return 'BaseClass'        
             
     ##############
     ## 슬롯함수 ##
@@ -124,8 +127,6 @@ class DetectorCCTV():
         contours, _ = cv2.findContours(diff_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         return plot_img, True, contours
     
-
-    
     # yolo 이미지 디텍션 함수
     def detect_yolo_track(self, frame, thr):
         
@@ -169,8 +170,6 @@ class DetectorCCTV():
             text = None
         return frame, text
 
-
-    
     def get_diff_img(self):
         '''
         return diff_cnt(영상간 차이값), diff(이미지)
@@ -198,7 +197,8 @@ class DetectorCCTV():
 
     
 
-class MultiCCTV():
+
+class CustomMultiClass():
     '''
     Worker의 start() 함수가 실행되면 동집의 실질적인 작업 수행
     '''
@@ -341,5 +341,10 @@ class MultiCCTV():
     def set_roi(self, x1, y1, x2, y2):
         self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
         
+
+
+class PlayClass:
+    pass
+
                 
  
