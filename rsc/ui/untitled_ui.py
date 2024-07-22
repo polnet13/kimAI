@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'untitled.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -68,9 +68,6 @@ class Ui_MainWindow(object):
         self.checkbox_move.setObjectName(u"checkbox_move")
         self.checkbox_move.setGeometry(QRect(290, 620, 331, 19))
         self.checkbox_move.setChecked(True)
-        self.checkbox_blind = QCheckBox(self.centralwidget)
-        self.checkbox_blind.setObjectName(u"checkbox_blind")
-        self.checkbox_blind.setGeometry(QRect(290, 660, 361, 19))
         self.btn_region_reset = QPushButton(self.centralwidget)
         self.btn_region_reset.setObjectName(u"btn_region_reset")
         self.btn_region_reset.setGeometry(QRect(40, 630, 161, 31))
@@ -95,7 +92,7 @@ class Ui_MainWindow(object):
         self.thrSlider_yolo.setOrientation(Qt.Horizontal)
         self.label_model = QLabel(self.centralwidget)
         self.label_model.setObjectName(u"label_model")
-        self.label_model.setGeometry(QRect(290, 589, 64, 15))
+        self.label_model.setGeometry(QRect(290, 579, 64, 31))
         font = QFont()
         font.setPointSize(12)
         self.label_model.setFont(font)
@@ -154,12 +151,6 @@ class Ui_MainWindow(object):
         self.textBrowser.setObjectName(u"textBrowser")
         self.textBrowser.setGeometry(QRect(10, 10, 281, 381))
         self.tabWidget.addTab(self.tab_dongzip, "")
-        self.tab_bike = QWidget()
-        self.tab_bike.setObjectName(u"tab_bike")
-        self.tableView_bike = QTableView(self.tab_bike)
-        self.tableView_bike.setObjectName(u"tableView_bike")
-        self.tableView_bike.setGeometry(QRect(10, 10, 291, 381))
-        self.tabWidget.addTab(self.tab_bike, "")
         self.horizontalLayoutWidget = QWidget(self.centralwidget)
         self.horizontalLayoutWidget.setObjectName(u"horizontalLayoutWidget")
         self.horizontalLayoutWidget.setGeometry(QRect(790, 570, 291, 41))
@@ -227,7 +218,6 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.label_thr_move.setText(QCoreApplication.translate("MainWindow", u"90", None))
         self.checkbox_move.setText(QCoreApplication.translate("MainWindow", u"\uc6c0\uc9c1\uc784 \uac10\uc9c0 \ud45c\uc2dc", None))
-        self.checkbox_blind.setText(QCoreApplication.translate("MainWindow", u"\uac1c\uc778\uc815\ubcf4 \ub9c8\uc2a4\ud0b9 (\ub9c8\uc2a4\ud0b9 \ub300\uc0c1\uc740 \uc124\uc815\uc5d0\uc11c \uc120\ud0dd)", None))
         self.btn_region_reset.setText(QCoreApplication.translate("MainWindow", u"\ud0d0\uc9c0 \uc601\uc5ed reset", None))
         self.btn_fileopen.setText(QCoreApplication.translate("MainWindow", u"\ud30c\uc77c\uc5f4\uae30", None))
         self.label_0.setText(QCoreApplication.translate("MainWindow", u"\uc6c0\uc9c1\uc784 \uac10\ub3c4", None))
@@ -249,7 +239,6 @@ class Ui_MainWindow(object):
         self.label_xy.setText(QCoreApplication.translate("MainWindow", u"\ud574\uc0c1\ub3c4", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_detect), QCoreApplication.translate("MainWindow", u"AI \ud0d0\uc9c0 \ub0b4\uc5ed", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_dongzip), QCoreApplication.translate("MainWindow", u"\ub3d9zip \uc548\ub0b4", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_bike), QCoreApplication.translate("MainWindow", u"\uc774\ub95c\ucc28 \ud0d0\uc9c0", None))
         self.btn_dongzip.setText(QCoreApplication.translate("MainWindow", u"\uba40\ud2f0 open", None))
         self.btn_dongzip_reset.setText(QCoreApplication.translate("MainWindow", u"reset", None))
         self.btn_dongzip_reset_2.setText(QCoreApplication.translate("MainWindow", u"\uc644\ub8cc \uc5f4\uae30", None))

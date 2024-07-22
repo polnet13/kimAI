@@ -161,19 +161,6 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkbox_blind">
-    <property name="geometry">
-     <rect>
-      <x>290</x>
-      <y>660</y>
-      <width>361</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>개인정보 마스킹 (마스킹 대상은 설정에서 선택)</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="btn_region_reset">
     <property name="geometry">
      <rect>
@@ -261,9 +248,9 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>589</y>
+      <y>579</y>
       <width>64</width>
-      <height>15</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
@@ -480,21 +467,6 @@
         <x>10</x>
         <y>10</y>
         <width>281</width>
-        <height>381</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_bike">
-     <attribute name="title">
-      <string>이륜차 탐지</string>
-     </attribute>
-     <widget class="QTableView" name="tableView_bike">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>291</width>
         <height>381</height>
        </rect>
       </property>
