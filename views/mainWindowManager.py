@@ -15,7 +15,7 @@ import cv2
 from multiprocessing import Process, Queue
 # 사용자
 from control import tools
-from module import enrolled
+from module import enrolled, generic
 from rsc.ui.untitled_ui import Ui_MainWindow
 import settings
 
@@ -65,7 +65,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         # 드롭다운 값이 변경되었을 때 함수 실행
         self.selected_mode = self.dropdown_models.currentText()
         self.dropdown_models.currentIndexChanged.connect(self.slot_dropdown_model_changed)
-
         # qslider 설정
         self.playSlider.valueChanged.connect(self.play_slider_moved)  # 재생구간
         self.thrSlider_move.valueChanged.connect(self.thr_slider_move_moved) # 움직임 감도
@@ -100,6 +99,8 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         self.workers = None
         self.flag_start_btn = False
         self.flag_dongzip_btn = False
+        # 플레이어 객체 생성
+        self.player = generic.PlayerClass()
         
         
         #################
@@ -136,13 +137,8 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
     ##############
 
     def detector_init(self):
-        # CCTV 분석기 초기화
-
-        if self.selected_model == '이륜차 번호판 감지':
-            self.detector = enrolled.DetectorBike()
-        else:
-            self.detector = enrolled.DetectorCCTV() 
-        self.detector_fileopen()
+        self.slot_dropdown_model_changed()
+        self.player_fileopen()
 
 
     def slot_btn_fileopen(self):
@@ -170,7 +166,7 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         os.startfile(path)
 
 
-    def detector_fileopen(self):
+    def player_fileopen(self):
         # 이미지 처리
         self.img, self.width, self.height = self.detector.fileopen(self.fileName)
         self.reset_roi(self.img)
@@ -251,7 +247,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         self.fileNames = tools.sort_files_by_size(self.fileNames)
         self.fileName = self.fileNames[0]
         self.detector_init()
-        print('self.detector_init()')
         self.make_queue_and_progress_bars(self.fileNames)
 
 
@@ -535,6 +530,9 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         
     # 드롭다운 메뉴가 변경되었을 때 Yolo 모델을 변경 
     def slot_dropdown_model_changed(self):
+        '''
+        등록된 모듈에서 객체 자동으로 가져오도록 추후 수정
+        '''
         text = self.dropdown_models.currentText() 
         if not self.selected_mode == text:
             self.selected_mode = text

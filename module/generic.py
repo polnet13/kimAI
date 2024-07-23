@@ -328,7 +328,7 @@ class CustomMultiClass():
         
 
 
-class PlayClass:
+class PlayerClass:
     
     def __init__(self) -> None:
         # cv2 관련
