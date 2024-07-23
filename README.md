@@ -15,21 +15,28 @@ pip3 install easyocr
 ```
 root
 ├─ apps
-│  ├─ model_setting (장고앱에서 마이그레이션 지원)
-│  │  └─ models.py
-├─ db.sqlite3 (장고에서 생성한 DB)
+│  └─ model_setting (장고앱에서 마이그레이션 지원)
+│      └─ models.py
+├─ control (필요한 함수 모음)
+├─ module (★★ 커스텀 모델 클래스 ★★)
+├─ rsc  
+│  ├─ models (디텍션 모델)
+│  ├─ user_network (OCR 커스텀 모델)
+│  └─ ui(ui 파일)
+├─ saved_model (OCR 커스텀 모델)
+├─ views
+│  ├─ mainWindowManager.py (pyside6 슬롯함수 작성)
+│  └─ orm.py (장고 orm 컨트롤 코드)
 ├─ main.py (스타팅 포인트)
+├─ settings.py (전역변수 등 세팅)
 ├─ manage.py (장고 명령어 관련 코드)
-├─ README.md 
-├─ rsc (이미지 등 리소스 관리 디렉토리)
-│  ├─ assets
-│  │  └─ **.png
-│  └─ ui.py (ui파일에서 py파일로 변환)
-├─ settings.py (장고 세팅)
-├─ viewManagers 
-   ├─ mainWindowManager.py (pyside6 슬롯함수 작성)
-   └─ orm.py (장고 orm 컨트롤 코드)
+├─ db.sqlite3 (장고에서 생성한 DB)
+└─ README.md 
 ```
+
+# 커스텀 모듈 만드는 방법
+- module.generic 모듈의 CustomBaseClass 상속받아 enrolled 디렉터리에 코드 작성
+- module.readme.md 참고해서 작성
 
 # ui파일 => 파이썬 파일로 변환
 untitled.ui 파일 위치에서 명령어 실행
@@ -46,5 +53,3 @@ python manage.py migrate
 
 #### Using Pyinstaller
 python manage.py deploy
-
-test

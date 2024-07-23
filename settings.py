@@ -1,6 +1,9 @@
 import os
 import sys
 from django.utils.translation import gettext_lazy as _
+
+
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = '-uh7xo(=5e(@wh%9ugm!)n4ndh4cdm04ws=uzx$moj^zhazv6%'  # USE YOUR KEY
 DEBUG = True

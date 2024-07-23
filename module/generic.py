@@ -1,23 +1,46 @@
 import os
 import cv2
-import torch
-from ultralytics import YOLO
-from control import tools
-from control.run_ocr import OcrReader
 import numpy as np
 import pandas as pd
+import torch
+from ultralytics import YOLO
+
+from control import tools
+from control.run_ocr import OcrReader
+import settings
 
 
 class CustomBaseClass():
     '''
     커스텀 모듈의 기본기능을 정의한 클래스
+
+    [ input ] 
+    path(프로젝트 경로), model_path(모델 경로), multiMode(멀티프로세스 사용여부)
+    
+    [ output ]
+    None
+
+    [ 속성 ]
+
+    [ 매서드 ]
+    __init__(path, model_path, multiMode)
+    __str__()
+    fileopen(파일경로)
+    cap_read(jump_frame, play_status)
+    detect_yolo_track(frame, thr)
     '''
-    def __init__(self, path, model_path, multiMode = False) -> None:
+    tag = 'CustomBaseClass'
+
+    def __str__(self, tag):
+        '''어떤 모델 객체인지 반환'''
+        print(tag)
+        return tag
+    
+    def __init__(self, multiMode = False) -> None:
         # GPU 사용 
         self.gpu = torch.cuda.is_available()
         # 이미지 초기화
-        self.base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.img_path = os.path.join(path, 'rsc/init.jpg')
+        self.img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
         self.img = cv2.imread(self.img_path)
         
         # 탐지 영역 설정 활성화 상태
@@ -32,13 +55,8 @@ class CustomBaseClass():
         self.total_frames = 0    # 진행률을 확인하기 위한 총 프레임수
         self.curent_frame = 0    # 현재 프레임
         # cv2 이벤트 감지
-        self.roi_frame_1 = None
-        self.roi_frame_2 = None
-        self.roi_frame_3 = None
-        self.difframe = None
-        self.diff_max = 11       # 영상 차이 픽셀의 개수(이것 이상이면 움직임이 있다고 결정)
         self.roi_color = (0, 0, 255)
-
+        model_path = os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')
         self.model = YOLO(model_path)
         try:
             detection = self.model(self.img)[0]
@@ -46,6 +64,7 @@ class CustomBaseClass():
         except:
             print("모델 초기화 중 디텍션 오류 발생")
         # 라벨을 초기화 하는 함수 작성        
+ 
  
     def __str__(self) -> str:
         return 'BaseClass'        
@@ -92,41 +111,7 @@ class CustomBaseClass():
             play_status = False
             return self.img, self.curent_frame, play_status
         
-    def detect_move(self, roi_img, region_status, thr):
-        '''
-        DetectorCCTV.detect_move()
-        이미지 3개를 받아서 흑백으로 변환(빠른 연산을 위해서)
-        1,2프레임과 2,3프레임의 차이를 구하고,
-        두 차이 이미지를 비교하여 움직임이 있는 부분을 찾아내는 함수
-        return plot_img, 움직임 불리언값
-        '''
-        # bright = self.Slider_bright.value()
-        bright = 0
-        roi_img = cv2.add(roi_img, bright)   
-        # 밝기 처리한 이미지를 리턴하므로 원본 이미지를 복사하여 사용
-        plot_img = roi_img.copy()
-        gray_img = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
-        # ROI를 설정합니다.
-        if region_status:
-            self.roi_frame_1 = self.roi_frame_2 
-            self.roi_frame_2 = self.roi_frame_3 
-            self.roi_frame_3 = gray_img
-        else:
-            self.roi_frame_1 = self.roi_frame_2 = self.roi_frame_3 = gray_img
-        # frame1, frame2, frame3이 하나라도 None이면 원본+밝기 이미지 출력
-        if self.roi_frame_1 is None or self.roi_frame_2 is None or self.roi_frame_3 is None:
-            self.roi_color = (0, 0, 255)
-            return plot_img, False, False
-        # 움직임 감지
-        diff_cnt, diff_img = self.get_diff_img()
-        # 움직임이 임계값 이하인 경우 원본 출력
-        if diff_cnt < thr:
-            return plot_img, False, False
-        self.roi_color = (0, 255, 0)      
-        # 영상에서 1인 부분이 thr 이상이면 움직임이 있다고 판단 영상출력을 하는데 움직임이 있는 부분은 빨간색으로 테두리를 표시
-        contours, _ = cv2.findContours(diff_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        return plot_img, True, contours
-    
+
     # yolo 이미지 디텍션 함수
     def detect_yolo_track(self, frame, thr):
         
@@ -344,7 +329,52 @@ class CustomMultiClass():
 
 
 class PlayClass:
-    pass
+    
+    def __init__(self) -> None:
+        # cv2 관련
+        self.cap = None
+        self.fps = None
+        self.total_frames = 0    # 진행률을 확인하기 위한 총 프레임수
+        self.curent_frame = 0    # 현재 프레임
+        # 모델 
+        self.model = None
 
+    def fileopen(self, fileName):
+        '''반드시 정의 해야 함'''
+        if fileName:
+            self.fileName = fileName
+            self.cap = cv2.VideoCapture(fileName)
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))          
+            # 프레임 관련 정보 초기화
+            self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))  
+            self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
+            _, frame = self.cap.read() 
+            self.img = frame
+            if self.model is not None:
+                detection = self.model(frame)[0]
+                # 라벨을 초기화 하는 함수 작성        
+                self.labels = [ v for _ , v in detection.names.items() ]
+            return (frame, self.width, self.height)
+        
+    def cap_read(self, jump_frame, play_status):
+        '''
+        반드시 정의해야 함
+        cap_read() 함수는 cv2.VideoCapture 객체를 통해 프레임을 읽어오고,
+        이미지, 프레임(float), 플레이 상태(불리언)를 반환함
+        '''
+        ret, self.img = self.cap.read() 
+        if ret:
+            # 현재 프레임 번호가 self.jump_frame 의 배수일 때만 이미지 처리
+            self.curent_frame = int( self.cap.get(cv2.CAP_PROP_POS_FRAMES))
+            if self.curent_frame % jump_frame != 0:
+                return self.img, self.curent_frame, play_status
+            return self.img, self.curent_frame, play_status
+        else:
+            self.curent_frame = 1
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 1)
+            play_status = False
+            return self.img, self.curent_frame, play_status
                 
  

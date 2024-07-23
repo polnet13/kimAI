@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout, QHBoxLayout
-from PySide6.QtWidgets import QWidget, QListWidgetItem, QScrollArea, QMessageBox
+from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
 # 웹 바로가기
 from PySide6.QtGui import QDesktopServices 
 from PySide6.QtCore import QUrl, QTimer, Qt, QThread
@@ -9,25 +9,27 @@ from PySide6 import QtGui
 # 단축키
 from PySide6.QtGui import QKeySequence, QShortcut  
 from PySide6.QtCore import Qt
-# 사용자
-from control import tools
-from module.enrolled.cctv import DetectorCCTV, MultiCCTV
-from module.enrolled.bike import DetectorBike
-from rsc.ui.untitled_ui import Ui_MainWindow
 # 외부 모듈
 import os, time, random
 import cv2
 from multiprocessing import Process, Queue
+# 사용자
+from control import tools
+from module import enrolled
+from rsc.ui.untitled_ui import Ui_MainWindow
+import settings
 
 
 
 class Worker(Process):
-    
+    '''
+    멀티 작업 클래스
+    '''
     def __init__(self):
         super().__init__()
         self.queue = None
         self.obj = None
-        
+
     def run(self):
         self.obj.queue = self.queue
         self.obj.multi_process()
@@ -35,23 +37,22 @@ class Worker(Process):
 
 
 class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWindow   
-
+    '''
+    UI 컨트롤 관련 클래스
+    '''
     def __init__(self):
         super().__init__()
-        self.base = os.path.dirname(os.path.dirname(__file__))
         self.setupUi(self)
         # 멀티 프로세싱 관련 변수
         self.num_cores = os.cpu_count()
         self.statusBar().showMessage(f'코어 수: {self.num_cores}')
-        
-        self.message_box_shown = False  # 메시지 박스 표시 플래그
-        # 모델 드롭다운 메뉴 생성
-        model_dir = os.path.join(self.base, 'rsc/models')
-        for filename in os.listdir(model_dir):
-            if filename.endswith('.pt'):
-                self.dropdown_models.addItem(filename)
-        self.dropdown_models.addItem('이륜차 번호판 감지')
-        # 기본 값을 "이륜차 번호판 감지"으로 설정
+        # 메시지 박스 표시 플래그
+        self.message_box_shown = False  
+        # 모델 드롭다운 메뉴
+        detectors = tools.get_classes(enrolled)
+        for detector in detectors:
+            self.dropdown_models.addItem(detector.tag)
+        # 기본 값을 "이륜차 번호판 감지"으로 설정(배포시 제거)
         index = self.dropdown_models.findText("이륜차 번호판 감지")
         self.dropdown_models.setCurrentIndex(index)
         self.checkbox_yolo.setChecked(True)
@@ -59,16 +60,11 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         self.move_thr = 5
         # yolo 모델 선택 및 경로
         self.selected_model = self.dropdown_models.currentText()
-        self.model_path = os.path.join(self.base, 'rsc/models', self.selected_model)
+        self.model_path = os.path.join(settings.BASE_DIR, 'rsc/models', self.selected_model)
         self.yolo_thr = 30
-        self.init_img_path = os.path.join(self.base, 'rsc/init.jpg')
         # 드롭다운 값이 변경되었을 때 함수 실행
         self.selected_mode = self.dropdown_models.currentText()
         self.dropdown_models.currentIndexChanged.connect(self.slot_dropdown_model_changed)
-        # # CCTV 분석기 초기화
-        self.fileName = self.init_img_path
-        # self.detector = self.detector_init()
-        # print('Detector 초기화 완료')
 
         # qslider 설정
         self.playSlider.valueChanged.connect(self.play_slider_moved)  # 재생구간
@@ -85,7 +81,9 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         self.label.setStyleSheet("background-color: black")
         # 리스트뷰 
         self.tableView.clicked.connect(self.on_item_clicked)
-        # 원본이미지
+        # # CCTV 분석기 초기화
+        self.init_img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
+        self.fileName = self.init_img_path
         self.img = cv2.imread(self.init_img_path)
         # 영상관련 정보 
         self.width = 0
@@ -107,7 +105,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         #################
         ## 단축키 함수 ##
         ################
-        print('단축키 설정 시작')
         # A키 눌렀을 때 설정
         self.s_key = QShortcut(QKeySequence(Qt.Key_A), self)
         self.s_key.activated.connect(self.slot_btn_minusOneFrame) 
@@ -132,12 +129,22 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         # delete키 눌렀을 때 설정
         self.delete_key = QShortcut(QKeySequence(Qt.Key_Delete), self)
         self.delete_key.activated.connect(self.delete_listview_row) 
-        print('초기화 완료')
 
 
     ##############
     ## 슬롯함수 ##
     ##############
+
+    def detector_init(self):
+        # CCTV 분석기 초기화
+
+        if self.selected_model == '이륜차 번호판 감지':
+            self.detector = enrolled.DetectorBike()
+        else:
+            self.detector = enrolled.DetectorCCTV() 
+        self.detector_fileopen()
+
+
     def slot_btn_fileopen(self):
         '''
         파일 입력 받고 
@@ -147,6 +154,7 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         self.selected_model = self.dropdown_models.currentText()
         self.detector_init()
         
+
     def slot_btn_minusOneFrame(self):
         self.curent_frame = self.detector.cap.get(cv2.CAP_PROP_POS_FRAMES)-2
         self.playSlider.setValue(self.curent_frame)
@@ -158,16 +166,9 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
 
 
     def slot_btn_open_complete(self):
-        path = os.path.join(self.base, 'output')
+        path = os.path.join(settings.BASE_DIR, 'output')
         os.startfile(path)
 
-    def detector_init(self):
-        # CCTV 분석기 초기화
-        if self.selected_model == '이륜차 번호판 감지':
-            self.detector = DetectorBike(self.base)
-        else:
-            self.detector = DetectorCCTV(self.base, self.model_path) 
-        self.detector_fileopen()
 
     def detector_fileopen(self):
         # 이미지 처리
@@ -427,21 +428,13 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         '''
         영상 비율 관련 수정필요
         ''' 
-        if x < 0:
-            return 0
-        if x > self.width:
-            return self.width
-        return x
+        return max(0, min(x, self.width))
         
     def is_in_label_y(self, y):   
         '''
         영상 비율 관련 수정필요
         ''' 
-        if y < 0:
-            return 0
-        if y > self.height:
-            return self.height
-        return y
+        return max(0, min(y, self.height))
 
     ############
     ## 마우스 ##
@@ -517,10 +510,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         '''
         self.label_roi.setText(f'관심영역: ({int(self.x1)}, {int(self.y1)}), ({int(self.x2)}, {int(self.y2)})') 
         self.update()
-        # 모델 변경
-        text = self.dropdown_models.currentText()
-        if not self.selected_mode == text:
-            self.change_model()
         
     def display_img(self, img=None, color=(0, 0, 255)):
         '''
@@ -546,27 +535,22 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         
     # 드롭다운 메뉴가 변경되었을 때 Yolo 모델을 변경 
     def slot_dropdown_model_changed(self):
-        
         text = self.dropdown_models.currentText() 
         if not self.selected_mode == text:
-            self.selected_model = text
-            self.change_model()
-
-    def change_model(self):
-        '''
-        선택된 모델을 변경하는 함수
-        '''
-        if self.selected_model == '이륜차 번호판 감지':
+            self.selected_mode = text
+        if self.selected_mode == '이륜차 번호판 감지':
             self.checkbox_yolo.setChecked(True)
-            self.detector = DetectorBike(self.base)
-        else:
+            self.detector = enrolled.DetectorBike()
+        elif self.selected_mode == 'CCTV 분석':
             self.checkbox_yolo.setChecked(False)
-            self.model_path = os.path.join(self.base, 'rsc/models', self.selected_model)
-            self.detector = DetectorCCTV(self.base, self.model_path)
+            self.detector = enrolled.DetectorCCTV()
+        else:
+            self.detector = enrolled.DetectorCCTV()
         if self.fileName:
             self.detector.fileopen(self.fileName)
         self.update()
         self.display_img()
+
         
     def slot_btn_init_detection(self):
         self.detector.track_ids = {}
@@ -652,7 +636,7 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         1: 오토바이 분석
         '''
         if menu_number == 0:
-            self.objects = [MultiCCTV(
+            self.objects = [enrolled.MultiCCTV(
                 file, self.x1, self.y1, self.x2, self.y2
             ) for i, file in enumerate(self.fileNames)]
         if menu_number == 1:

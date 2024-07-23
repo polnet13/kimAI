@@ -7,36 +7,22 @@ from module.generic import CustomBaseClass
 
 
 class DetectorCCTV(CustomBaseClass):
-    '''
-    cv2, YOLO를 이용한 이미지 처리
-    '''
-    def __init__(self, path, model_path, multiMode = False) -> None:
-        super().__init__(path, model_path, multiMode=False)
 
-         
-    ##############
-    ## 슬롯함수 ##
-    ##############
+    tag = 'CCTV 분석기'
 
-        
-    def cap_read(self, jump_frame, play_status):
-        '''
-        cap_read() 함수는 cv2.VideoCapture 객체를 통해 프레임을 읽어오고,
-        이미지, 프레임(float), 플레이 상태(불리언)를 반환함
-        '''
-        ret, self.img = self.cap.read() 
-        if ret:
-            # 현재 프레임 번호가 self.jump_frame 의 배수일 때만 이미지 처리
-            self.curent_frame = int( self.cap.get(cv2.CAP_PROP_POS_FRAMES))
-            if self.curent_frame % jump_frame != 0:
-                return self.img, self.curent_frame, play_status
-            return self.img, self.curent_frame, play_status
-        else:
-            self.curent_frame = 1
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 1)
-            play_status = False
-            return self.img, self.curent_frame, play_status
-        
+    def __init__(self, multiMode = False) -> None:
+        super().__init__(multiMode=False)
+        print(self.tag)
+        # 움직임 감지
+        self.roi_frame_1 = None
+        self.roi_frame_2 = None
+        self.roi_frame_3 = None
+        self.difframe = None
+        self.diff_max = 11       # 영상 차이 픽셀의 개수(이것 이상이면 움직임이 있다고 결정)
+    
+    #######################
+    ## 슬롯함수 오버라이드 ##
+    ######################## 
     def detect_move(self, roi_img, region_status, thr):
         '''
         DetectorCCTV.detect_move()
@@ -73,52 +59,6 @@ class DetectorCCTV(CustomBaseClass):
         return plot_img, True, contours
     
 
-    
-    # yolo 이미지 디텍션 함수
-    def detect_yolo_track(self, frame, thr):
-        
-        # # 욜로 모델이 선택되어 있으면 디텍션
-        # plot_img = self.img
-        # if self.dropdown_models.currentText() != '딥러닝X 이벤트 감지만 수행':
-        #     plot_img = self.detect_yolo_track(self.img)  
-        '''
-        input: 원본해상도 이미지
-        output: 원본해상도 욜로 이미지,
-        검출된 객체에 대한 bbox와 텍스트를 생성하여 이미지에 출력
-        개인정보 가리기와 bbox 생성을 선택할 수 있음
-        
-        frame: 원본 해상도의 욜로 처리된 이미지
-        img: cv2 이미지(바운딩 박스 처리된 이미지)
-        track_id: 추적된 객체의 id값
-        ''' 
-        detections = self.model.track(frame, persist=True)[0]
-        # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
-        for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
-            xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3])
-            try:
-                track_id, confidence, label_number = int(data[4]), float(data[5]), int(data[6])
-            except IndexError:
-                continue
-            # 사람만 검출하도록 함(추후 수정 필요)\
-            if label_number != 0:
-                continue
-            # 임계값 이하는 생략 하라는 코드
-            if confidence < thr/100:
-                continue
-            # 개인정보 가리기
-            # if self.checkbox_blind.isChecked():
-            #     frame = yolo_tools.blind_img(frame, xmin+self.x1, ymin+self.y1, xmax+self.x1, ymax+self.y1)
-            # bbox를 생성하는데 tracking한 객체의 id값도 출력하도록 함
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 2)
-            cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
-            # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
-            if track_id not in self.track_ids:
-                self.track_ids[track_id] = [self.cap.get(cv2.CAP_PROP_POS_FRAMES)]
-            text = None
-        return frame, text
-
-
-    
     def get_diff_img(self):
         '''
         return diff_cnt(영상간 차이값), diff(이미지)
@@ -147,10 +87,11 @@ class DetectorCCTV(CustomBaseClass):
     
 
 class MultiCCTV():
-    '''
-    Worker의 start() 함수가 실행되면 동집의 실질적인 작업 수행
-    '''
+    
+    tag = 'CCTV 분석기(멀티)'
+
     def __init__(self, fileName, x1, y1, x2, y2):
+        print(self.tag)
         self.queue = None
         # 경로 설정
         self.base = os.path.dirname(fileName)

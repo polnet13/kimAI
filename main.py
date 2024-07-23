@@ -17,7 +17,6 @@ except Exception as e:
 class csswindow(mainWindow):
     def __init__(self):
         super().__init__()
-
     
 def main():
     app = QApplication(sys.argv) 

@@ -6,23 +6,25 @@ from control.run_ocr import OcrReader
 import numpy as np
 import pandas as pd
 from module import generic 
+import settings
+from module.generic import CustomBaseClass
+
 
 # class definition:
 
 
 
-class DetectorBike():
-    '''
-    cv2, YOLO를 이용한 이미지 처리
-    '''
-    def __init__(self, path, multiMode = False) -> None:
-        print('이륜차 탐지 모드 실행')
+class DetectorBike(CustomBaseClass):
+
+    tag = '이륜차 번호판 감지'
+    
+    def __init__(self, multiMode = False) -> None:
+        print(self.tag)
         # 이미지 초기화
-        self.base = path
-        self.img_path = os.path.join(path, 'rsc/init.jpg')
+        self.img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
         # C:\Users\prude\OneDrive\Documents\kimAI\rsc\init.jpg
-        self.model_bike_path = os.path.join(path, 'rsc/models/yolov8n.pt')
-        self.model_nbp_path = os.path.join(path, 'rsc/models/motobike_e300_b8_s640.pt')
+        self.model_bike_path = os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')
+        self.model_nbp_path = os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')
         # 데이터 프레임
         self.df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
         # 이미지 읽기
@@ -167,8 +169,6 @@ class DetectorBike():
         return roi_img, True, thr
 
 
-
-
     def detect_nbp_img(self, bike_img):
         '''
         return 
@@ -225,24 +225,6 @@ class DetectorBike():
             dst = cv2.warpPerspective(img, pers, (dw, dh), flags=cv2.INTER_CUBIC)
         return dst
 
-class DataPD():
-    
-    def __init__(self):
-            # 자료 정리
-        data = {
-            "track_ID": [],
-            "cap": [],
-            "bike_thr": [],
-            "ocr_si_thr": [],
-            "ocr_giho_thr": [],
-            "ocr_number_thr": [],
-            "ocr_si": [],
-            "ocr_giho": [],
-            "ocr_number": []
-        }
-        self.df = pd.DataFrame(data)  # 트랙ID, cap넘버, bike_thr, ocr_si_thr, ocr_giho_thr, ocr_number_thr, ocr_si, ocr_giho, ocr_number
-
-
 class MultiBike():
     '''
     Process 모듈을 상속 받아서
@@ -251,8 +233,10 @@ class MultiBike():
     ocr_nbp() 번호판 이미지를 OCR하여 번호판을 추출하는 함수
     nbp_tracking_sort() 가장 확률이 높은 순으로 3개 선택하는 함수
     '''
+    tag = '이륜차 탐지(멀티)'
 
     def __init__(self, fileName):
+        print(self.tag)
         self.queue = None
         # 경로 설정
         self.base = os.path.dirname(fileName)

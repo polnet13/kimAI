@@ -69,3 +69,24 @@ def to_original_shape(original_shape, _frame_shape, xmin, ymin, xmax, ymax):
     original_xmax = int(xmax * width_ratio)
     original_ymax = int(ymax * height_ratio)
     return original_xmin, original_ymin, original_xmax, original_ymax
+
+
+
+
+import inspect
+
+def get_classes(module):
+    """특정 모듈 객체에서 정의된 모든 클래스를 반환 
+
+    Args:
+    module: 대상 모듈 객체
+
+    Returns:
+    클래스 객체 목록
+    """
+    classes = []
+    for _, obj in inspect.getmembers(module):
+        if inspect.isclass(obj):
+            classes.append(obj)
+
+    return classes
