@@ -31,12 +31,10 @@ class CustomBaseClass():
     '''
     tag = 'CustomBaseClass'
 
-    def __str__(self, tag):
-        '''어떤 모델 객체인지 반환'''
-        print(tag)
-        return tag
-    
     def __init__(self, multiMode = False) -> None:
+        self.tag = CustomBaseClass.tag
+        self.track = True
+
         # GPU 사용 
         self.gpu = torch.cuda.is_available()
         # 이미지 초기화
@@ -56,18 +54,11 @@ class CustomBaseClass():
         self.curent_frame = 0    # 현재 프레임
         # cv2 이벤트 감지
         self.roi_color = (0, 0, 255)
-        model_path = os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')
-        self.model = YOLO(model_path)
-        try:
-            detection = self.model(self.img)[0]
-            self.labels = [ v for _ , v in detection.names.items() ]
-        except:
-            print("모델 초기화 중 디텍션 오류 발생")
-        # 라벨을 초기화 하는 함수 작성        
+
  
  
     def __str__(self) -> str:
-        return 'BaseClass'        
+        return CustomBaseClass.tag      
             
     ##############
     ## 슬롯함수 ##
@@ -179,6 +170,10 @@ class CustomBaseClass():
         # 영상에서 1인 부분의 갯수를 셈
         diff_cnt = cv2.countNonZero(diff)
         return diff_cnt, diff
+    
+
+    def getTrack(self):
+        return self.track
 
     
 

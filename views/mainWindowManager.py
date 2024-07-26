@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout, QHBoxLayout
 from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
@@ -58,9 +60,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         self.checkbox_yolo.setChecked(True)
         # 움직임 감지 임계값
         self.move_thr = 5
-        # yolo 모델 선택 및 경로
-        self.selected_model = self.dropdown_models.currentText()
-        self.model_path = os.path.join(settings.BASE_DIR, 'rsc/models', self.selected_model)
         self.yolo_thr = 30
         # 드롭다운 값이 변경되었을 때 함수 실행
         self.selected_mode = self.dropdown_models.currentText()
@@ -136,47 +135,46 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
     ## 슬롯함수 ##
     ##############
 
-    def detector_init(self):
+    def init_player(self):
         self.slot_dropdown_model_changed()
         self.player_fileopen()
 
 
     def slot_btn_fileopen(self):
-        '''
-        파일 입력 받고 
-        현재 선택된 모델 초기화
-        '''
         self.fileName, _ = QFileDialog.getOpenFileName(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
-        self.selected_model = self.dropdown_models.currentText()
-        self.detector_init()
+        self.selected_mode = self.dropdown_models.currentText()
+        self.init_player()
         
 
     def slot_btn_minusOneFrame(self):
-        self.curent_frame = self.detector.cap.get(cv2.CAP_PROP_POS_FRAMES)-2
+        self.curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)-2
         self.playSlider.setValue(self.curent_frame)
         
 
     def slot_btn_plusOneFrame(self):
-        self.curent_frame = self.detector.cap.get(cv2.CAP_PROP_POS_FRAMES)+1
+        self.curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)+1
         self.playSlider.setValue(self.curent_frame)
 
 
     def slot_btn_open_complete(self):
         path = os.path.join(settings.BASE_DIR, 'output')
-        os.startfile(path)
+        if sys.platform.startswith('win'):
+            os.startfile(path)
+        elif sys.platform.startswith('linux'):
+            subprocess.run(['xdg-open', path])
 
 
     def player_fileopen(self):
         # 이미지 처리
-        self.img, self.width, self.height = self.detector.fileopen(self.fileName)
+        self.img, self.width, self.height = self.player.fileopen(self.fileName)
         self.reset_roi(self.img)
         self.statusBar().showMessage(f'파일 경로: {self.fileName}')
         # 영상의 전체 프레임수를 가지고 옴
-        self.total_frames = self.detector.total_frames
+        self.total_frames = self.player.total_frames
         self.label_xy.setText(f'해상도: {self.width}*{self.height}')
-        self.playSlider.setMaximum(self.detector.total_frames -1)
-        self.label_fps.setText(f'fps : {self.detector.fps}')
-        self.fps = self.detector.fps
+        self.playSlider.setMaximum(self.player.total_frames -1)
+        self.label_fps.setText(f'fps : {self.player.fps}')
+        self.fps = self.player.fps
         self.update()
         self.display_img()
         
@@ -186,8 +184,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         '''
         self.play_status = not self.play_status
 
-        print(self.selected_model)
-
         if self.play_status:
             # 타임이벤트 생성
             self.timer = QTimer()
@@ -195,7 +191,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
             self.timer.start(1)
         else:
             self.timer.stop()
-        # self.detector.play()
 
 
     # 이벤트 감지       
@@ -206,7 +201,7 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         '''
         self.jump_frame = self.jump_frameSlider.value()
         # 프레임을 읽어옴
-        img, self.curent_frame, self.play_status = self.detector.cap_read(self.jump_frame, self.play_status)
+        img, self.curent_frame, self.play_status = self.player.cap_read(self.jump_frame, self.play_status)
         # 정지 버튼이 눌렸을 때
         if self.play_status == False:
             self.timer.stop()
@@ -217,7 +212,7 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         # 슬라이더 업데이트
         self.playSlider.setValue(self.curent_frame)
         # 재생시간 업데이트
-        frame_time = time.strftime('%H:%M:%S', time.gmtime(self.curent_frame/self.detector.fps))
+        frame_time = time.strftime('%H:%M:%S', time.gmtime(self.curent_frame/self.player.fps))
         self.playTimer.setText(f'{frame_time}')
         # 마지막 프레임일 때
         if self.curent_frame == self.total_frames:
@@ -246,7 +241,7 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         # fileNames의 파일들의 용량을 확인하고 용량이 큰 순서대로 정렬
         self.fileNames = tools.sort_files_by_size(self.fileNames)
         self.fileName = self.fileNames[0]
-        self.detector_init()
+        self.init_player()
         self.make_queue_and_progress_bars(self.fileNames)
 
 
@@ -329,8 +324,8 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         n = float(n)
         # slider 위치를 n 값으로 이동
         self.playSlider.setValue(n) 
-        self.detector.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
-        self.img = self.detector.cap.read()[1]
+        self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
+        self.img = self.player.cap.read()[1]
         self.display_img()
         print(f'row: {row}, n: {n}')
         
@@ -343,13 +338,15 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         슬라이더가 움직일 때 이미지 처리하는 '핵심' 함수
         '''
         # 공통 코드 
-        self.detector.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
-        self.img, self.curent_frame, self.play_status = self.detector.cap_read(
+        self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
+        self.img, self.curent_frame, self.play_status = self.player.cap_read(
             self.jump_frame, self.play_status)
         roi_img = tools.get_roi_img(
             self.img, 
             self.x1, self.y1, self.x2, self.y2
             )
+        #################################################################################
+        # 모든 인스턴스에 적용되도록 하나의 함수로 통합 필요함 apply()
         # ROI 부분만 움직임 감지
         roi_img, detect_move_bool, contours = self.detector.detect_move(
             roi_img, self.region_status, self.move_thr
@@ -364,11 +361,9 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
             if text:
                 self.textBrowser.append(text)
                 self.textBrowser.setFocus()
-            # 이것 때문에 오류 발생
-            # bike:  track_ids[n] = [_cap_number, ocr_text] 
-            # cctv:  track_ids[n] = cap 
             if self.detector.track_ids:
                 self.dict_to_listview() 
+        #################################################################################
         # self.img에 roi_img를 붙여서 출력
         plot_img = self.img.copy()
         plot_img[self.y1:self.y2, self.x1:self.x2] = roi_img
@@ -533,27 +528,29 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         '''
         등록된 모듈에서 객체 자동으로 가져오도록 추후 수정
         '''
+        # 드롭다운에서 현재 모델 text 변수에 저장
         text = self.dropdown_models.currentText() 
         if not self.selected_mode == text:
             self.selected_mode = text
-        if self.selected_mode == '이륜차 번호판 감지':
-            self.checkbox_yolo.setChecked(True)
-            self.detector = enrolled.DetectorBike()
-        elif self.selected_mode == 'CCTV 분석':
-            self.checkbox_yolo.setChecked(False)
-            self.detector = enrolled.DetectorCCTV()
-        else:
-            self.detector = enrolled.DetectorCCTV()
+        enrolled_classes = tools.get_classes(enrolled)
+        for detector in enrolled_classes:
+            if hasattr(detector, 'tag') and detector.tag == text:
+                if detector is not None:
+                    self.detector = detector()
+                    checkbox_track = self.detector.getTrack()
+                    print(detector.tag)
+                    self.checkbox_yolo.setChecked(checkbox_track)
+                else:
+                    print(f"Error: {detector} 클래스가 전역 네임스페이스에 존재하지 않습니다.")
+
+        # 플레이어 객체 생성    
         if self.fileName:
-            self.detector.fileopen(self.fileName)
+            self.player.fileopen(self.fileName)
+            self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         self.update()
         self.display_img()
 
         
-    def slot_btn_init_detection(self):
-        self.detector.track_ids = {}
-        self.dict_to_listview()
-    
     def slot_btn_region_reset(self):
         if self.img is None:
             self.label_roi.setText(f'관심영역: {self.region_status}') 

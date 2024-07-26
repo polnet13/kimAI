@@ -19,7 +19,8 @@ class DetectorBike(CustomBaseClass):
     tag = '이륜차 번호판 감지'
     
     def __init__(self, multiMode = False) -> None:
-        print(self.tag)
+        self.tag = DetectorBike.tag
+        super().__init__(multiMode=False)
         # 이미지 초기화
         self.img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
         # C:\Users\prude\OneDrive\Documents\kimAI\rsc\init.jpg
@@ -66,49 +67,6 @@ class DetectorBike(CustomBaseClass):
     ##############
     ## 슬롯함수 ##
     ##############
-    def fileopen(self, fileName):
-        '''반드시 정의 해야 함'''
-        if fileName:
-            self.fileName = fileName
-            self.cap = cv2.VideoCapture(fileName)
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            # track_ids 초기화
-            self.track_ids = {}
-            
-            # 프레임 관련 정보 초기화
-            self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))  
-            self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
-            _, frame = self.cap.read() 
-            self.img = frame
-            if self.model is not None:
-                detection = self.model(frame)[0]
-                # 라벨을 초기화 하는 함수 작성        
-                self.labels = [ v for _ , v in detection.names.items() ]
-            return (frame, self.width, self.height )
-        
-    def cap_read(self, jump_frame, play_status):
-        '''
-        반드시 정의해야 함
-        cap_read() 함수는 cv2.VideoCapture 객체를 통해 프레임을 읽어오고,
-        이미지, 프레임(float), 플레이 상태(불리언)를 반환함
-        '''
-        ret, self.img = self.cap.read() 
-        if ret:
-            # 현재 프레임 번호가 self.jump_frame 의 배수일 때만 이미지 처리
-            self.curent_frame = int( self.cap.get(cv2.CAP_PROP_POS_FRAMES))
-            if self.curent_frame % jump_frame != 0:
-                return self.img, self.curent_frame, play_status
-            return self.img, self.curent_frame, play_status
-        else:
-            print(self.df['si'].value_counts()[:3])
-            print(self.df['giho'].value_counts()[:3])
-            print(self.df['num'].value_counts()[:3])
-            self.curent_frame = 1
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 1)
-            play_status = False
-            return self.img, self.curent_frame, play_status
     
     # yolo 이미지 디텍션 함수
     def detect_yolo_track(self, frame, thr):

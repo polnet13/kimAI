@@ -12,7 +12,8 @@ class DetectorCCTV(CustomBaseClass):
 
     def __init__(self, multiMode = False) -> None:
         super().__init__(multiMode=False)
-        print(self.tag)
+        self.tag = DetectorCCTV.tag
+        self.track = False
         # 움직임 감지
         self.roi_frame_1 = None
         self.roi_frame_2 = None
@@ -91,7 +92,9 @@ class MultiCCTV():
     tag = 'CCTV 분석기(멀티)'
 
     def __init__(self, fileName, x1, y1, x2, y2):
-        print(self.tag)
+        super().__init__(multiMode=False)
+        self.tag = MultiCCTV.tag
+        self.track = False
         self.queue = None
         # 경로 설정
         self.base = os.path.dirname(fileName)

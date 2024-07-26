@@ -1,5 +1,7 @@
 import cv2
 import os, time
+import inspect
+
 
 
 def guiToResolution(x, y, img):
@@ -70,10 +72,28 @@ def to_original_shape(original_shape, _frame_shape, xmin, ymin, xmax, ymax):
     original_ymax = int(ymax * height_ratio)
     return original_xmin, original_ymin, original_xmax, original_ymax
 
+# 이미지를 입력 받으면 모자이크 처리된 이미지를 반환
+def mosaic(img, xmin, ymin, xmax, ymax, ratio=0.01):
+    '''
+    이미지와 xmin, ymin, xmax, ymax값을 입력 받아서 xmin, ymin, xmax, ymax 좌표에 모자이크 처리
+    '''
+    # 모자이크 처리할 영역 추출
+    roi = img[ymin:ymax, xmin:xmax]
+    # 모자이크 처리
+    h, w = roi.shape[:2]
+    small_w = max(1, int(w * ratio))
+    small_h = max(1, int(h * ratio))
+    small_roi = cv2.resize(roi, (small_w, small_h))
+    # 원래 크기로 확대
+    mosaic_roi = cv2.resize(small_roi, (w, h), interpolation=cv2.INTER_AREA)
+    # 모자이크 처리된 이미지를 원본 이미지에 삽입
+    img[ymin:ymax, xmin:xmax] = mosaic_roi
+    print('모자이크 처리')
+    return img
 
 
 
-import inspect
+
 
 def get_classes(module):
     """특정 모듈 객체에서 정의된 모든 클래스를 반환 
