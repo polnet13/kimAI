@@ -9,6 +9,9 @@ from control import tools
 from control.run_ocr import OcrReader
 import settings
 
+from PySide6.QtWidgets import QSlider 
+from rsc.ui.untitled_ui import Ui_MainWindow
+
 
 class CustomBaseClass():
     '''
@@ -175,8 +178,6 @@ class CustomBaseClass():
     def getTrack(self):
         return self.track
 
-    
-
 
 class CustomMultiClass():
     '''
@@ -322,7 +323,6 @@ class CustomMultiClass():
         self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
         
 
-
 class PlayerClass:
     
     def __init__(self) -> None:
@@ -372,4 +372,43 @@ class PlayerClass:
             play_status = False
             return self.img, self.curent_frame, play_status
                 
- 
+
+class OptionClass:
+    '''
+    make_slider 슬라이더 객체를 반환 
+    set_slider_value  슬라이더 값을 설정 
+    get_slider_value  슬라이더 값을 가져옴
+    get_slider_by_name  슬라이더 이름으로 슬라이더 객체를 찾음
+    '''
+    def __init__(self) -> None:
+        self.slider = []
+        self.roi_mosaic = []
+
+    def make_slider(self, name, min, max, default):
+        SliderOBJ = QSlider()
+        SliderOBJ.setObjectName(f"{name}")
+        SliderOBJ.setMinimum(min)
+        SliderOBJ.setMaximum(max)
+        SliderOBJ.setSliderPosition(default)
+        self.slider.append(SliderOBJ)
+        return SliderOBJ  
+
+    def add_slider_to_frame(self, frame, name, min, max, value):
+        slider = self.make_slider(name, min, max, value)
+        frame.layout().addWidget(slider)  # 프레임의 레이아웃에 슬라이더 추가
+
+    def set_slider_value(self, name, value):
+        slider = self.get_slider_by_name(name)
+        if slider:
+            slider.setValue(value)
+
+    def get_slider_value(self, name):
+        slider = self.get_slider_by_name(name)
+        if slider:
+            return slider.value()
+        return None
+
+
+    def make_roi_mosaic(self, x1, y1, x2, y2):
+        self.roi_mosaic.append([x1, y1, x2, y2])
+        return self.roi_mosaic

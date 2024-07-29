@@ -14,9 +14,9 @@ from huggingface_hub import hf_hub_download
 
 
 
-class DetectorMosaic(CustomBaseClass):
+class DetectorMosaic_v2(CustomBaseClass):
 
-    tag = '모자이크'
+    tag = '모자이크_v2'
     
     def __init__(self, multiMode = False) -> None:
         super().__init__(multiMode=False)
@@ -69,13 +69,10 @@ class DetectorMosaic(CustomBaseClass):
             # 임계값 이하는 생략 하라는 코드
             if _confidence < thr/100:
                 continue
-            detected_img = frame[ymin:ymax, xmin:xmax]  # <== 오토바이 이미지
-            if not _label_number == 0:
-                img = self.detect_nbp_mosaic(detected_img)
-            if _label_number == 0:
-                # 사람 모자이크 
-                # img = tools.mosaic(detected_img, 0, 0, detected_img.shape[1], detected_img.shape[0], ratio=0.01)
-                img = self.detect_face_mosaic(detected_img)  # 얼굴만 모자이크
+            detected_img = frame[ymin:ymax, xmin:xmax]  
+            # 검출된 객체 모자이크 처리
+            img = tools.mosaic(detected_img, xmin, ymin, xmax, ymax, ratio=0.05, full=True)
+
             # 모자이크 처리 원본에 삽입
             if img is not None:
                 frame[ymin:ymax, xmin:xmax] = img

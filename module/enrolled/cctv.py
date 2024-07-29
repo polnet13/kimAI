@@ -92,7 +92,7 @@ class MultiCCTV():
     tag = 'CCTV 분석기(멀티)'
 
     def __init__(self, fileName, x1, y1, x2, y2):
-        super().__init__(multiMode=False)
+        super().__init__()
         self.tag = MultiCCTV.tag
         self.track = False
         self.queue = None

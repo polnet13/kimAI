@@ -38,7 +38,7 @@ class Worker(Process):
 
 
 
-class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWindow   
+class mainWindow(QMainWindow, Ui_MainWindow):  
     '''
     UI 컨트롤 관련 클래스
     '''
@@ -412,19 +412,6 @@ class mainWindow(QMainWindow, Ui_MainWindow): # Ui_MainWindow == rec.ui.MainWind
         '''워커와 GUI 종료'''
         self.terminate_workers()
         self.close()        
-
-    # 마우스 좌표가 30 보다 작으면 30으로 설정하고 영상 가로 사이즈+30 보다 크면 영상가로 사이즈+30으로 설정
-    def is_in_label_x(self, x):   
-        '''
-        영상 비율 관련 수정필요
-        ''' 
-        return max(0, min(x, self.width))
-        
-    def is_in_label_y(self, y):   
-        '''
-        영상 비율 관련 수정필요
-        ''' 
-        return max(0, min(y, self.height))
 
     ############
     ## 마우스 ##
