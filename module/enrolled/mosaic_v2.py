@@ -6,7 +6,8 @@ from control.run_ocr import OcrReader
 import numpy as np
 import pandas as pd
 import settings
-from module.generic import CustomBaseClass
+from control.gui_sliders import SliderClass
+from module.generic import CustomBaseClass, ArgsDict
 from huggingface_hub import hf_hub_download
 
 
@@ -18,10 +19,17 @@ class DetectorMosaic_v2(CustomBaseClass):
 
     tag = '모자이크_v2'
     
-    def __init__(self, multiMode = False) -> None:
-        super().__init__(multiMode=False)
+    def __init__(self) -> None:
+        # 슬라이더 설정
+        _arg_dict = {
+            '민감도':[1,1,100],
+            '모자이크':[1,1,100],
+            }
+        ArgsDict.clear()
+        ArgsDict.makeValues(_arg_dict)
+        self.arg = SliderClass(_arg_dict)
+        super().__init__()
         # GPU 사용하는 YOLO 모델 불러오기
-        self.thr = 1    # 욜로에서는 임계값, 이벤트에서는 영상 차이
         model_base = os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt')
         model_nbp = os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')
         model_face = os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')
@@ -41,10 +49,10 @@ class DetectorMosaic_v2(CustomBaseClass):
     ## 슬롯함수 ##
     ##############
     # yolo 이미지 디텍션 함수
-    def detect_yolo_track(self, frame, thr):
+    def detect_yolo_track(self, frame):
         '''
         이 함수에서 실질적인 탐지 작업을 수행함
-        input: origin_img, thr
+        input: origin_img
 
         output
         frame: 원본 해상도의 욜로 처리된 이미지
@@ -67,11 +75,13 @@ class DetectorMosaic_v2(CustomBaseClass):
             if _label_number not in [0,2,3,5,7,9]:
                 continue
             # 임계값 이하는 생략 하라는 코드
-            if _confidence < thr/100:
+            yolo_thr = ArgsDict.getValue('민감도')
+            if _confidence < yolo_thr/100:
                 continue
             detected_img = frame[ymin:ymax, xmin:xmax]  
             # 검출된 객체 모자이크 처리
-            img = tools.mosaic(detected_img, xmin, ymin, xmax, ymax, ratio=0.05, full=True)
+            ratio = ArgsDict.getValue('모자이크')/300
+            img = tools.mosaic(detected_img, xmin, ymin, xmax, ymax, ratio=ratio, full=True)
 
             # 모자이크 처리 원본에 삽입
             if img is not None:

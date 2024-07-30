@@ -446,6 +446,22 @@
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
+     <widget class="QFrame" name="frame_option">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>240</y>
+        <width>311</width>
+        <height>231</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_multi">
      <attribute name="title">
@@ -532,11 +548,6 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_option">
-     <attribute name="title">
-      <string>설정</string>
-     </attribute>
-    </widget>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar">
@@ -596,22 +607,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>btn_dongzip</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>slot_btn_multi_open()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>846</x>
-     <y>588</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>727</x>
-     <y>605</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>btn_dongzip_reset</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
@@ -640,6 +635,22 @@
     <hint type="destinationlabel">
      <x>969</x>
      <y>632</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_dongzip</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>slot_btn_multi_open()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>846</x>
+     <y>588</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>727</x>
+     <y>605</y>
     </hint>
    </hints>
   </connection>

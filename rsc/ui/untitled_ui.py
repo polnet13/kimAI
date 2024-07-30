@@ -141,6 +141,11 @@ class Ui_MainWindow(object):
         self.label_frame_gap.setObjectName(u"label_frame_gap")
         self.label_frame_gap.setGeometry(QRect(260, 210, 31, 16))
         self.label_frame_gap.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.frame_option = QFrame(self.tab_control)
+        self.frame_option.setObjectName(u"frame_option")
+        self.frame_option.setGeometry(QRect(10, 240, 311, 231))
+        self.frame_option.setFrameShape(QFrame.StyledPanel)
+        self.frame_option.setFrameShadow(QFrame.Raised)
         self.tabWidget.addTab(self.tab_control, "")
         self.tab_multi = QWidget()
         self.tab_multi.setObjectName(u"tab_multi")
@@ -172,9 +177,6 @@ class Ui_MainWindow(object):
         self.textBrowser.setObjectName(u"textBrowser")
         self.textBrowser.setGeometry(QRect(10, 10, 311, 461))
         self.tabWidget.addTab(self.tab_dongzip, "")
-        self.tab_option = QWidget()
-        self.tab_option.setObjectName(u"tab_option")
-        self.tabWidget.addTab(self.tab_option, "")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -185,9 +187,9 @@ class Ui_MainWindow(object):
         self.btn_play.clicked.connect(MainWindow.slot_btn_play)
         self.btn_region_reset.clicked.connect(MainWindow.slot_btn_region_reset)
         self.btn_fileopen.clicked.connect(MainWindow.slot_btn_fileopen)
-        self.btn_dongzip.clicked.connect(MainWindow.slot_btn_multi_open)
         self.btn_dongzip_reset.clicked.connect(MainWindow.slot_btn_multi_reset)
         self.btn_dongzip_reset_2.clicked.connect(MainWindow.slot_btn_open_complete)
+        self.btn_dongzip.clicked.connect(MainWindow.slot_btn_multi_open)
 
         self.tabWidget.setCurrentIndex(0)
 
@@ -231,6 +233,5 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_multi), QCoreApplication.translate("MainWindow", u"\uba40\ud2f0", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_detect), QCoreApplication.translate("MainWindow", u"AI \ud0d0\uc9c0 \ub0b4\uc5ed", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_dongzip), QCoreApplication.translate("MainWindow", u"\ub3d9zip \uc548\ub0b4", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_option), QCoreApplication.translate("MainWindow", u"\uc124\uc815", None))
     # retranslateUi
 

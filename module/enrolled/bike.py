@@ -1,13 +1,15 @@
 import cv2
-from ultralytics import YOLO
 import os
-from control import tools
-from control.run_ocr import OcrReader
 import numpy as np
 import pandas as pd
+from ultralytics import YOLO
+from control import tools
+from control.run_ocr import OcrReader
+from control.gui_sliders import SliderClass
 from module import generic 
-import settings
 from module.generic import CustomBaseClass
+from module.generic import ArgsDict
+import settings
 
 
 # class definition:
@@ -18,9 +20,16 @@ class DetectorBike(CustomBaseClass):
 
     tag = '이륜차 번호판 감지'
     
-    def __init__(self, multiMode = False) -> None:
+    def __init__(self) -> None:
         self.tag = DetectorBike.tag
-        super().__init__(multiMode=False)
+        # 슬라이더 설정
+        _arg_dict = {
+            'thr_bike':[1,1,100],
+            }
+        ArgsDict.clear()
+        ArgsDict.makeValues(_arg_dict)
+        self.arg = SliderClass(_arg_dict)
+        super().__init__()
         # 이미지 초기화
         self.img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
         # C:\Users\prude\OneDrive\Documents\kimAI\rsc\init.jpg
@@ -33,8 +42,6 @@ class DetectorBike(CustomBaseClass):
         # 탐지 영역 설정 활성화 상태
         self.region_status = False
         # GPU 사용하는 YOLO 모델 불러오기
-        self.thr_bike = 0.6     # 욜로에서는 임계값, 이벤트에서는 영상 차이
-        self.thr_nbp = 0.3
         self.labels = None
         self.track_ids = {}
         # cv2 관련
@@ -69,10 +76,10 @@ class DetectorBike(CustomBaseClass):
     ##############
     
     # yolo 이미지 디텍션 함수
-    def detect_yolo_track(self, frame, thr):
+    def detect_yolo_track(self, frame):
         '''
         이 함수에서 실질적인 탐지 작업을 수행함
-        input: origin_img, thr
+        input: origin_img
 
         output
         frame: 원본 해상도의 욜로 처리된 이미지
@@ -95,6 +102,7 @@ class DetectorBike(CustomBaseClass):
             if _label_number != 3:
                 continue
             # 임계값 이하는 생략 하라는 코드
+            thr = ArgsDict.getValue('thr_bike')
             if _confidence < thr/100:
                 continue
             bike_img = frame[ymin:ymax, xmin:xmax]
@@ -120,11 +128,11 @@ class DetectorBike(CustomBaseClass):
             pass
         return frame, text
         
-    def detect_move(self, roi_img, region_status, thr):
+    def detect_move(self, roi_img, region_status):
         '''
         바이크 탐지에서는 사용하지 않음                    
         '''
-        return roi_img, True, thr
+        return roi_img, True
 
 
     def detect_nbp_img(self, bike_img):

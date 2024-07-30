@@ -3,6 +3,10 @@ import sys
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout, QHBoxLayout
 from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
+from PySide6.QtCore import QRect
+from PySide6.QtWidgets import QFrame
+from PySide6.QtWidgets import QApplication
+
 # 웹 바로가기
 from PySide6.QtGui import QDesktopServices 
 from PySide6.QtCore import QUrl, QTimer, Qt, QThread
@@ -18,6 +22,7 @@ from multiprocessing import Process, Queue
 # 사용자
 from control import tools
 from module import enrolled, generic
+from module.generic import ArgsDict
 from rsc.ui.untitled_ui import Ui_MainWindow
 import settings
 
@@ -54,12 +59,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         detectors = tools.get_classes(enrolled)
         for detector in detectors:
             self.dropdown_models.addItem(detector.tag)
-        # 기본 값을 "이륜차 번호판 감지"으로 설정(배포시 제거)
-        index = self.dropdown_models.findText("이륜차 번호판 감지")
-        self.dropdown_models.setCurrentIndex(index)
         self.checkbox_yolo.setChecked(True)
         # 움직임 감지 임계값
-        self.move_thr = 5
         self.yolo_thr = 30
         # 드롭다운 값이 변경되었을 때 함수 실행
         self.selected_mode = self.dropdown_models.currentText()
@@ -69,9 +70,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.thrSlider_move.valueChanged.connect(self.thr_slider_move_moved) # 움직임 감도
         self.thrSlider_yolo.valueChanged.connect(self.thr_slider_yolo_moved) # 욜로 감도
         self.thrSlider_move.setValue(5)
-        self.thrSlider_yolo.setValue(30)
+        self.thrSlider_yolo.setValue(1)
         self.label_thr_move.setText(str(5)) # label5 = 움직임 감도
-        self.label_4.setText(str(30)) # label4 = 욜로 감도
+        self.label_4.setText(str(1)) # label4 = 욜로 감도
         self.jump_frameSlider.valueChanged.connect(self.jump_frameSlider_moved) # 초당프레임 분석
         self.jump_frameSlider.setValue(1)
         self.Slider_bright.valueChanged.connect(self.Slider_bright_moved)  # 재생구간
@@ -100,8 +101,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.flag_dongzip_btn = False
         # 플레이어 객체 생성
         self.player = generic.PlayerClass()
-        
-        
+ 
         #################
         ## 단축키 함수 ##
         ################
@@ -221,7 +221,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
 
     def slot_btn_multi_open(self):
-        # slot_btn_multi_open로 변경 예정
         '''
         동집 버튼을 누르면
         큐(실질적인 동영상 압축 작업)와 프로그래스바를 생성하고,
@@ -348,8 +347,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         #################################################################################
         # 모든 인스턴스에 적용되도록 하나의 함수로 통합 필요함 apply()
         # ROI 부분만 움직임 감지
-        roi_img, detect_move_bool, contours = self.detector.detect_move(
-            roi_img, self.region_status, self.move_thr
+        try:
+            move_thr = ArgsDict.getValue('움직임_픽셀차이')
+        except:
+            move_thr = 5
+        roi_img, detect_move_bool = self.detector.detect_move(
+            roi_img, self.region_status
             )
         # 움직임이 없는 경우 원본 이미지 출력
         if detect_move_bool == False:
@@ -357,7 +360,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             return
         # ROI 부분만 욜로 디텍션
         if self.checkbox_yolo.isChecked():
-            roi_img, text  = self.detector.detect_yolo_track(roi_img, self.yolo_thr)
+            roi_img, text  = self.detector.detect_yolo_track(roi_img)
             if text:
                 self.textBrowser.append(text)
                 self.textBrowser.setFocus()
@@ -509,27 +512,54 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     ##########
     ## 기타 ##
     ##########            
-        
+
     # 드롭다운 메뉴가 변경되었을 때 Yolo 모델을 변경 
     def slot_dropdown_model_changed(self):
         '''
-        등록된 모듈에서 객체 자동으로 가져오도록 추후 수정
+        핵심 함수
         '''
         # 드롭다운에서 현재 모델 text 변수에 저장
-        text = self.dropdown_models.currentText() 
+        text = self.dropdown_models.currentText()
+        print(f"Selected text: {text}")
+
         if not self.selected_mode == text:
             self.selected_mode = text
+
         enrolled_classes = tools.get_classes(enrolled)
         for detector in enrolled_classes:
             if hasattr(detector, 'tag') and detector.tag == text:
-                if detector is not None:
-                    self.detector = detector()
-                    checkbox_track = self.detector.getTrack()
-                    print(detector.tag)
-                    self.checkbox_yolo.setChecked(checkbox_track)
-                else:
-                    print(f"Error: {detector} 클래스가 전역 네임스페이스에 존재하지 않습니다.")
+                print(f"Matching detector found: {detector}")
+                self.detector = None
+                self.detector = detector()
 
+                # 기존 레이아웃 제거
+                if self.frame_option.layout() is not None:
+                    old_layout = self.frame_option.layout()
+                    print("Removing old layout")
+                    while old_layout.count():
+                        item = old_layout.takeAt(0)
+                        widget = item.widget()
+                        if widget is not None:
+                            widget.deleteLater()
+                    self.frame_option.setLayout(None)
+
+                # 프레임 다시 그리기
+                self.frame_option.repaint()
+                self.update()
+                print("Frame updated")
+                # 새로운 레이아웃 설정
+                # 새로 못그리는게 arg.option_box가 새로운 ArgDict를 반영하지 못하는거 같음
+                self.detector.arg.update(ArgsDict.all())
+                self.frame_option.setLayout(self.detector.arg.option_box)
+                # 위젯 업데이트
+                self.frame_option.update()
+
+                # 이벤트 루프 처리 (필요한 경우)
+                QApplication.processEvents()
+ 
+                checkbox_track = self.detector.getTrack()
+                print(detector.tag)
+                self.checkbox_yolo.setChecked(checkbox_track)
         # 플레이어 객체 생성    
         if self.fileName:
             self.player.fileopen(self.fileName)

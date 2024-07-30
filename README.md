@@ -53,3 +53,9 @@ python manage.py migrate
 
 #### Using Pyinstaller
 python manage.py deploy
+
+## Todo
+- 해상도가 큰 영상 느려지는 것 리사이즈로 해결(640*360)
+- 탭 적절하게 자동변환되도록
+- 반응형 옵션창 
+- 안내판 지우고 모두 테이블로 대체(반응형으로 구현하기 위함)

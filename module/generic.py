@@ -9,8 +9,7 @@ from control import tools
 from control.run_ocr import OcrReader
 import settings
 
-from PySide6.QtWidgets import QSlider 
-from rsc.ui.untitled_ui import Ui_MainWindow
+
 
 
 class CustomBaseClass():
@@ -37,13 +36,11 @@ class CustomBaseClass():
     def __init__(self, multiMode = False) -> None:
         self.tag = CustomBaseClass.tag
         self.track = True
-
         # GPU 사용 
         self.gpu = torch.cuda.is_available()
         # 이미지 초기화
         self.img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
         self.img = cv2.imread(self.img_path)
-        
         # 탐지 영역 설정 활성화 상태
         self.region_status = False
         # GPU 사용하는 YOLO 모델 불러오기
@@ -106,48 +103,7 @@ class CustomBaseClass():
             return self.img, self.curent_frame, play_status
         
 
-    # yolo 이미지 디텍션 함수
-    def detect_yolo_track(self, frame, thr):
-        
-        # # 욜로 모델이 선택되어 있으면 디텍션
-        # plot_img = self.img
-        # if self.dropdown_models.currentText() != '딥러닝X 이벤트 감지만 수행':
-        #     plot_img = self.detect_yolo_track(self.img)  
-        '''
-        input: 원본해상도 이미지
-        output: 원본해상도 욜로 이미지,
-        검출된 객체에 대한 bbox와 텍스트를 생성하여 이미지에 출력
-        개인정보 가리기와 bbox 생성을 선택할 수 있음
-        
-        frame: 원본 해상도의 욜로 처리된 이미지
-        img: cv2 이미지(바운딩 박스 처리된 이미지)
-        track_id: 추적된 객체의 id값
-        ''' 
-        detections = self.model.track(frame, persist=True)[0]
-        # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
-        for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
-            xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3])
-            try:
-                track_id, confidence, label_number = int(data[4]), float(data[5]), int(data[6])
-            except IndexError:
-                continue
-            # 사람만 검출하도록 함(추후 수정 필요)\
-            if label_number != 0:
-                continue
-            # 임계값 이하는 생략 하라는 코드
-            if confidence < thr/100:
-                continue
-            # 개인정보 가리기
-            # if self.checkbox_blind.isChecked():
-            #     frame = yolo_tools.blind_img(frame, xmin+self.x1, ymin+self.y1, xmax+self.x1, ymax+self.y1)
-            # bbox를 생성하는데 tracking한 객체의 id값도 출력하도록 함
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 2)
-            cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
-            # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
-            if track_id not in self.track_ids:
-                self.track_ids[track_id] = [self.cap.get(cv2.CAP_PROP_POS_FRAMES)]
-            text = None
-        return frame, text
+
 
     def get_diff_img(self):
         '''
@@ -373,42 +329,30 @@ class PlayerClass:
             return self.img, self.curent_frame, play_status
                 
 
-class OptionClass:
-    '''
-    make_slider 슬라이더 객체를 반환 
-    set_slider_value  슬라이더 값을 설정 
-    get_slider_value  슬라이더 값을 가져옴
-    get_slider_by_name  슬라이더 이름으로 슬라이더 객체를 찾음
-    '''
-    def __init__(self) -> None:
-        self.slider = []
-        self.roi_mosaic = []
+class ArgsDict:
+                     
+    arg_dict = {}
 
-    def make_slider(self, name, min, max, default):
-        SliderOBJ = QSlider()
-        SliderOBJ.setObjectName(f"{name}")
-        SliderOBJ.setMinimum(min)
-        SliderOBJ.setMaximum(max)
-        SliderOBJ.setSliderPosition(default)
-        self.slider.append(SliderOBJ)
-        return SliderOBJ  
+    @classmethod
+    def makeValues(cls, arg_dict):
+        cls.arg_dict = arg_dict
 
-    def add_slider_to_frame(self, frame, name, min, max, value):
-        slider = self.make_slider(name, min, max, value)
-        frame.layout().addWidget(slider)  # 프레임의 레이아웃에 슬라이더 추가
+    @classmethod
+    def getValue(cls, str):
+        print(cls.arg_dict[str][0])
+        return cls.arg_dict[str][0]
+    
+    @classmethod
+    def setValue(cls, str, value):
+        cls.arg_dict[str][0] = value
 
-    def set_slider_value(self, name, value):
-        slider = self.get_slider_by_name(name)
-        if slider:
-            slider.setValue(value)
+    @classmethod
+    def clear(cls):
+        cls.arg_dict = {}
 
-    def get_slider_value(self, name):
-        slider = self.get_slider_by_name(name)
-        if slider:
-            return slider.value()
-        return None
+    @classmethod
+    def all(cls):
+        print(cls.arg_dict)
+        return cls.arg_dict
+ 
 
-
-    def make_roi_mosaic(self, x1, y1, x2, y2):
-        self.roi_mosaic.append([x1, y1, x2, y2])
-        return self.roi_mosaic
