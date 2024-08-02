@@ -1,9 +1,10 @@
 # 스타팅 포인트
+import sys 
 import os
 import multiprocessing
 from PySide6.QtWidgets import *
 from views.mainWindowManager import mainWindow
-import sys 
+from PySide6.QtCore import Qt
 
 try:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")

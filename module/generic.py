@@ -5,8 +5,8 @@ import pandas as pd
 import torch
 from ultralytics import YOLO
 
+
 from control import tools
-from control.run_ocr import OcrReader
 import settings
 
 
@@ -37,7 +37,7 @@ class CustomBaseClass():
         self.tag = CustomBaseClass.tag
         self.track = True
         # GPU 사용 
-        self.gpu = torch.cuda.is_available()
+        # self.gpu = torch.cuda.is_available()
         # 이미지 초기화
         self.img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
         self.img = cv2.imread(self.img_path)
@@ -331,20 +331,37 @@ class PlayerClass:
 
 class ArgsDict:
                      
-    arg_dict = {}
+    arg_dict = {}  # 슬라이더 변수 저장
+    detector_dict = {}  # 디텍터 클래스 저장 ex) {DetectorMosaic.tag: DetectorMosaic, ...}
+    selected_mode = None  # 현재 드롭다운에서 선택된 모드
+    detector = None   # 현재 선택된 디텍터 (모델로더의 드롭다운 변경시 초기화)
+    roi_frame_1 = None   # 움직임 감지를 위한 프레임 저장
+    roi_frame_2 = None
+    roi_frame_3 = None
+    roi_color = (0, 0, 255)   # 움직임 감지 ROI 색상
+    track_ids = {}  # 추적된 객체의 id값
+    
 
     @classmethod
-    def makeValues(cls, arg_dict):
-        cls.arg_dict = arg_dict
-
-    @classmethod
-    def getValue(cls, str):
-        print(cls.arg_dict[str][0])
-        return cls.arg_dict[str][0]
+    def setDetector(cls, tag):
+        cls.detector = cls.detector_dict[tag]
+        return
     
     @classmethod
-    def setValue(cls, str, value):
-        cls.arg_dict[str][0] = value
+    def setValue(cls, tag, _arg_dict):
+        cls.arg_dict[tag] = _arg_dict
+
+    @classmethod
+    def enrollDetectors(cls, tag, _model_dict):
+        cls.detector_dict[tag] = _model_dict
+
+    @classmethod
+    def getValue(cls, tag, arg):
+        '''
+        str: 'tag', '모자이크'
+        key: '모자이크'
+        '''
+        return cls.arg_dict[tag][arg]
 
     @classmethod
     def clear(cls):
@@ -354,5 +371,30 @@ class ArgsDict:
     def all(cls):
         print(cls.arg_dict)
         return cls.arg_dict
- 
+    
+    @classmethod
+    def getDetector(cls):
+        return cls.detector_dict[cls.selected_mode]
+
+    @classmethod
+    def setRoiFrame(cls, gray_img):
+        cls.roi_frame_1 = cls.roi_frame_2 
+        cls.roi_frame_2 = cls.roi_frame_3 
+        cls.roi_frame_3 = gray_img
+
+    @classmethod
+    def getRoiFrame(cls):
+        return cls.roi_frame_1, cls.roi_frame_2, cls.roi_frame_3
+
+    @classmethod
+    def setRoiColor(cls, color):
+        cls.roi_color = color
+    
+    @classmethod
+    def getRoiColor(cls):
+        return cls.roi_color
+    
+    @classmethod
+    def setTrackIds(cls, track_id, cap_num):
+        cls.track_ids[track_id] = [cap_num]
 

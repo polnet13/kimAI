@@ -5,7 +5,7 @@ import pandas as pd
 from ultralytics import YOLO
 from control import tools
 from control.run_ocr import OcrReader
-from control.gui_sliders import SliderClass
+from module.modelLoader import ModelClass
 from module import generic 
 from module.generic import CustomBaseClass
 from module.generic import ArgsDict
@@ -18,65 +18,45 @@ import settings
 
 class DetectorBike(CustomBaseClass):
 
-    tag = '이륜차 번호판 감지'
+    tag = '이륜차_번호판_감지'
+    arg_dict = {
+        '감지_민감도':1,
+        }
+    models = {
+        'base': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt')),
+        'model_nbp': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
+        'reader': OcrReader(),
+    }
+    
+    img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
+    df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
+    track_ids = {}
     
     def __init__(self) -> None:
-        self.tag = DetectorBike.tag
-        # 슬라이더 설정
-        _arg_dict = {
-            'thr_bike':[1,1,100],
-            }
-        ArgsDict.clear()
-        ArgsDict.makeValues(_arg_dict)
-        self.arg = SliderClass(_arg_dict)
         super().__init__()
-        # 이미지 초기화
-        self.img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
-        # C:\Users\prude\OneDrive\Documents\kimAI\rsc\init.jpg
-        self.model_bike_path = os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')
-        self.model_nbp_path = os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')
-        # 데이터 프레임
-        self.df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
-        # 이미지 읽기
-        self.img = cv2.imread(self.img_path)
-        # 탐지 영역 설정 활성화 상태
-        self.region_status = False
-        # GPU 사용하는 YOLO 모델 불러오기
-        self.labels = None
-        self.track_ids = {}
-        # cv2 관련
-        self.cap = None
-        self.fps = None
-        self.total_frames = 0    # 진행률을 확인하기 위한 총 프레임수
-        self.curent_frame = 0    # 현재 프레임
+        # 슬라이더 설정
+        ArgsDict.clear()
+        ArgsDict.setValue(DetectorBike.tag, DetectorBike.arg_dict)
+        self.tag = DetectorBike.tag
+
         # 모델 초기화
-        # AI 모델 생성
-        self.model = YOLO(self.model_bike_path)
-        self.model_nbp = YOLO(self.model_nbp_path)
-        self.reader = OcrReader()
         try:
-            bike_img = cv2.imread(self.img_path)
-            detection = self.model(bike_img)[0]
+            bike_img = cv2.imread(DetectorBike.img_path)
+            detector = DetectorBike.models['base']
+            detection = detector(bike_img)[0]
             print(detection.names.items())
             self.labels = [ v for _ , v in detection.names.items() ]
         except:
             print("모델 초기화 중 디텍션 오류 발생")
         # 라벨을 초기화 하는 함수 작성        
-
-
-        
-    def change_model(self, text):
-        ''' 모델을 변경하는 함수 '''
-        print('현재 생성된 객체를 제거 하고 초기화 함  \n구현예정')
-        return 
-    
+ 
 
     ##############
     ## 슬롯함수 ##
     ##############
     
     # yolo 이미지 디텍션 함수
-    def detect_yolo_track(self, frame):
+    def detect_yolo_track(frame, cap_num):
         '''
         이 함수에서 실질적인 탐지 작업을 수행함
         input: origin_img
@@ -86,63 +66,65 @@ class DetectorBike(CustomBaseClass):
         img: cv2 이미지(바운딩 박스 처리된 이미지)
         track_id: 추적된 객체의 id값
         ''' 
-        detections = self.model.track(frame, persist=True)[0]
-        text = None
-        font_scale = int(frame.shape[0]/30)
+        text = ''
+        try:
+            detections = DetectorBike.models['base'].track(frame, persist=True)[0]
+        except:
+            DetectorBike.models['base'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt'))
+            detections = DetectorBike.models['base'].track(frame, persist=True)[0]
+        print('탐지 중')
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
-            _cap_number = 0
             _xmin, _ymin, _xmax, _ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
             xmin, ymin, xmax, ymax = tools.to_original_shape(frame.shape, frame.shape, _xmin, _ymin, _xmax, _ymax) # 원본
             try:
-                _track_id, _confidence, _label_number = int(data[4]), float(data[5]), int(data[6])
+                track_id, _confidence, _label_number = int(data[4]), float(data[5]), int(data[6])
             except IndexError:
                 continue
             # 오토바이만 검출하도록 함
             if _label_number != 3:
+                print('오토바이 미검출')
                 continue
+            print('오토바이 검출')
             # 임계값 이하는 생략 하라는 코드
-            thr = ArgsDict.getValue('thr_bike')
+            thr = ArgsDict.getValue(DetectorBike.tag, '감지_민감도')
             if _confidence < thr/100:
+                print('임계값 미만으로 생략')
                 continue
             bike_img = frame[ymin:ymax, xmin:xmax]
             # 번호판 이미지 검출
-            nbp_img = self.detect_nbp_img(bike_img)
+            nbp_img = DetectorBike.detect_nbp_img(bike_img)
             # 휘어진 번호판 이미지 처리
             try:
-                nbp_img = self.nbp_transform(nbp_img)
+                nbp_img = DetectorBike.nbp_transform(nbp_img)
             except:
                 return frame, None
             # ocr 처리
             if nbp_img is not None:
-                si, giho, num = self.reader.read(nbp_img)
+                si, giho, num = DetectorBike.models['reader'].read(nbp_img)
+                print(si, giho, num)
                 _df = pd.DataFrame({'si':[si], 'giho':[giho], 'num':[num]})
-                self.df = pd.concat([self.df, _df], ignore_index=True)
+                DetectorBike.df = pd.concat([DetectorBike.df, _df], ignore_index=True)
                 frame[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img
         try:
-            s = self.df['si'].value_counts().idxmax()
-            g = self.df['giho'].value_counts().idxmax()
-            n = self.df['num'].value_counts().idxmax()
+            s = DetectorBike.df['si'].value_counts().idxmax()
+            g = DetectorBike.df['giho'].value_counts().idxmax()
+            n = DetectorBike.df['num'].value_counts().idxmax()
             text = f'{s} {g} {n}'  # 누적 인식
         except:
             pass
         return frame, text
         
-    def detect_move(self, roi_img, region_status):
-        '''
-        바이크 탐지에서는 사용하지 않음                    
-        '''
-        return roi_img, True
 
 
-    def detect_nbp_img(self, bike_img):
+    def detect_nbp_img(bike_img):
         '''
         return 
         성공: 번호판 이미지
         실패: None
         ''' 
         roi_img = None
-        detection = self.model_nbp(bike_img)[0]
+        detection = DetectorBike.models['model_nbp'](bike_img)[0]
         # 번호판 검출
         for data_nbp in detection.boxes.data.tolist():
             xmin, ymin, xmax, ymax = int(data_nbp[0]), int(data_nbp[1]), int(data_nbp[2]), int(data_nbp[3])
@@ -153,18 +135,10 @@ class DetectorBike(CustomBaseClass):
             if label != 1:
                 continue
             roi_img = bike_img[ymin:ymax, xmin:xmax]
-        return roi_img
+            return roi_img
+    
 
-    def reorderPts(self, pts):
-        idx = np.lexsort((pts[:, 1], pts[:, 0]))  # 칼럼0 -> 칼럼1 순으로 정렬한 인덱스를 반환
-        pts = pts[idx]  # x좌표로 정렬
-        if pts[0, 1] > pts[1, 1]:
-            pts[[0, 1]] = pts[[1, 0]]
-        if pts[2, 1] < pts[3, 1]:
-            pts[[2, 3]] = pts[[3, 2]]
-        return pts
-
-    def nbp_transform(self, frame):
+    def nbp_transform(frame):
         img = frame.copy()
         # 출력 영상 설정
         dw, dh = 300, 150
@@ -186,10 +160,30 @@ class DetectorBike(CustomBaseClass):
             if not cv2.isContourConvex(approx) or len(approx) != 4:
                 continue
             # cv2.polylines(frame, [approx], True, (0, 255, 0), 2, cv2.LINE_AA)
-            srcQuad = self.reorderPts(approx.reshape(4, 2).astype(np.float32))
+            srcQuad = DetectorBike.reorderPts(approx.reshape(4, 2).astype(np.float32))
             pers = cv2.getPerspectiveTransform(srcQuad, dstQuad)
             dst = cv2.warpPerspective(img, pers, (dw, dh), flags=cv2.INTER_CUBIC)
         return dst
+    
+
+    def reorderPts(pts):
+        idx = np.lexsort((pts[:, 1], pts[:, 0]))  # 칼럼0 -> 칼럼1 순으로 정렬한 인덱스를 반환
+        pts = pts[idx]  # x좌표로 정렬
+        if pts[0, 1] > pts[1, 1]:
+            pts[[0, 1]] = pts[[1, 0]]
+        if pts[2, 1] < pts[3, 1]:
+            pts[[2, 3]] = pts[[3, 2]]
+        return pts
+
+
+    def detect_move(roi_img, region_status):
+        '''
+        바이크 탐지에서는 사용하지 않음   
+        return 값의 3번째는 True로 주어야 메인윈도우메니저의 무브 디텍트에서 안잡힘                 
+        '''
+        return roi_img, True, True
+
+
 
 class MultiBike():
     '''
