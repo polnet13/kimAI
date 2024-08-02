@@ -10,6 +10,8 @@ pip3 install lapx==0.5.2
 pip install opencv-python
 pip3 install numpy==1.26.4
 pip3 install easyocr
+pip install fuzzywuzzy
+pip install python-Levenshtein  
 
 # 프로젝트 구조
 ```
