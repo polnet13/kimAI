@@ -27,22 +27,22 @@ class ModelClass:
 
     def make_optionbox(self):
         # UI 구성 요소 생성
+        self.layout = QVBoxLayout()
         self.combo_box = QComboBox()
-        self.combo_box.addItems(ArgsDict.arg_dict.keys())
-        self.combo_box.currentIndexChanged.connect(self.change_sliders)
-
+        sub_layout = QHBoxLayout()
         self.slider_container = QVBoxLayout()
         self.label1_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
         self.label2_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
-
+        self.combo_box.addItems(ArgsDict.arg_dict.keys())
+        self.combo_box.currentIndexChanged.connect(self.change_sliders)
         # 레이아웃 설정
-        self.layout = QVBoxLayout()
-        sub_layout = QHBoxLayout()
         sub_layout.addLayout(self.label2_container)
-        sub_layout.addLayout(self.slider_container)
         sub_layout.addLayout(self.label1_container)
+        sub_layout.addLayout(self.slider_container)
         self.layout.addWidget(self.combo_box)
+        self.layout.addSpacing(10)  # 일정 간격 추가
         self.layout.addLayout(sub_layout)
+        self.layout.setAlignment(Qt.AlignTop)
 
         # 초기 슬라이더 설정 (첫 번째 메뉴 기준)
         self.change_sliders(0)

@@ -3,10 +3,19 @@ import os, time
 import inspect
 
 
+def resize_img(plot_img, x_res):
+    '''
+    이미지를 640으로 리사이즈
+    '''
+    height, width = plot_img.shape[:2]
+    if width > x_res:
+        ratio = x_res / width
+        plot_img = cv2.resize(plot_img, (x_res, int(height * ratio)))
+    return plot_img
 
 def guiToResolution(x, y, img):
     '''
-    gui(720, 480)의 좌표 값을 해상도에 맞춰 변환
+    gui(720, 480)의 좌표 값을 해상도에 맞춰 비디오의 좌표로 변환
     '''
     height, width = img.shape[:2]
     x = max(0, min(x-40, 720)) / 720 * width

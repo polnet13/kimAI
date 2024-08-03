@@ -128,9 +128,9 @@
     <property name="geometry">
      <rect>
       <x>780</x>
-      <y>10</y>
+      <y>40</y>
       <width>331</width>
-      <height>511</height>
+      <height>481</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -144,7 +144,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>20</y>
+        <y>276</y>
         <width>211</width>
         <height>19</height>
        </rect>
@@ -160,7 +160,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>40</y>
+        <y>300</y>
         <width>211</width>
         <height>19</height>
        </rect>
@@ -176,50 +176,117 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>70</y>
+        <y>10</y>
         <width>311</width>
-        <height>311</height>
+        <height>251</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="frame_option"/>
+      <layout class="QVBoxLayout" name="frame_option">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>3</number>
+       </property>
+       <property name="bottomMargin">
+        <number>3</number>
+       </property>
+      </layout>
      </widget>
-     <widget class="QLabel" name="label_fps">
+     <widget class="QPushButton" name="pushButton_1">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>450</y>
-        <width>299</width>
-        <height>20</height>
+        <y>330</y>
+        <width>141</width>
+        <height>26</height>
        </rect>
       </property>
       <property name="text">
-       <string>fps</string>
+       <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="label_xy">
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>390</y>
-        <width>299</width>
-        <height>20</height>
+        <y>370</y>
+        <width>141</width>
+        <height>26</height>
        </rect>
       </property>
       <property name="text">
-       <string>해상도</string>
+       <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="label_roi">
+     <widget class="QPushButton" name="pushButton_3">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>420</y>
-        <width>299</width>
-        <height>21</height>
+        <y>410</y>
+        <width>141</width>
+        <height>26</height>
        </rect>
       </property>
       <property name="text">
-       <string>관심영역</string>
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_4">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>169</x>
+        <y>330</y>
+        <width>141</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_5">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>370</y>
+        <width>141</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_6">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>410</y>
+        <width>141</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </widget>
@@ -308,6 +375,45 @@
       </property>
      </widget>
     </widget>
+   </widget>
+   <widget class="QLabel" name="label_fps">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>590</y>
+      <width>299</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>프레임/초</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_xy">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>530</y>
+      <width>299</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>해상도</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_roi">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>560</y>
+      <width>299</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>관심영역</string>
+    </property>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar">

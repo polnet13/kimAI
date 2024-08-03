@@ -7,7 +7,7 @@ from control import tools
 from control.run_ocr import OcrReader
 from module.modelLoader import ModelClass
 from module import generic 
-from module.generic import CustomBaseClass
+# from module.generic import CustomBaseClass
 from module.generic import ArgsDict
 import settings
 
@@ -16,7 +16,7 @@ import settings
 
 
 
-class DetectorBike(CustomBaseClass):
+class DetectorBike():
 
     tag = '이륜차_번호판_감지'
     arg_dict = {

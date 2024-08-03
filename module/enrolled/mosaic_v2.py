@@ -7,15 +7,21 @@ import numpy as np
 import pandas as pd
 import settings
 from module.modelLoader import ModelClass
-from module.generic import CustomBaseClass, ArgsDict
+from module.generic import ArgsDict
 from huggingface_hub import hf_hub_download
 
 
-# class definition:
+
+# ToDo
+# 1. 분석 시작점, 끝점 버튼과 라벨 추가
+#   - 시작점 cap.get(cv2.CAP_PROP_POS_FRAMES) 으로 프레임 설정후 레코딩 시작
+#   - 끝점 반복 조건문(if cap_num == 끝점)으로 레코딩 종료
+# 2. 프레임별 모자이크 추가 버튼 및 기능
+#   - 모자이크 추가 버튼 클릭시, 프레임별로 모자이크 추가 df = {'cap_num': cap_num, 'a': a, 'b': b}
+# 3. 판다스로 데이터 저장
 
 
-
-class DetectorMosaic_v2(CustomBaseClass):
+class DetectorMosaic_v2():
 
     tag = '모자이크'
     arg_dict = {

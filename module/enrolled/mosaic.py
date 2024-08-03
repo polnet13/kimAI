@@ -7,13 +7,13 @@ import numpy as np
 import pandas as pd
 import settings
 from module.modelLoader import ModelClass
-from module.generic import CustomBaseClass, ArgsDict
+from module.generic import ArgsDict
 from huggingface_hub import hf_hub_download
 
 
  
 # class definition:
-class DetectorMosaic(CustomBaseClass):
+class DetectorMosaic():
 
     tag = '모자이크_얼굴_번호판만'
     arg_dict = {
