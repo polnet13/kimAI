@@ -130,7 +130,7 @@
       <x>780</x>
       <y>40</y>
       <width>331</width>
-      <height>481</height>
+      <height>491</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -140,27 +140,30 @@
      <attribute name="title">
       <string>컨트롤</string>
      </attribute>
-     <widget class="QCheckBox" name="checkbox_move">
+     <widget class="QCheckBox" name="check_realsize">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>276</y>
-        <width>211</width>
+        <y>280</y>
+        <width>301</width>
         <height>19</height>
        </rect>
       </property>
       <property name="text">
-       <string>움직임 감지 표시</string>
+       <string>실제 사이즈로 분석 (다소 느려질 수 있음)</string>
       </property>
       <property name="checked">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkbox_yolo">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>300</y>
+        <y>310</y>
         <width>211</width>
         <height>19</height>
        </rect>
@@ -178,7 +181,7 @@
         <x>10</x>
         <y>10</y>
         <width>311</width>
-        <height>251</height>
+        <height>261</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="frame_option">
@@ -200,7 +203,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>330</y>
+        <y>340</y>
         <width>141</width>
         <height>26</height>
        </rect>
@@ -216,7 +219,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>370</y>
+        <y>380</y>
         <width>141</width>
         <height>26</height>
        </rect>
@@ -232,7 +235,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>410</y>
+        <y>420</y>
         <width>141</width>
         <height>26</height>
        </rect>
@@ -248,7 +251,7 @@
       <property name="geometry">
        <rect>
         <x>169</x>
-        <y>330</y>
+        <y>340</y>
         <width>141</width>
         <height>26</height>
        </rect>
@@ -264,7 +267,7 @@
       <property name="geometry">
        <rect>
         <x>170</x>
-        <y>370</y>
+        <y>380</y>
         <width>141</width>
         <height>26</height>
        </rect>
@@ -280,7 +283,7 @@
       <property name="geometry">
        <rect>
         <x>170</x>
-        <y>410</y>
+        <y>420</y>
         <width>141</width>
         <height>26</height>
        </rect>
@@ -380,7 +383,7 @@
     <property name="geometry">
      <rect>
       <x>790</x>
-      <y>590</y>
+      <y>580</y>
       <width>299</width>
       <height>20</height>
      </rect>
@@ -393,7 +396,7 @@
     <property name="geometry">
      <rect>
       <x>790</x>
-      <y>530</y>
+      <y>540</y>
       <width>299</width>
       <height>20</height>
      </rect>
@@ -413,6 +416,19 @@
     </property>
     <property name="text">
      <string>관심영역</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_cap_num">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>600</y>
+      <width>311</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>프레임 번호</string>
     </property>
    </widget>
   </widget>

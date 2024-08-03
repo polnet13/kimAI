@@ -8,7 +8,7 @@ from control.run_ocr import OcrReader
 from module.modelLoader import ModelClass
 from module import generic 
 # from module.generic import CustomBaseClass
-from module.generic import ArgsDict
+from module.sharedData import DT
 import settings
 
 
@@ -35,8 +35,8 @@ class DetectorBike():
     def __init__(self) -> None:
         super().__init__()
         # 슬라이더 설정
-        ArgsDict.clear()
-        ArgsDict.setValue(DetectorBike.tag, DetectorBike.arg_dict)
+        DT.clear()
+        DT.setValue(DetectorBike.tag, DetectorBike.arg_dict)
         self.tag = DetectorBike.tag
 
         # 모델 초기화
@@ -66,6 +66,8 @@ class DetectorBike():
         img: cv2 이미지(바운딩 박스 처리된 이미지)
         track_id: 추적된 객체의 id값
         ''' 
+        # 이미지에 디텍션값을 넣으면 roi가 되는 함수를 만들어야 됨
+        # 함수명은 detct_make_roiimg
         text = ''
         try:
             detections = DetectorBike.models['base'].track(frame, persist=True)[0]
@@ -75,8 +77,7 @@ class DetectorBike():
         print('탐지 중')
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
-            _xmin, _ymin, _xmax, _ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
-            xmin, ymin, xmax, ymax = tools.to_original_shape(frame.shape, frame.shape, _xmin, _ymin, _xmax, _ymax) # 원본
+            xmin, ymin, xmax, ymax  = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
             try:
                 track_id, _confidence, _label_number = int(data[4]), float(data[5]), int(data[6])
             except IndexError:
@@ -87,11 +88,18 @@ class DetectorBike():
                 continue
             print('오토바이 검출')
             # 임계값 이하는 생략 하라는 코드
-            thr = ArgsDict.getValue(DetectorBike.tag, '감지_민감도')
+            thr = DT.arg_dict[DetectorBike.tag]['감지_민감도'] 
             if _confidence < thr/100:
                 print('임계값 미만으로 생략')
                 continue
-            bike_img = frame[ymin:ymax, xmin:xmax]
+            # 프레임의 절대좌표 => 상대좌표 => 오리지날 이미지의 절대좌표
+            print(xmin, ymin, xmax, ymax )
+            xmin, ymin, xmax, ymax = tools.shape_to_relPoint(frame.shape, xmin, ymin, xmax, ymax)
+            print(xmin, ymin, xmax, ymax )
+            xmin, ymin, xmax, ymax = tools.shape_to_absPoint(DT.img.shape, xmin, ymin, xmax, ymax)
+            print(xmin, ymin, xmax, ymax )
+            bike_img = DT.img[ymin:ymax, xmin:xmax]
+            print(bike_img.shape)
             # 번호판 이미지 검출
             nbp_img = DetectorBike.detect_nbp_img(bike_img)
             # 휘어진 번호판 이미지 처리
@@ -176,12 +184,12 @@ class DetectorBike():
         return pts
 
 
-    def detect_move(roi_img, region_status):
+    def detect_move(roi_img):
         '''
         바이크 탐지에서는 사용하지 않음   
         return 값의 3번째는 True로 주어야 메인윈도우메니저의 무브 디텍트에서 안잡힘                 
         '''
-        return roi_img, True, True
+        return roi_img, True
 
 
 

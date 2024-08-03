@@ -1,6 +1,20 @@
 import cv2
 import os, time
 import inspect
+from module.sharedData import DT
+
+
+def sort_roi(x1, y1, x2, y2):
+    '''
+    마우스 드래그시 roi를 정렬하는 함수
+    x1, y1, x2, y2
+    '''
+    if x1 > x2:
+            x1, x2 = x2, x1
+    if y1 > y2:
+        y1, y2 = y2, y1
+    return x1, y1, x2, y2
+
 
 
 def resize_img(plot_img, x_res):
@@ -13,22 +27,20 @@ def resize_img(plot_img, x_res):
         plot_img = cv2.resize(plot_img, (x_res, int(height * ratio)))
     return plot_img
 
-def guiToResolution(x, y, img):
-    '''
-    gui(720, 480)의 좌표 값을 해상도에 맞춰 비디오의 좌표로 변환
-    '''
-    height, width = img.shape[:2]
-    x = max(0, min(x-40, 720)) / 720 * width
-    y = max(0, min(y-40, 720)) / 480 * height
-    return int(x), int(y)
 
 def to_video_point_y(y, height):
+    '''
+    '''
     return y * 100 / height
 
 def to_gui_point_x(x, width):
+    '''
+    '''
     return x * width / 100
 
 def to_gui_point_y(y, height):
+    '''
+    '''
     return y * height / 100
 
 def merge_roi_img(img, roi_img, x1, y1):
@@ -43,12 +55,43 @@ def draw_contours(img, contours):
             cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
         return img
 
-def get_roi_img(img, x1, y1, x2, y2):
-    return img[y1:y2, x1:x2]
 
 def sort_files_by_size(filesPath):
     return sorted(filesPath, key=lambda x: os.path.getsize(x), reverse=True)
 
+
+def shape_to_adjust(x, y):
+    '''
+    gui 좌표값 오차 보정 함수
+    gui(720, 480)의 좌표 값을 입력된 이미지의 해상도에 맞춰 비디오의 좌표로 변환
+    '''
+    x = max(0, min(x-40, 720)) / 720  
+    y = max(0, min(y-40, 720)) / 480  
+    return x, y
+
+def shape_to_absPoint(img_shape, xmin, ymin, xmax, ymax):
+    '''
+    이미지 쉐입과 상대적 좌표 => 절대적 좌표로 변환
+    img_shape = img.shape
+    '''
+    # 욜로 디텍션 결과로 얻은 xmin, ymin, xmax, ymax의 상대적 좌표 값을 이미지의 사이즈에 맞게 변환
+    height, width = img_shape[:2]
+    xmin = int(xmin * width)
+    ymin = int(ymin * height)
+    xmax = int(xmax * width)
+    ymax = int(ymax * height)
+    return xmin, ymin, xmax, ymax
+
+def shape_to_relPoint(img_shape, xmin, ymin, xmax, ymax):
+    '''
+    이미지 쉐입과 절대적 좌표 => 상대적 좌표로 변환
+    '''
+    height, width = img_shape[:2]
+    xmin = xmin / width
+    ymin = ymin / height
+    xmax = xmax / width
+    ymax = ymax / height
+    return xmin, ymin, xmax, ymax
 
 def makeText(text, filepath):
     today = time.time()
@@ -59,6 +102,8 @@ def makeText(text, filepath):
 
 def to_original_shape(original_shape, _frame_shape, xmin, ymin, xmax, ymax):
     '''
+    욜로 디텍션 결과는 상대좌표를 나타내므로 원본 이미지의 좌표로 변환
+
     입력: original_shape, _frame_shape, xmin, ymin, xmax, yma
     출력: original_xmin, original_ymin, original_xmax, original_ymax
     '''

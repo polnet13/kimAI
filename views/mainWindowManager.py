@@ -22,7 +22,7 @@ from module import enrolled, generic
 from rsc.ui.untitled_ui import Ui_MainWindow
 from PySide6.QtUiTools import QUiLoader   
 import settings
-from module.generic import ArgsDict
+from module.sharedData import DT
 from module.modelLoader import ModelClass
 
 
@@ -44,7 +44,7 @@ class Worker(Process):
 class mainWindow(QMainWindow, Ui_MainWindow):  
     '''
     UI 컨트롤 관련 클래스
-    영상부 해상도 640*480
+    영상부 해상도 680*480
     '''
     def __init__(self):
         super().__init__()
@@ -54,8 +54,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.statusBar().showMessage(f'코어 수: {self.num_cores}')
         # 메시지 박스 표시 플래그
         self.message_box_shown = False  
-
-
         self.checkbox_yolo.setChecked(True)
         # qslider 설정
         self.playSlider.valueChanged.connect(self.play_slider_moved)  # 재생구간
@@ -64,19 +62,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 리스트뷰 
         self.tableView.clicked.connect(self.on_item_clicked)
         # # CCTV 분석기 초기화
-        self.init_img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
-        self.fileName = self.init_img_path
-        self.img = cv2.imread(self.init_img_path)
-        # 영상관련 정보 
-        self.width = 0
-        self.height = 0
-        self.fps = 0
-        self.total_frames = 0  
-        # roi: 영상의 해상도 값으로 설정
-        self.region_status = False
-        # play/pause 스위치
-        self.play_status = False
-        self.recording = False
+        # self.img = cv2.imread(DT.fileName)
         # 멀티프로세싱
         self.workers = None
         self.flag_start_btn = False
@@ -86,12 +72,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 모델 드롭다운 메뉴
         detectors = tools.get_classes(enrolled)
         for detector in detectors:
-            ArgsDict.setValue(detector.tag, detector.arg_dict)
-            ArgsDict.enrollDetectors(detector.tag, detector)
-
+            DT.setValue(detector.tag, detector.arg_dict)
+            DT.enrollDetectors(detector.tag, detector)
         self.modelclass = ModelClass()
         self.frame_option.addLayout(self.modelclass.layout, 11)
- 
 
  
         #################
@@ -123,28 +107,25 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.delete_key.activated.connect(self.delete_listview_row) 
 
 
-
-
     ##############
     ## 슬롯함수 ##
     ##############
-
-
     def slot_btn_fileopen(self):
-        self.fileName, _ = QFileDialog.getOpenFileName(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
+        _fileName, _ = QFileDialog.getOpenFileName(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
+        DT.setFileName(_fileName)
         self.selected_mode = self.modelclass.combo_box.currentText()
         print('\n\n\n', self.selected_mode)
         self.player_fileopen()
         
 
     def slot_btn_minusOneFrame(self):
-        self.curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)-2
-        self.playSlider.setValue(self.curent_frame)
+        _curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)-2
+        self.playSlider.setValue(_curent_frame)
         
 
     def slot_btn_plusOneFrame(self):
-        self.curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)+1
-        self.playSlider.setValue(self.curent_frame)
+        _curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)
+        self.playSlider.setValue(_curent_frame)
 
 
     def slot_btn_open_complete(self):
@@ -157,15 +138,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
     def player_fileopen(self):
         # 이미지 처리
-        self.img, self.width, self.height = self.player.fileopen(self.fileName)
-        self.reset_roi(self.img)
-        self.statusBar().showMessage(f'파일 경로: {self.fileName}')
+        self.player.open(DT.fileName)
+        self.reset_roi()
+        self.statusBar().showMessage(f'파일 경로: {DT.fileName}')
         # 영상의 전체 프레임수를 가지고 옴
-        self.total_frames = self.player.total_frames
-        self.label_xy.setText(f'해상도: {self.width}*{self.height}')
-        self.playSlider.setMaximum(self.player.total_frames -1)
-        self.label_fps.setText(f'fps : {self.player.fps}')
-        self.fps = self.player.fps
+        self.label_xy.setText(f'해상도: {DT.width}*{DT.height}')
+        self.playSlider.setMaximum(DT.total_frames -1)
+        self.label_fps.setText(f'fps : {DT.fps}')
+        DT.setRoiPoint(DT.img.shape)
         self.update()
         self.display_img()
         
@@ -173,9 +153,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         qimage 객체로 변경해서 출력하는 것의 속도 측정
         '''
-        self.play_status = not self.play_status
-
-        if self.play_status:
+        _play_status = not DT.play_status
+        DT.setPlayStatus(_play_status)
+        if DT.setPlayStatus:
             # 타임이벤트 생성
             self.timer = QTimer()
             self.timer.timeout.connect(self.play)
@@ -188,27 +168,25 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def play(self):
         '''
         cap_read() 함수는 cv2.VideoCapture 객체를 통해 프레임을 읽어오고,
-        jump_frame 만큼 프레임을 건너뛰어서 읽어온다.
         '''
-        self.jump_frame = ArgsDict.arg_dict['CCTV_플레이어']['띄엄띄엄_보기']
         # 프레임을 읽어옴
-        img, self.curent_frame, self.play_status = self.player.cap_read(self.jump_frame, self.play_status)
+        self.player.cap_read()
         # 정지 버튼이 눌렸을 때
-        if self.play_status == False:
+        if DT.play_status == False:
             self.timer.stop()
             return 
         # 이미지가 없을 때
-        if img is None:
+        if DT.img is None:
             return
         # 슬라이더 업데이트
-        self.playSlider.setValue(self.curent_frame)
+        self.playSlider.setValue(DT.cap_num)
         # 재생시간 업데이트
-        frame_time = time.strftime('%H:%M:%S', time.gmtime(self.curent_frame/self.player.fps))
-        self.playTimer.setText(f'{frame_time}')
+        frameTimer = time.strftime('%H:%M:%S', time.gmtime(DT.cap_num/DT.fps))
+        self.playTimer.setText(f'{frameTimer}')
         # 마지막 프레임일 때
-        if self.curent_frame == self.total_frames:
+        if DT.cap_num == DT.total_frames:
+            DT.play_status = False
             self.timer.stop()
-            self.play_status = False
 
 
     def slot_btn_multi_open(self):
@@ -224,16 +202,17 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             return
         self.flag_dongzip_btn = True
         fileNames, _ = QFileDialog.getOpenFileNames(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
-        ArgsDict.setFileNames(fileNames)
-        if len(ArgsDict.fileNames) == 0:
+        DT.setFileNames(fileNames)
+        if len(DT.fileNames) == 0:
             self.flag_dongzip_btn = False
             self.textBrowser.append('동영상 파일이 선택되지 않았습니다.')
             return
         # fileNames의 파일들의 용량을 확인하고 용량이 큰 순서대로 정렬
-        ArgsDict.fileNames = tools.sort_files_by_size(ArgsDict.fileNames)
-        self.fileName = ArgsDict.fileNames[0]
+        DT.fileNames = tools.sort_files_by_size(DT.fileNames)
+        _fileName = DT.fileNames[0]
+        DT.setFileName(_fileName)
         self.player_fileopen()
-        self.make_queue_and_progress_bars(ArgsDict.fileNames)
+        self.make_queue_and_progress_bars(DT.fileNames)
 
 
         
@@ -258,38 +237,26 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.timer.start(100)  
 
 
-    def sort_roi(self):
-        '''
-        roi 좌표를 정렬하는 함수
-        '''
-        x1, y1, x2, y2 = ArgsDict.roi[0], ArgsDict.roi[1], ArgsDict.roi[2], ArgsDict.roi[3]
-        if x1 > x2:
-            x1, x2 = x2, x1
-        if y1 > y2:
-            y1, y2 = y2, y1
-        ArgsDict.setRoi((x1, y1, x2, y2))
+
 
  
     def slot_btn_reset(self):
-        if self.img is None:
-            self.label_roi.setText(f'관심영역: {self.region_status}') 
+        if DT.img is None:
+            self.label_roi.setText(f'관심영역: {DT.region_status}') 
             self.update()
         else:
-            self.reset_roi(self.img)
+            self.reset_roi()
             self.display_img()
 
 
-    def reset_roi(self, img):
+    def reset_roi(self):
         '''
         이미지의 해상도에 꽉차는 roi를 설정함
         '''
-        self.region_status = False
-        if img is None:
-            return
-        x1 = y1 = 0
-        x2 = img.shape[1]
-        y2 = img.shape[0]
-        ArgsDict.setRoi((x1, y1, x2, y2))
+        DT.setRegionStatus(False)
+        DT.setRoi((0, 0, 1, 1))
+        yx = (DT.height, DT.width)
+        DT.setRoiPoint(yx)
         self.label_roi_update()
         
     
@@ -320,8 +287,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # slider 위치를 n 값으로 이동
         self.playSlider.setValue(n) 
         self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
-        self.img = self.player.cap.read()[1]
-        self.display_img()
+        img = self.player.cap.read()[1]
+        self.display_img(img)
         print(f'row: {row}, n: {n}')
         
         
@@ -334,37 +301,40 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         # 공통 코드 
         self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
-        self.img, self.curent_frame, self.play_status = self.player.cap_read(
-            self.jump_frame, self.play_status)
-        roi_img = tools.get_roi_img(
-            self.img, 
-            ArgsDict.roi[0], ArgsDict.roi[1], ArgsDict.roi[2], ArgsDict.roi[3]
-            )
-        #################################################################################
-        # 모든 인스턴스에 적용되도록 하나의 함수로 통합 필요함 apply()
-        # ROI 부분만 움직임 감지
-        # 아래쪽 코드를 player 클래스로 이동 시킬 예정임
-        roi_img, self.region_status, move_detect = ArgsDict.detector.detect_move(
-            roi_img=roi_img, 
-            region_status=self.region_status
-            )
+        DT.setCapNum(value)
+        self.player.cap_read()
+        # 분석용 이미지로 처리
+        if self.check_realsize.isChecked():
+            img = DT.img
+            x1, y1, x2, y2 = DT.roi_point[0]
+            print(x1, y1, x2, y2)
+        else:
+            img = tools.resize_img(DT.img, 680)
+            x1, y1, x2, y2 = DT.roi_point[1]
+        roi_img = img[y1:y2, x1:x2]
+        roi_img, move_detect_bool = DT.detector.detect_move(roi_img)
         # 움직임이 없는 경우 원본 이미지 출력
-        if move_detect == False:
-            self.display_img(self.img, (0,0,255))
+        if move_detect_bool == False:
+            self.display_img(img, (0,0,255))
             return
         # ROI 부분만 욜로 디텍션
         if self.checkbox_yolo.isChecked():
-            roi_img, text  = ArgsDict.detector.detect_yolo_track(roi_img, value)
+            # detect_yolo_track 에서 기본 디텍션은 줄인 사이즈
+            # 이후 추가 디텍션은 원본이미지로 수행함
+            roi_img, text  = DT.detector.detect_yolo_track(roi_img, value)
+            # roi_img 사용 : cctv, multicctv
+            # roi 무시: bike, 모자이크함
             if text:
                 self.textBrowser.append(text)
                 self.textBrowser.setFocus()
-            if ArgsDict.track_ids:
+            if DT.track_ids:
                 self.dict_to_listview() 
         #################################################################################
         # self.img에 roi_img를 붙여서 출력
-        plot_img = self.img.copy()
-        plot_img[ArgsDict.roi[1]:ArgsDict.roi[3], ArgsDict.roi[0]:ArgsDict.roi[2]] = roi_img
-        self.display_img(plot_img, (0,255,0))
+        img[y1:y2, x1:x2] = roi_img
+        self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
+        self.display_img(img, (0,255,0))
+
         
             
     def jump_frameSlider_moved(self, value):
@@ -385,8 +355,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # cctv:  track_ids[n] = cap 
         # 모델 초기화를 데이터 추가 전에 수행
         self.qmodel = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
-        print(f'self.detector.track_ids = {ArgsDict.track_ids}')
-        for key, values in ArgsDict.track_ids.items():
+        print(f'self.detector.track_ids = {DT.track_ids}')
+        for key, values in DT.track_ids.items():
             print(f'key: {key}, value: {values}')
             value_objs = []
             key_item = QtGui.QStandardItem(str(key))
@@ -410,60 +380,72 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         실제 좌표(a,b)를 받아서 디스플레이 이미지의 좌표로 변환
         '''
-        a, b = event.pos().x(), event.pos().y()
-        if self.img is None:
+        if DT.play_status:
             return
+        if DT.img is None:
+            return
+        x, y = event.pos().x(), event.pos().y()
         # a, b값이 play창 밖이면 무시하도록
-        if a < 40 or a > 760 or b < 40 or b > 520:
+        if x < 40 or x > 760 or y < 40 or y > 520:
             return
-        if self.play_status:
-            return
-        # a, b값을 gui좌표에서 백분율로 변환
-        a, b = tools.guiToResolution(a, b, self.img)
+        x, y = tools.shape_to_adjust(x, y)  # gui 오차 보정
         if event.button() == Qt.LeftButton:
-            ArgsDict.setRoi((a,b,ArgsDict.roi[2], ArgsDict.roi[3]))
+            DT.setRoi((x, y, DT.roi[2], DT.roi[3]))
 
         
-    # 마우스 왼쪽 버튼을 누르고 드래그 할 때의 동작
     def mouseMoveEvent(self, event):
-        a, b = event.pos().x(), event.pos().y()
-        if self.img is None:
+        if DT.play_status:
             return
+        x, y = event.pos().x(), event.pos().y()
         # a, b값이 play창 밖이면 무시하도록
-        if a < 40 or a > 760 or b < 40 or b > 520 or self.img is None:
+        if x < 40 or x > 760 or y < 40 or y > 520 or DT.img is None:
             return
-        # a, b값을 gui좌표에서 백분율로 변환
-        a, b = tools.guiToResolution(a, b, self.img)
-        img = self.img.copy()
-        if self.play_status:
+        if DT.img is None:
             return
-        ArgsDict.setRoi((ArgsDict.roi[0], ArgsDict.roi[1], a, b))
+        x, y = tools.shape_to_adjust(x, y)
+        if self.check_realsize.isChecked():
+            img = DT.img
+        else:
+            img = tools.resize_img(DT.img, 680)
+        DT.setRoi((DT.roi[0], DT.roi[1], x, y))
+        x1, y1, x2, y2 = DT.roi[0], DT.roi[1], DT.roi[2], DT.roi[3]
+        x1, y1, x2, y2 = tools.sort_roi(x1, y1, x2, y2)
+        DT.setRoi((x1, y1, x2, y2))
+        DT.setRoiPoint(img.shape)
         # 영상비율 자동 조절되도록 수정 필요
         self.display_img(img)
+        self.label_roi_update()
 
         
     # 마우스 왼쪽 버튼이 떼졌을 때의 동작
     def mouseReleaseEvent(self, event):
-        a, b = event.pos().x(), event.pos().y()
-        if self.img is None:
+        x, y = event.pos().x(), event.pos().y()
+        x, y = tools.shape_to_adjust(x, y)
+        if DT.img is None:
             return
-        img = self.img.copy()
         # a, b값이 play창 밖이면 무시하도록
-        if a < 40 or a > 760 or b < 40 or b > 520:
+        if x < 40 or x > 760 or y < 40 or y > 520:
             return
-        if self.play_status:
+        if DT.play_status:
             return
         # a, b값을 gui좌표에서 백분율로 변환
-        a, b = tools.guiToResolution(a, b, img)
+        if self.check_realsize.isChecked():
+            img = DT.img
+        else:
+            img = tools.resize_img(DT.img, 680)
+        _, _, x, y = tools.shape_to_relPoint(img.shape, DT.roi[0], DT.roi[1], x, y, )
         # 마우스 왼쪽 버튼이 떼지고 재생중이 아닐 때
         if (event.button() == Qt.LeftButton):
-            self.region_status = True
-            self.drawing = False
-            ArgsDict.setRoi((ArgsDict.roi[0], ArgsDict.roi[1], a, b))
-            self.display_img(img)
-        self.sort_roi()
+            DT.region_status = True
+            self.drawing = False  #???? 뭐지??
+            DT.setRoi((DT.roi[0], DT.roi[1], x, y))
+
+        x1, y1, x2, y2 = DT.roi[0], DT.roi[1], DT.roi[2], DT.roi[3]
+        x1, y1, x2, y2 = tools.sort_roi(x1, y1, x2, y2)
+        DT.setRoi((x1, y1, x2, y2))
+        DT.setRoiPoint(img.shape)
+        self.display_img(img)
         self.label_roi_update()
-        ArgsDict.setRoiFrame(None)
     
     ##################
     ## GUI 업데이트 ##
@@ -474,8 +456,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         디스플레이창에 roi 좌표를 출력하고
         roi 갱신으로 욜로모델도 갱신함(트래킹시 이미지 사이즈 변경되면 욜로 오류발생 방지)
         '''
-        x1, x2, y1, y2 = ArgsDict.roi[0], ArgsDict.roi[1], ArgsDict.roi[2], ArgsDict.roi[3]
-        self.label_roi.setText(f'관심영역: ({int(x1)}, {int(y1)}), ({int(x2)}, {int(y2)})') 
+        x1, y1, x2, y2 = DT.roi
+        self.label_roi.setText(f'관심영역(x1,y1,x2,y2): {x1:.2f}, {y1:.2f}, {x2:.2f}, {y2:.2f}') 
         self.update()
         
     def display_img(self, img=None, color=(0, 0, 255)):
@@ -484,18 +466,18 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         img를 입력 받으면 입력받은 이미지를 출력하고, 입력받지 않으면 self.img를 출력
         '''
         if img is None:
-            plot_img = self.img.copy()
+            plot_img = DT.img.copy()
         else:
             plot_img = img.copy()
-        # plot 이미지의 x축이 640을 넘어가면 비율대로 x를 640으로 맞춤
-        if plot_img.shape[1] > 640:
-            plot_img = tools.resize_img(plot_img, 640)
         # ROI 좌표가 모두 있는지 확인
-        if ArgsDict.roi[0] is None or ArgsDict.roi[2] is None or ArgsDict.roi[1] is None or ArgsDict.roi[3] is None:
+        if DT.roi_point[1][0] is None or DT.roi_point[1][2] is None or DT.roi_point[1][1] is None or DT.roi_point[1][3] is None:
             pass
         else:
-            cv2.rectangle(plot_img, (ArgsDict.roi[0], ArgsDict.roi[1]),(ArgsDict.roi[2], ArgsDict.roi[3]), color, 2)
+            cv2.rectangle(plot_img, (DT.roi_point[1][0], DT.roi_point[1][1]),(DT.roi_point[1][2], DT.roi_point[1][3]), color, 2)
         # 욜로 감지된 경우(구현 예정)
+        # plot 이미지의 x축이 680 넘어가면 비율대로 x를 680 맞춤
+        if plot_img.shape[1] > 680:
+            plot_img = tools.resize_img(plot_img, 680)
         self.label.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(plot_img.data, plot_img.shape[1], plot_img.shape[0], QtGui.QImage.Format_RGB888).rgbSwapped()))
         self.label.setScaledContents(True)
         self.label.update()
@@ -506,15 +488,15 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
         
     def slot_btn_region_reset(self):
-        if self.img is None:
-            self.label_roi.setText(f'관심영역: {self.region_status}') 
+        if DT.img is None:
+            self.label_roi.setText(f'관심영역: {DT.region_status}') 
             self.update()
         else:
-            self.reset_roi(self.img)
+            self.reset_roi()
             self.display_img()
 
     def slot_btn_multi_reset(self):
-        ArgsDict.fileNames = []
+        DT.fileNames = []
         self.flag_dongzip_btn = False
         self.flag_start_btn = False
         self.clear_status_bars()
@@ -586,8 +568,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         if menu_number == 0:
             self.objects = [enrolled.MultiCCTV(
-                file, ArgsDict.roi[0], ArgsDict.roi[1], ArgsDict.roi[2], ArgsDict.roi[3]
-            ) for i, file in enumerate(ArgsDict.fileNames)]
+                file, DT.roi[0], DT.roi[1], DT.roi[2], DT.roi[3]
+            ) for i, file in enumerate(DT.fileNames)]
         if menu_number == 1:
             pass
 
@@ -603,11 +585,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def run_workers(self):
         '''워커 시작: 멀티프로세스 열일 시작'''
         self.active_workers = 0
-        for _ in range(min(int(self.num_cores) - 1, len(ArgsDict.fileNames))):  # 코어 수 - 2개의 작업을 시작
-            self.workers[self.active_workers].x1 = ArgsDict.roi[0]
-            self.workers[self.active_workers].x2 = ArgsDict.roi[2]
-            self.workers[self.active_workers].y1 = ArgsDict.roi[1]
-            self.workers[self.active_workers].y2 = ArgsDict.roi[3]
+        for _ in range(min(int(self.num_cores) - 1, len(DT.fileNames))):  # 코어 수 - 2개의 작업을 시작
+            self.workers[self.active_workers].x1 = DT.roi[0]
+            self.workers[self.active_workers].x2 = DT.roi[2]
+            self.workers[self.active_workers].y1 = DT.roi[1]
+            self.workers[self.active_workers].y2 = DT.roi[3]
             self.workers[self.active_workers].start()
             self.active_workers += 1
 

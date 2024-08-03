@@ -4,7 +4,7 @@ from ultralytics import YOLO
 import os
 from control import tools
 from module.modelLoader import ModelClass
-from module.generic import ArgsDict
+from module.sharedData import DT
 import settings
 
 
@@ -22,14 +22,14 @@ class MultiCCTV:
         'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt')),
         'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
-    } # 어디서 읽어서 ArgsDict.models 로 전달함
+    } # 어디서 읽어서 DT.models 로 전달함
 
 
 
     def __init__(self, fileName, x1, y1, x2, y2):
         # 슬라이더 설정
-        ArgsDict.clear()
-        ArgsDict.setValue(MultiCCTV.tag, MultiCCTV.arg_dict)
+        DT.clear()
+        DT.setValue(MultiCCTV.tag, MultiCCTV.arg_dict)
         # self.arg = ModelClass(MultiCCTV.arg_dict)
         super().__init__()
         self.tag = MultiCCTV.tag
@@ -51,8 +51,8 @@ class MultiCCTV:
         self.difframe = None
         self.move_thr = 30
         self.roi_color = (0, 0, 255)
-        self.thr = ArgsDict.getValue('감지_민감도')
-        self.diff_max = ArgsDict.getValue('움직임_픽셀차이')
+        self.thr = DT.getValue('감지_민감도')
+        self.diff_max = DT.getValue('움직임_픽셀차이')
 
 
     def multi_process(self):
@@ -92,7 +92,7 @@ class MultiCCTV:
                     self.img, 
                     self.x1, self.y1, self.x2, self.y2)
                 # ROI 부분만 움직임 감지
-                thr = ArgsDict.getValue('움직임_픽셀차이')
+                thr = DT.getValue('움직임_픽셀차이')
                 roi_img, detect_move_bool, contours = self.detect_move(
                     roi_img, thr)
                 # 움직임이 없는 경우 루프 건너뜀

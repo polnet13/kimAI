@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import settings
 from module.modelLoader import ModelClass
-from module.generic import ArgsDict
+from module.sharedData import DT
 from huggingface_hub import hf_hub_download
 
 
@@ -25,13 +25,13 @@ class DetectorMosaic():
         'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt')),
         'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
-    } # 어디서 읽어서 ArgsDict.models 로 전달함
+    } # 어디서 읽어서 DT.models 로 전달함
     
     def __init__(self) -> None:
         super().__init__()
         # 슬라이더 설정
-        ArgsDict.clear()
-        ArgsDict.setValue(DetectorMosaic.tag, DetectorMosaic.arg_dict)
+        DT.clear()
+        DT.setValue(DetectorMosaic.tag, DetectorMosaic.arg_dict)
         # self.arg = ModelClass()   # 드롭다운 <=> 모델 <=> 슬라이더를 연결
         self.tag = DetectorMosaic.tag
  
@@ -61,8 +61,8 @@ class DetectorMosaic():
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
             _cap_number = 0
-            _xmin, _ymin, _xmax, _ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
-            xmin, ymin, xmax, ymax = tools.to_original_shape(frame.shape, frame.shape, _xmin, _ymin, _xmax, _ymax) # 원본
+            xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
+            # xmin, ymin, xmax, ymax = tools.to_original_shape(frame.shape, frame.shape, _xmin, _ymin, _xmax, _ymax) # 원본
             try:
                 _track_id, _confidence, _label_number = int(data[4]), float(data[5]), int(data[6])
             except IndexError:
@@ -72,7 +72,7 @@ class DetectorMosaic():
             if _label_number not in [0,2,3,5,7,9]:
                 continue
             # 임계값 이하는 생략 하라는 코드
-            yolo_thr = ArgsDict.getValue(DetectorMosaic.tag,'민감도')
+            yolo_thr = DT.arg_dict[DetectorMosaic.tag]['민감도']
             if _confidence < yolo_thr/100:
                 continue
             detected_img = frame[ymin:ymax, xmin:xmax]  # <== 오토바이 이미지
@@ -88,11 +88,11 @@ class DetectorMosaic():
         return frame, text
     
         
-    def detect_move(roi_img, region_status):
+    def detect_move(roi_img):
         '''
         모자이크 모드에서는 사용하지 않음                    
         '''
-        return roi_img, True, True
+        return roi_img, True
 
 
     def detect_nbp_mosaic(bike_img):
@@ -102,8 +102,8 @@ class DetectorMosaic():
         실패: None
         ''' 
         mosaic_img = None
-        detection = ArgsDict.models['model_nbp'](bike_img)[0]
-        ratio = ArgsDict.getValue(DetectorMosaic.tag, '모자이크')/600
+        detection = DetectorMosaic.models['model_nbp'](bike_img)[0]
+        ratio = DT.arg_dict[DetectorMosaic.tag]['모자이크']/600
         # 번호판 검출
         for data_nbp in detection.boxes.data.tolist():
             xmin, ymin, xmax, ymax = int(data_nbp[0]), int(data_nbp[1]), int(data_nbp[2]), int(data_nbp[3])
@@ -124,7 +124,7 @@ class DetectorMosaic():
         실패: None
         ''' 
         mosaic_img = None
-        ratio = ArgsDict.getValue(DetectorMosaic.tag, '모자이크')/600
+        ratio = DT.arg_dict[DetectorMosaic.tag]['모자이크']/600
         detection = DetectorMosaic.models['model_face'](face_img)[0]
         # 번호판 검출
         for data_face in detection.boxes.data.tolist():

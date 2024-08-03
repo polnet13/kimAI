@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QSlider, QLabel, QWidget, QScrollArea
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QComboBox
 from functools import partial
-from module.generic import ArgsDict
+from module.sharedData import DT
 from module import enrolled
 from control import tools
 
@@ -17,15 +17,6 @@ class ModelClass:
 
         self.layout = None
         self.detector = None
-        self.make_optionbox()
-        # 모델 사전 등록
-
-
-    def update_label(self, value, selected_menu_text, label1, arg):
-        label1.setText(str(value))
-        ArgsDict.arg_dict[selected_menu_text][arg] = value
-
-    def make_optionbox(self):
         # UI 구성 요소 생성
         self.layout = QVBoxLayout()
         self.combo_box = QComboBox()
@@ -33,7 +24,7 @@ class ModelClass:
         self.slider_container = QVBoxLayout()
         self.label1_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
         self.label2_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
-        self.combo_box.addItems(ArgsDict.arg_dict.keys())
+        self.combo_box.addItems(DT.arg_dict.keys())
         self.combo_box.currentIndexChanged.connect(self.change_sliders)
         # 레이아웃 설정
         sub_layout.addLayout(self.label2_container)
@@ -43,7 +34,6 @@ class ModelClass:
         self.layout.addSpacing(10)  # 일정 간격 추가
         self.layout.addLayout(sub_layout)
         self.layout.setAlignment(Qt.AlignTop)
-
         # 초기 슬라이더 설정 (첫 번째 메뉴 기준)
         self.change_sliders(0)
         
@@ -64,9 +54,9 @@ class ModelClass:
 
         # 선택된 메뉴에 대한 슬라이더 생성
         selected_menu_text = self.combo_box.itemText(index)
-        ArgsDict.selected_mode = selected_menu_text
+        DT.selected_mode = selected_menu_text
 
-        slider_values_dict = ArgsDict.arg_dict[selected_menu_text]
+        slider_values_dict = DT.arg_dict[selected_menu_text]
         for arg, value in slider_values_dict.items():
             slider = QSlider(Qt.Horizontal)
             slider.setMinimum(1)
@@ -78,9 +68,12 @@ class ModelClass:
             self.slider_container.addWidget(slider)
             self.label1_container.addWidget(label1)
             self.label2_container.addWidget(label2)
-        
         # 모델 생성
-        ArgsDict.setDetector(selected_menu_text)
+        DT.setDetector(selected_menu_text)
+
+    def update_label(self, value, selected_menu_text, label1, arg):
+        label1.setText(str(value))
+        DT.arg_dict[selected_menu_text][arg] = value
 
 
 
