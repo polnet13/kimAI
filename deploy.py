@@ -7,7 +7,7 @@ os.chdir(path)  # 프로젝트 디렉토리로 이동
 
 
 # 옵션 설정
-onefile = False
+onefile = True
 console = False
 
 # 제외할 파일과 폴더를 지정
@@ -38,7 +38,7 @@ subprocess.run(text, shell=True)
 import os 
 
 wd = os.path.abspath(os.path.dirname(__file__))
-python_path = r'C:/Users/prude/anaconda3/envs/django/python.exe'
+python_path = r'C:/Users/prude/anaconda3/envs/pol/python.exe'
 target = os.path.join(wd, 'dist', 'main','main.exe')
 comand = f'{target}'
 

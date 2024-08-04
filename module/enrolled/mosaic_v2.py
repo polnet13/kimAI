@@ -29,7 +29,7 @@ class DetectorMosaic_v2():
         '가림정도':10,
         }
     models = {
-        'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt')),
+        'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8s.pt')),
         'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
