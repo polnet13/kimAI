@@ -134,7 +134,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_control">
      <attribute name="title">
@@ -153,10 +153,10 @@
        </rect>
       </property>
       <property name="text">
-       <string>실제 사이즈로 분석 (다소 느려질 수 있음)</string>
+       <string>실제 사이즈로 분석</string>
       </property>
       <property name="checked">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="checkbox_yolo">
@@ -350,7 +350,7 @@
     </widget>
     <widget class="QWidget" name="tab_detect">
      <attribute name="title">
-      <string>AI 탐지 내역</string>
+      <string>탐지 리스트</string>
      </attribute>
      <widget class="QTableView" name="tableView">
       <property name="geometry">
@@ -358,14 +358,14 @@
         <x>10</x>
         <y>10</y>
         <width>311</width>
-        <height>461</height>
+        <height>441</height>
        </rect>
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_dongzip">
+    <widget class="QWidget" name="tab_info">
      <attribute name="title">
-      <string>동zip 안내</string>
+      <string>안내</string>
      </attribute>
      <widget class="QTextBrowser" name="textBrowser">
       <property name="geometry">
@@ -489,22 +489,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>btn_dongzip_reset</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>slot_btn_multi_reset()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>934</x>
-     <y>587</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>665</x>
-     <y>641</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>btn_dongzip_reset_2</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
@@ -517,6 +501,22 @@
     <hint type="destinationlabel">
      <x>969</x>
      <y>632</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_dongzip_reset</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>slot_btn_multi_reset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>934</x>
+     <y>587</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>641</y>
     </hint>
    </hints>
   </connection>

@@ -113,9 +113,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def slot_btn_fileopen(self):
         _fileName, _ = QFileDialog.getOpenFileName(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
         DT.setFileName(_fileName)
-        self.selected_mode = self.modelclass.combo_box.currentText()
-        print('\n\n\n', self.selected_mode)
+        DT.selected_mode = self.modelclass.combo_box.currentText()
+        columns = DT.detector_dict[DT.selected_mode].columns
+        DT.setDf(columns)
         self.player_fileopen()
+        self.df_to_tableview()
+        tools.plot_df_to_obj_img(DT.img, 0)
         
 
     def slot_btn_minusOneFrame(self):
@@ -271,10 +274,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     # 점프 프레임값 -3    
     def minus_gap(self):
         self.jump_frameSlider.setValue(self.jump_frameSlider.value() - 3)
-    # 리스트뷰에서 선택된 행 삭제
+    # 테이블뷰 선택된 행 삭제
     def delete_listview_row(self):
         index = self.tableView.currentIndex().row()
-        self.qmodel.removeRow(index)
+        print(f'테이블 index: {index}')
+        # 디텍터 마다 테이블 삭제시 작동하는 함수를 다르게 하기 위해서 detector에 위임함
+        DT.detector.drop(index, inplace=True)
+        # 테이블뷰 다시 출력
+        self.df_to_tableview()
         self.update()
         
     # 리스트뷰 항목 클릭시 해당 프레임으로 이동
@@ -288,6 +295,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.playSlider.setValue(n) 
         self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
         img = self.player.cap.read()[1]
+        # cap_num 에 맞춰 바운딩 박스 그림
+        if DT.play_status is False:
+            cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
+            img = tools.plot_df_to_obj_img(img, cap_num)
+        
         self.display_img(img)
         print(f'row: {row}, n: {n}')
         
@@ -313,13 +325,13 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             x1, y1, x2, y2 = DT.roi_point[1]
         roi_img = img[y1:y2, x1:x2]
         roi_img, move_detect_bool = DT.detector.detect_move(roi_img)
+
         # 움직임이 없는 경우 원본 이미지 출력
         if move_detect_bool == False:
             self.display_img(img, (0,0,255))
             return
         # ROI 부분만 욜로 디텍션
         if self.checkbox_yolo.isChecked():
-            # detect_yolo_track 에서 기본 디텍션은 줄인 사이즈
             # 이후 추가 디텍션은 원본이미지로 수행함
             roi_img, text  = DT.detector.detect_yolo_track(roi_img, value)
             # roi_img 사용 : cctv, multicctv
@@ -327,12 +339,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             if text:
                 self.textBrowser.append(text)
                 self.textBrowser.setFocus()
-            if DT.track_ids:
-                self.dict_to_listview() 
+            if not DT.df.empty:
+                self.df_to_tableview() 
         #################################################################################
         # self.img에 roi_img를 붙여서 출력
         img[y1:y2, x1:x2] = roi_img
         self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
+        #
+
         self.display_img(img, (0,255,0))
 
         
@@ -348,22 +362,19 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def Slider_bright_moved(self, value):
         self.label_bright.setText(str(value))
     
-      
-    # 딕셔너리 리스트뷰에 출력
-    def dict_to_listview(self):
-        # bike:  track_ids[n] = [_cap_number, ocr_text] 
-        # cctv:  track_ids[n] = cap 
-        # 모델 초기화를 데이터 추가 전에 수행
+
+    # df => 리스트뷰
+    def df_to_tableview(self):
+        # 모델 초기화를 데터 추가 전에 수행
         self.qmodel = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
-        print(f'self.detector.track_ids = {DT.track_ids}')
-        for key, values in DT.track_ids.items():
-            print(f'key: {key}, value: {values}')
-            value_objs = []
-            key_item = QtGui.QStandardItem(str(key))
-            value_objs = [QtGui.QStandardItem(str(value)) for value in values]
-            value_objs.insert(0, key_item)
+        columns = DT.df.columns
+        self.qmodel.setColumnCount(len(columns))
+        self.qmodel.setHorizontalHeaderLabels(columns)
+        for row in range(len(DT.df)):
+            value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df.iloc[row]]
             self.qmodel.appendRow(value_objs)
         self.tableView.setModel(self.qmodel)
+
 
 
     def program_exit(self):
@@ -433,7 +444,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             img = DT.img
         else:
             img = tools.resize_img(DT.img, 680)
-        _, _, x, y = tools.shape_to_relPoint(img.shape, DT.roi[0], DT.roi[1], x, y, )
+        _, _, x, y = tools.abs_to_rel(img.shape, DT.roi[0], DT.roi[1], x, y, )
         # 마우스 왼쪽 버튼이 떼지고 재생중이 아닐 때
         if (event.button() == Qt.LeftButton):
             DT.region_status = True
@@ -465,6 +476,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         최종적으로 roi를 표시한 이미지를 출력하는 함수
         img를 입력 받으면 입력받은 이미지를 출력하고, 입력받지 않으면 self.img를 출력
         '''
+
         if img is None:
             plot_img = DT.img.copy()
         else:

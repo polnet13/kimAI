@@ -26,6 +26,8 @@ class DetectorMosaic():
         'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
+    columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
+    
     
     def __init__(self) -> None:
         super().__init__()

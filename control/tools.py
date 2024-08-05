@@ -69,7 +69,7 @@ def shape_to_adjust(x, y):
     y = max(0, min(y-40, 720)) / 480  
     return x, y
 
-def shape_to_absPoint(img_shape, xmin, ymin, xmax, ymax):
+def rel_to_abs(img_shape, xmin, ymin, xmax, ymax):
     '''
     이미지 쉐입과 상대적 좌표 => 절대적 좌표로 변환
     img_shape = img.shape
@@ -82,7 +82,7 @@ def shape_to_absPoint(img_shape, xmin, ymin, xmax, ymax):
     ymax = int(ymax * height)
     return xmin, ymin, xmax, ymax
 
-def shape_to_relPoint(img_shape, xmin, ymin, xmax, ymax):
+def abs_to_rel(img_shape, xmin, ymin, xmax, ymax):
     '''
     이미지 쉐입과 절대적 좌표 => 상대적 좌표로 변환
     '''
@@ -93,6 +93,24 @@ def shape_to_relPoint(img_shape, xmin, ymin, xmax, ymax):
     ymax = ymax / height
     return xmin, ymin, xmax, ymax
 
+def plot_df_to_obj_img(img, cap_num):
+    '''
+    입력: img, cap_num
+    처리: DT.df 정보를 이용하여 이미지에 바운딩 박스를 그림
+    출력: img
+    '''
+    df = DT.df
+    cap_num = int(cap_num)
+    df = df[df['프레임번호']== cap_num]
+    for index, row in df.iterrows():
+        xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']
+        xmin, ymin, xmax, ymax = rel_to_abs(img.shape, xmin, ymin, xmax, ymax)
+        img = cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 5)
+        img = cv2.putText(img, f'{row["객체ID"]}', (xmin, ymin-5), cv2.FONT_ITALIC, 1, (255,255,255), 2)
+    return img
+
+
+
 def makeText(text, filepath):
     today = time.time()
     path = os.path.join(filepath, f'요약_{today}.txt')
@@ -100,30 +118,22 @@ def makeText(text, filepath):
         with open(path, 'a') as f:
             f.write(row + '\n')
 
-def to_original_shape(original_shape, _frame_shape, xmin, ymin, xmax, ymax):
+def roiImg_to_oigin(roi_img_shape, xmin, ymin, xmax, ymax):
     '''
-    욜로 디텍션 결과는 상대좌표를 나타내므로 원본 이미지의 좌표로 변환
+    [입력]
+    roi_min_point: (xmin, ymin)
+    roi_img.shape: (w, h)
+    xmin, ymin, xmax, ymax: 상대적 좌표
 
-    입력: original_shape, _frame_shape, xmin, ymin, xmax, yma
-    출력: original_xmin, original_ymin, original_xmax, original_ymax
+    [출력]
+    original_xmin, original_ymin, original_xmax, original_ymax
     '''
-    # 원본 이미지의 너비와 높이
-    original_width = original_shape[1]
-    original_height = original_shape[0]
-
-    # 조정된 이미지의 너비와 높이
-    resized_width = _frame_shape[1]
-    resized_height = _frame_shape[0]  # 이전 단계에서 계산한 높이
-
-    # 너비와 높이의 비율 계산
-    width_ratio = original_width / resized_width
-    height_ratio = original_height / resized_height
-
-    # 검출된 좌표를 원본 이미지의 좌표로 변환
-    original_xmin = int(xmin * width_ratio)
-    original_ymin = int(ymin * height_ratio)
-    original_xmax = int(xmax * width_ratio)
-    original_ymax = int(ymax * height_ratio)
+    x, y = DT.roi_point[1][:2]
+    xmin, ymin, xmax, ymax = rel_to_abs(roi_img_shape, xmin, ymin, xmax, ymax)
+    original_xmin = xmin + x
+    original_ymin = ymin + y
+    original_xmax = xmax + x
+    original_ymax = ymax + y
     return original_xmin, original_ymin, original_xmax, original_ymax
 
 # 이미지를 입력 받으면 모자이크 처리된 이미지를 반환

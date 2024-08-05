@@ -5,13 +5,15 @@
 # 패키지
 conda install pytorch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 pytorch-cuda=12.1 -c pytorch -c nvidia
 pip install PySide6==6.4.3
-pip install ultralytics==8.2.pip install opencv-python==4.9.027
+pip install ultralytics==8.2
+pip install opencv-python==4.9.0.80
 pip3 install lapx==0.5.2 
-pip install opencv-python==4.10.0
+pip install opencv-python==4.10.0.82
 pip3 install numpy==1.26.4
 pip3 install easyocr
 pip install fuzzywuzzy
 pip install python-Levenshtein  
+pip install django
 
 # 프로젝트 구조
 ```

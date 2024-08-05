@@ -3,6 +3,8 @@ from ultralytics import YOLO
 import os
 from module.sharedData import DT
 import settings
+import pandas as pd
+from control import tools
 
 
 class DetectorCCTV:
@@ -19,23 +21,71 @@ class DetectorCCTV:
         'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
+    columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
     
 
-
-    def __init__(self) -> None:
-        super().__init__()
+    def setup(): 
         # 슬라이더 설정
         DT.clear()
         DT.setValue(DetectorCCTV.tag, DetectorCCTV.arg_dict)
-        # self.arg = ModelClass()
-        self.tag = DetectorCCTV.tag
-        self.track = False
-        # 움직임 감지
-        self.diff_max = DT.getValue(self.tag, '움직임_픽셀차이')
+        DT.setDf(columns = DetectorCCTV.columns)
+
     
     #######################
     ## 슬롯함수 오버라이드 ##
     ######################## 
+    # yolo 이미지 디텍션 함수
+    def detect_yolo_track(frame, cap_num):
+        '''
+        input: 원본해상도 이미지
+        output: 원본해상도 욜로 이미지,
+        검출된 객체에 대한 bbox와 텍스트를 생성하여 이미지에 출력
+        개인정보 가리기와 bbox 생성을 선택할 수 있음
+        
+        frame: 원본 해상도의 욜로 처리된 이미지
+        img: cv2 이미지(바운딩 박스 처리된 이미지)
+        track_id: 추적된 객체의 id값
+        ''' 
+        text = ''
+        try:
+            detections = DetectorCCTV.models['model'].track(frame, persist=True)[0]
+        except Exception as e:
+            print(e)
+            # 욜로 트래커 초기화
+            DetectorCCTV.models['model'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt'))
+            detections = DetectorCCTV.models['model'].track(frame, persist=True)[0]
+    
+        # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
+        for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
+            xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3])
+            try:
+                track_id, confidence, label_number = int(data[4]), float(data[5]), int(data[6])
+            except IndexError:
+                continue
+            # 검출대상 설정
+            # (0, 'person'), (2, 'car'), (3, 'motorcycle'), (5, 'bus'), (7, 'truck'), (9, 'traffic light')
+            if label_number != 0:
+                continue
+            # 임계값 이하는 생략 하라는 코드
+            thr = DT.getValue(DetectorCCTV.tag, '감지_민감도')
+            if confidence < thr/100:
+                continue
+            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 1)
+            cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
+            # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
+            if track_id not in DT.df['객체ID'].values and DT.play_status:
+                # xmin, ymin, xmax, ymax의 값은 roi_img의 상대좌표인데, 이를 전체 이미지에서의 상대좌표로 변환(전체 이미지 shape은 DT.img.shape)
+                xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
+                xmin, ymin, xmax, ymax = tools.roiImg_to_oigin(frame.shape, xmin, ymin, xmax, ymax)
+                xmin, ymin, xmax, ymax = tools.abs_to_rel(DT.img.shape, xmin, ymin, xmax, ymax)
+                DT.df = pd.concat([DT.df, pd.DataFrame([[track_id, cap_num, xmin, ymin, xmax, ymax]], columns=DT.df.columns)], ignore_index=True)
+        return frame, text
+    
+
+    def drop(index, inplace=True):
+        DT.applyDrop(index, inplace=True)
+
+
     def detect_move(roi_img):
         '''
         DetectorCCTV.detect_move()
@@ -96,51 +146,10 @@ class DetectorCCTV:
         return diff_cnt, diff
     
 
-        # yolo 이미지 디텍션 함수
-    def detect_yolo_track(frame, cap_num):
-        '''
-        input: 원본해상도 이미지
-        output: 원본해상도 욜로 이미지,
-        검출된 객체에 대한 bbox와 텍스트를 생성하여 이미지에 출력
-        개인정보 가리기와 bbox 생성을 선택할 수 있음
-        
-        frame: 원본 해상도의 욜로 처리된 이미지
-        img: cv2 이미지(바운딩 박스 처리된 이미지)
-        track_id: 추적된 객체의 id값
-        ''' 
-        text = ''
-        try:
-            detections = DetectorCCTV.models['model'].track(frame, persist=True)[0]
-        except Exception as e:
-            print(e)
-            # 욜로 트래커 초기화
-            DetectorCCTV.models['model'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt'))
-            detections = DetectorCCTV.models['model'].track(frame, persist=True)[0]
-    
-        # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
-        for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
-            xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3])
-            try:
-                track_id, confidence, label_number = int(data[4]), float(data[5]), int(data[6])
-            except IndexError:
-                continue
-            # 사람만 검출하도록 함(추후 수정 필요)\
-            if label_number != 0:
-                continue
-            # 임계값 이하는 생략 하라는 코드
-            thr = DT.getValue(DetectorCCTV.tag, '감지_민감도')
-            if confidence < thr/100:
-                continue
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 2)
-            cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
-            # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
-            if track_id not in DT.track_ids:
-                DT.setTrackIds(track_id, cap_num)
-        return frame, text
- 
 
-    @classmethod
-    def getTrackid(cls, track_id):
-        return cls.track_ids[track_id] 
+
+
+    
+
 
   

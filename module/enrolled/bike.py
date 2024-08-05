@@ -27,28 +27,31 @@ class DetectorBike():
         'model_nbp': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'reader': OcrReader(),
     }
+    columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
     
     img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
     df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
     track_ids = {}
     
-    def __init__(self) -> None:
-        super().__init__()
-        # 슬라이더 설정
-        DT.clear()
-        DT.setValue(DetectorBike.tag, DetectorBike.arg_dict)
-        self.tag = DetectorBike.tag
+    def setup():
+        print('setup()')
+    # def __init__(self) -> None:
+    #     super().__init__()
+    #     # 슬라이더 설정
+    #     DT.clear()
+    #     DT.setValue(DetectorBike.tag, DetectorBike.arg_dict)
+    #     self.tag = DetectorBike.tag
 
-        # 모델 초기화
-        try:
-            bike_img = cv2.imread(DetectorBike.img_path)
-            detector = DetectorBike.models['base']
-            detection = detector(bike_img)[0]
-            print(detection.names.items())
-            self.labels = [ v for _ , v in detection.names.items() ]
-        except:
-            print("모델 초기화 중 디텍션 오류 발생")
-        # 라벨을 초기화 하는 함수 작성        
+    #     # 모델 초기화
+    #     try:
+    #         bike_img = cv2.imread(DetectorBike.img_path)
+    #         detector = DetectorBike.models['base']
+    #         detection = detector(bike_img)[0]
+    #         print(detection.names.items())
+    #         self.labels = [ v for _ , v in detection.names.items() ]
+    #     except:
+    #         print("모델 초기화 중 디텍션 오류 발생")
+    #     # 라벨을 초기화 하는 함수 작성        
  
 
     ##############
@@ -84,22 +87,15 @@ class DetectorBike():
                 continue
             # 오토바이만 검출하도록 함
             if _label_number != 3:
-                print('오토바이 미검출')
                 continue
-            print('오토바이 검출')
             # 임계값 이하는 생략 하라는 코드
             thr = DT.arg_dict[DetectorBike.tag]['감지_민감도'] 
             if _confidence < thr/100:
-                print('임계값 미만으로 생략')
                 continue
             # 프레임의 절대좌표 => 상대좌표 => 오리지날 이미지의 절대좌표
-            print(xmin, ymin, xmax, ymax )
-            xmin, ymin, xmax, ymax = tools.shape_to_relPoint(frame.shape, xmin, ymin, xmax, ymax)
-            print(xmin, ymin, xmax, ymax )
-            xmin, ymin, xmax, ymax = tools.shape_to_absPoint(DT.img.shape, xmin, ymin, xmax, ymax)
-            print(xmin, ymin, xmax, ymax )
+            xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
+            xmin, ymin, xmax, ymax = tools.rel_to_abs(DT.img.shape, xmin, ymin, xmax, ymax)
             bike_img = DT.img[ymin:ymax, xmin:xmax]
-            print(bike_img.shape)
             # 번호판 이미지 검출
             nbp_img = DetectorBike.detect_nbp_img(bike_img)
             # 휘어진 번호판 이미지 처리
@@ -110,7 +106,6 @@ class DetectorBike():
             # ocr 처리
             if nbp_img is not None:
                 si, giho, num = DetectorBike.models['reader'].read(nbp_img)
-                print(si, giho, num)
                 _df = pd.DataFrame({'si':[si], 'giho':[giho], 'num':[num]})
                 DetectorBike.df = pd.concat([DetectorBike.df, _df], ignore_index=True)
                 frame[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img

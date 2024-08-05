@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'untitled.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -63,7 +63,7 @@ class Ui_MainWindow(object):
         self.check_realsize.setObjectName(u"check_realsize")
         self.check_realsize.setEnabled(True)
         self.check_realsize.setGeometry(QRect(10, 280, 301, 19))
-        self.check_realsize.setChecked(False)
+        self.check_realsize.setChecked(True)
         self.checkbox_yolo = QCheckBox(self.tab_control)
         self.checkbox_yolo.setObjectName(u"checkbox_yolo")
         self.checkbox_yolo.setGeometry(QRect(10, 310, 211, 19))
@@ -123,12 +123,12 @@ class Ui_MainWindow(object):
         self.tableView.setObjectName(u"tableView")
         self.tableView.setGeometry(QRect(10, 10, 311, 461))
         self.tabWidget.addTab(self.tab_detect, "")
-        self.tab_dongzip = QWidget()
-        self.tab_dongzip.setObjectName(u"tab_dongzip")
-        self.textBrowser = QTextBrowser(self.tab_dongzip)
+        self.tab_info = QWidget()
+        self.tab_info.setObjectName(u"tab_info")
+        self.textBrowser = QTextBrowser(self.tab_info)
         self.textBrowser.setObjectName(u"textBrowser")
         self.textBrowser.setGeometry(QRect(10, 10, 311, 461))
-        self.tabWidget.addTab(self.tab_dongzip, "")
+        self.tabWidget.addTab(self.tab_info, "")
         self.label_fps = QLabel(self.centralwidget)
         self.label_fps.setObjectName(u"label_fps")
         self.label_fps.setGeometry(QRect(790, 580, 299, 20))
@@ -151,8 +151,8 @@ class Ui_MainWindow(object):
         self.btn_play.clicked.connect(MainWindow.slot_btn_play)
         self.btn_region_reset.clicked.connect(MainWindow.slot_btn_region_reset)
         self.btn_fileopen.clicked.connect(MainWindow.slot_btn_fileopen)
-        self.btn_dongzip_reset.clicked.connect(MainWindow.slot_btn_multi_reset)
         self.btn_dongzip_reset_2.clicked.connect(MainWindow.slot_btn_open_complete)
+        self.btn_dongzip_reset.clicked.connect(MainWindow.slot_btn_multi_reset)
         self.btn_dongzip.clicked.connect(MainWindow.slot_btn_multi_open)
 
         self.tabWidget.setCurrentIndex(0)
@@ -170,7 +170,7 @@ class Ui_MainWindow(object):
         self.playTimer.setText(QCoreApplication.translate("MainWindow", u"00:00", None))
         self.btn_init_detection.setText(QCoreApplication.translate("MainWindow", u"\ud0d0\uc9c0\ub0b4\uc5ed \ucd08\uae30\ud654", None))
         self.btn_page_print.setText(QCoreApplication.translate("MainWindow", u"\ud604\uc7ac \ud654\uba74 \uc800\uc7a5", None))
-        self.check_realsize.setText(QCoreApplication.translate("MainWindow", u"\uc2e4\uc81c \uc0ac\uc774\uc988\ub85c \ubd84\uc11d (\ub2e4\uc18c \ub290\ub824\uc9c8 \uc218 \uc788\uc74c)", None))
+        self.check_realsize.setText(QCoreApplication.translate("MainWindow", u"\uc2e4\uc81c \uc0ac\uc774\uc988\ub85c \ubd84\uc11d", None))
         self.checkbox_yolo.setText(QCoreApplication.translate("MainWindow", u"AI \uac10\uc9c0", None))
         self.pushButton_1.setText("")
         self.pushButton_2.setText("")
@@ -183,8 +183,8 @@ class Ui_MainWindow(object):
         self.btn_dongzip_reset_2.setText(QCoreApplication.translate("MainWindow", u"\uc644\ub8cc \uc5f4\uae30", None))
         self.btn_dongzip.setText(QCoreApplication.translate("MainWindow", u"\uba40\ud2f0 open", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_multi), QCoreApplication.translate("MainWindow", u"\uba40\ud2f0", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_detect), QCoreApplication.translate("MainWindow", u"AI \ud0d0\uc9c0 \ub0b4\uc5ed", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_dongzip), QCoreApplication.translate("MainWindow", u"\ub3d9zip \uc548\ub0b4", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_detect), QCoreApplication.translate("MainWindow", u"\ud0d0\uc9c0 \ub9ac\uc2a4\ud2b8", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_info), QCoreApplication.translate("MainWindow", u"\uc548\ub0b4", None))
         self.label_fps.setText(QCoreApplication.translate("MainWindow", u"\ud504\ub808\uc784/\ucd08", None))
         self.label_xy.setText(QCoreApplication.translate("MainWindow", u"\ud574\uc0c1\ub3c4", None))
         self.label_roi.setText(QCoreApplication.translate("MainWindow", u"\uad00\uc2ec\uc601\uc5ed", None))

@@ -17,6 +17,7 @@ class PlayerClass:
     
     def __init__(self) -> None:
         self.model = None
+        self.cap = None
 
     def open(self, fileName):
         '''반드시 정의 해야 함'''

@@ -43,7 +43,6 @@ class ModelClass:
         드롭다운 메뉴(콤보박스)의 선택에 따라 슬라이더를 변경하고,
         디텍터를 활성화 하는 함수
         '''
-        self.detector = None  # 기존 디텍터 메모리 해제 코드로 수정 필요
         # 기존 슬라이더 및 레이블 삭제
         for i in reversed(range(self.slider_container.count())):
             self.slider_container.itemAt(i).widget().deleteLater()
@@ -54,7 +53,9 @@ class ModelClass:
 
         # 선택된 메뉴에 대한 슬라이더 생성
         selected_menu_text = self.combo_box.itemText(index)
-        DT.selected_mode = selected_menu_text
+        DT.setSelectedMode(selected_menu_text)
+        # 디텍터 초기화
+        DT.reset()
 
         slider_values_dict = DT.arg_dict[selected_menu_text]
         for arg, value in slider_values_dict.items():
