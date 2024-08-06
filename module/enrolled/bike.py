@@ -23,7 +23,7 @@ class DetectorBike():
         '감지_민감도':1,
         }
     models = {
-        'base': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt')),
+        'base': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8s.pt')),
         'model_nbp': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'reader': OcrReader(),
     }
@@ -35,25 +35,8 @@ class DetectorBike():
     
     def setup():
         print('setup()')
-    # def __init__(self) -> None:
-    #     super().__init__()
-    #     # 슬라이더 설정
-    #     DT.clear()
-    #     DT.setValue(DetectorBike.tag, DetectorBike.arg_dict)
-    #     self.tag = DetectorBike.tag
-
-    #     # 모델 초기화
-    #     try:
-    #         bike_img = cv2.imread(DetectorBike.img_path)
-    #         detector = DetectorBike.models['base']
-    #         detection = detector(bike_img)[0]
-    #         print(detection.names.items())
-    #         self.labels = [ v for _ , v in detection.names.items() ]
-    #     except:
-    #         print("모델 초기화 중 디텍션 오류 발생")
-    #     # 라벨을 초기화 하는 함수 작성        
+    
  
-
     ##############
     ## 슬롯함수 ##
     ##############

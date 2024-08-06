@@ -3,18 +3,10 @@ import cv2
 from easyocr.easyocr import *
 from fuzzywuzzy import fuzz
 from collections import Counter
+import settings
 # GPU 설정
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 
-
-# 커스텀 설정
-model_name = 'best_norm_ED'
-model_alchitecture = 'None-VGG-BiLSTM-CTC-Seed1111'
-
-
-# 모델 경로
-base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-custom_model = os.path.join(base, 'saved_models', model_alchitecture)
 
 # 텍스트 리스트
 text_list = []
@@ -45,9 +37,9 @@ allowlist_num = '0123456789'
 
 class OcrReader:
    
-    def __init__(self, model_name = model_name):
+    def __init__(self, model_name = settings.model_name):
         # 경로설정 14라인
-        path = custom_model
+        path = settings.OCR_MODEL
         self.reader1 = Reader(['ko'],
                 model_storage_directory= path,
                 user_network_directory= path,
@@ -68,18 +60,7 @@ class OcrReader:
         img_si = img.copy()[:int(y*0.33),:]
         img_giho = img.copy()[:,:int(x*0.26)]
         img_num = img.copy()[int(y*0.31):,int(x*0.19):]
-        # result1 =  self.reader1.readtext(img)
-        # # 결과 출력1
-        # if len(result1) == 0:
-        #     print('노 디텍션 result1')
-        # else:
-        #     for (bbox, string, confidence) in result1:
-        #         print('커스텀')
-        #         print(f"{string}({confidence}) {bbox}")
-        #         # # bbox 그려진 이미지 만들기
-        #         # img1 = cv2.rectangle(img1, (int(bbox[0][0]), int(bbox[0][1])), (int(bbox[2][0]), int(bbox[2][1])), (0, 255, 0), 2)
-        #         # img1 = cv2.putText(img1, string, (int(bbox[0][0]), int(bbox[0][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
-        # 결과 출력2
+ 
         result2_si =  self.reader1.readtext(img_si, allowlist=allowlist_si)
         result2_giho =  self.reader1.readtext(img_giho, allowlist=allowlist_giho)
         result2_num =  self.reader1.readtext(img_num, allowlist=allowlist_num)

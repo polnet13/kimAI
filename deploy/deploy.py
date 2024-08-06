@@ -27,6 +27,7 @@ other_options = []
 if onefile:
     other_options.append('--onefile')
 console_text = '--console' if console else '--noconsole'
+ultralytics_module = 'rsc/ultralytics'  # ultralytics 모듈을 추가
 other_options.append(console_text)
 
 text = f'pyinstaller {" ".join(add_data_options)} {" ".join(other_options)} --hidden-import torch.jit --collect-all ultralytics --collect-all torch --collect-all torchvision main.py'

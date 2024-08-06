@@ -25,9 +25,14 @@ class MultiCCTV:
     } # 어디서 읽어서 DT.models 로 전달함
     columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
 
+    # MultiCCTV.arg
 
 
-    def __init__(self, fileName, x1, y1, x2, y2):
+
+
+    def __init__(self, fileName, x1, y1, x2, y2, shape):
+        # x1, y1, x2, y2 는 상대적 좌표임
+
         # 슬라이더 설정
         DT.clear()
         DT.setValue(MultiCCTV.tag, MultiCCTV.arg_dict)
@@ -44,7 +49,8 @@ class MultiCCTV:
         # 아웃풋 경로 생성
         if not os.path.exists(self.output_path):
             os.makedirs(self.output_path)
-        self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
+        # 비디오 파일의 이미지 쉐입을 가져옴
+        self.x1, self.y1, self.x2, self.y2 = tools.rel_to_abs(shape, x1, y1, x2, y2)
         # cv2 이벤트 감지
         self.roi_frame_1 = None
         self.roi_frame_2 = None
@@ -52,8 +58,8 @@ class MultiCCTV:
         self.difframe = None
         self.move_thr = 30
         self.roi_color = (0, 0, 255)
-        self.thr = DT.getValue('감지_민감도')
-        self.diff_max = DT.getValue('움직임_픽셀차이')
+        self.thr = 20
+        self.diff_max = DT.getValue(MultiCCTV.tag, '움직임_픽셀차이')
 
 
     def multi_process(self):
@@ -89,11 +95,9 @@ class MultiCCTV:
                     break
             else:
                 false=0
-                roi_img = tools.get_roi_img(
-                    self.img, 
-                    self.x1, self.y1, self.x2, self.y2)
+                roi_img = self.img[self.y1:self.y2, self.x1:self.x2]
                 # ROI 부분만 움직임 감지
-                thr = DT.getValue('움직임_픽셀차이')
+                thr = 20
                 roi_img, detect_move_bool, contours = self.detect_move(
                     roi_img, thr)
                 # 움직임이 없는 경우 루프 건너뜀
@@ -159,6 +163,7 @@ class MultiCCTV:
         diff_bc = cv2.absdiff(self.roi_frame_2, self.roi_frame_3)
 
         # 영상들의 차가 threshold 이상이면 값을 255(백색)으로 만들어줌
+        # 수정필요: self.thr 슬라이더로 받기
         _, diff_ab_t = cv2.threshold(diff_ab, self.thr, 255, cv2.THRESH_BINARY)
         _, diff_bc_t = cv2.threshold(diff_bc, self.thr, 255, cv2.THRESH_BINARY)
 

@@ -178,18 +178,19 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.play_status == False:
             self.timer.stop()
             return 
-        # 이미지가 없을 때
-        if DT.img is None:
-            return
-        # 슬라이더 업데이트
-        self.playSlider.setValue(DT.cap_num)
-        # 재생시간 업데이트
-        frameTimer = time.strftime('%H:%M:%S', time.gmtime(DT.cap_num/DT.fps))
-        self.playTimer.setText(f'{frameTimer}')
         # 마지막 프레임일 때
         if DT.cap_num == DT.total_frames:
             DT.play_status = False
             self.timer.stop()
+            DT.setCapNum(0)
+        # 슬라이더 업데이트
+        self.playSlider.setValue(DT.cap_num)
+        # 이미지가 없을 때
+        if DT.img is None:
+            return
+        # 재생시간 업데이트
+        frameTimer = time.strftime('%H:%M:%S', time.gmtime(DT.cap_num/DT.fps))
+        self.playTimer.setText(f'{frameTimer}')
 
 
     def slot_btn_multi_open(self):
@@ -537,6 +538,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.len_filenames = len(fileNames)
         self.startBtn = QPushButton(f'작업 시작')
         scroll_layout.addWidget(self.startBtn)
+
+        cap = cv2.VideoCapture(fileNames[0])
+        self.img_shape = cap.read()[1].shape
         self.startBtn.clicked.connect(self.start_multi)
         # 큐, 프로그래스 바, 워커 생성
         self.progress_bars = []
@@ -580,7 +584,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         if menu_number == 0:
             self.objects = [enrolled.MultiCCTV(
-                file, DT.roi[0], DT.roi[1], DT.roi[2], DT.roi[3]
+                file, DT.roi[0], DT.roi[1], DT.roi[2], DT.roi[3], self.img_shape
             ) for i, file in enumerate(DT.fileNames)]
         if menu_number == 1:
             pass

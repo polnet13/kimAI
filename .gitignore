@@ -9,12 +9,13 @@ __pycache__/
 *.MP4
 *.pt
 *.pth
-
+workspace.code-workspace
 
 # Distribution / packaging
 test/
 venv/
 .Python
+.vscode
 build/
 develop-eggs/
 dist/
