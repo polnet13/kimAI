@@ -1,10 +1,7 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QSlider, QLabel, QWidget, QScrollArea
+from PySide6.QtWidgets import QSlider, QLabel, QGridLayout, QPushButton
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QComboBox
-from functools import partial
 from module.sharedData import DT
-from module import enrolled
-from control import tools
 
 
 
@@ -24,8 +21,10 @@ class ModelClass:
         self.slider_container = QVBoxLayout()
         self.label1_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
         self.label2_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
-        self.combo_box.addItems(DT.arg_dict.keys())
+        self.btn_container = QGridLayout()
+        self.combo_box.addItems(DT.sliderDict.keys())
         self.combo_box.currentIndexChanged.connect(self.change_sliders)
+        self.progress_bar = QVBoxLayout()
         # 레이아웃 설정
         sub_layout.addLayout(self.label2_container)
         sub_layout.addLayout(self.label1_container)
@@ -33,31 +32,37 @@ class ModelClass:
         self.layout.addWidget(self.combo_box)
         self.layout.addSpacing(10)  # 일정 간격 추가
         self.layout.addLayout(sub_layout)
+        self.layout.addSpacing(20)  # 일정 간격 추가
+        self.layout.addLayout(self.btn_container)
         self.layout.setAlignment(Qt.AlignTop)
-        # 초기 슬라이더 설정 (첫 번째 메뉴 기준)
+        self.layout.addSpacing(20)  # 일정 간격 추가
+        self.layout.addLayout(self.progress_bar)
+        # 슬라이더, 버튼 생성
         self.change_sliders(0)
-        
+  
 
     def change_sliders(self, index):
         '''
         드롭다운 메뉴(콤보박스)의 선택에 따라 슬라이더를 변경하고,
         디텍터를 활성화 하는 함수
         '''
-        # 기존 슬라이더 및 레이블 삭제
+        # 기존 슬라이더, 레이블, 버튼 삭제
         for i in reversed(range(self.slider_container.count())):
             self.slider_container.itemAt(i).widget().deleteLater()
         for i in reversed(range(self.label1_container.count())):
             self.label1_container.itemAt(i).widget().deleteLater()
         for i in reversed(range(self.label2_container.count())):
             self.label2_container.itemAt(i).widget().deleteLater()
-
+        # 기존 버튼 제거
+        for i in reversed(range(self.btn_container.count())):
+            self.btn_container.itemAt(i).widget().deleteLater()
         # 선택된 메뉴에 대한 슬라이더 생성
         selected_menu_text = self.combo_box.itemText(index)
         DT.setSelectedMode(selected_menu_text)
         # 디텍터 초기화
         DT.reset()
-
-        slider_values_dict = DT.arg_dict[selected_menu_text]
+        # 슬라이더 생성
+        slider_values_dict = DT.sliderDict[selected_menu_text]
         for arg, value in slider_values_dict.items():
             slider = QSlider(Qt.Horizontal)
             slider.setMinimum(1)
@@ -69,16 +74,17 @@ class ModelClass:
             self.slider_container.addWidget(slider)
             self.label1_container.addWidget(label1)
             self.label2_container.addWidget(label2)
-        # 모델 생성
+        # 버튼 생성
+        for i in range(len(DT.detector.btn_names)):
+            button = QPushButton(DT.detector.btn_names[i])
+            self.btn_container.addWidget(button, i // 3, i % 3)
+            # 버튼 이벤트 연결
+            button.clicked.connect(DT.detector.btns[i])
+        # 모델 생성은 변수들 초기화 후 마지막으로 진행
         DT.setDetector(selected_menu_text)
 
     def update_label(self, value, selected_menu_text, label1, arg):
         label1.setText(str(value))
-        DT.arg_dict[selected_menu_text][arg] = value
-
-
-
-
- 
+        DT.sliderDict[selected_menu_text][arg] = value
 
 

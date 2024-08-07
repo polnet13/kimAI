@@ -16,7 +16,7 @@ from huggingface_hub import hf_hub_download
 class DetectorMosaic():
 
     tag = '모자이크_얼굴_번호판만'
-    arg_dict = {
+    slider_dict = {
         '민감도':1,
         '모자이크':5,
         }
@@ -27,15 +27,13 @@ class DetectorMosaic():
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
     columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
+    btn_names = ['시작', '끝', '분석', '추가(프레임)', '추가(전체)', '작업시작']
     
-    
-    def __init__(self) -> None:
-        super().__init__()
+    def setup(): 
         # 슬라이더 설정
         DT.clear()
-        DT.setValue(DetectorMosaic.tag, DetectorMosaic.arg_dict)
-        # self.arg = ModelClass()   # 드롭다운 <=> 모델 <=> 슬라이더를 연결
-        self.tag = DetectorMosaic.tag
+        DT.setSliderValue(DetectorMosaic.tag, DetectorMosaic.slider_dict)
+        DT.setDf(columns = DetectorMosaic.columns)
  
 
     ##############
@@ -74,7 +72,7 @@ class DetectorMosaic():
             if _label_number not in [0,2,3,5,7,9]:
                 continue
             # 임계값 이하는 생략 하라는 코드
-            yolo_thr = DT.arg_dict[DetectorMosaic.tag]['민감도']
+            yolo_thr = DT.sliderDict[DetectorMosaic.tag]['민감도']
             if _confidence < yolo_thr/100:
                 continue
             detected_img = frame[ymin:ymax, xmin:xmax]  # <== 오토바이 이미지
@@ -105,7 +103,7 @@ class DetectorMosaic():
         ''' 
         mosaic_img = None
         detection = DetectorMosaic.models['model_nbp'](bike_img)[0]
-        ratio = DT.arg_dict[DetectorMosaic.tag]['모자이크']/600
+        ratio = DT.sliderDict[DetectorMosaic.tag]['모자이크']/600
         # 번호판 검출
         for data_nbp in detection.boxes.data.tolist():
             xmin, ymin, xmax, ymax = int(data_nbp[0]), int(data_nbp[1]), int(data_nbp[2]), int(data_nbp[3])
@@ -126,7 +124,7 @@ class DetectorMosaic():
         실패: None
         ''' 
         mosaic_img = None
-        ratio = DT.arg_dict[DetectorMosaic.tag]['모자이크']/600
+        ratio = DT.sliderDict[DetectorMosaic.tag]['모자이크']/600
         detection = DetectorMosaic.models['model_face'](face_img)[0]
         # 번호판 검출
         for data_face in detection.boxes.data.tolist():
@@ -149,4 +147,29 @@ class DetectorMosaic():
             pts[[2, 3]] = pts[[3, 2]]
         return pts
 
+
+    #####################
+    ## 커스텀 버튼 함수 ##
+    #####################
+
+    def btn1():
+        print('btn1')
+
+    def btn2():
+        print('btn2')
+
+    def btn3():
+        print('btn3')
+
+    def btn4():
+        print('btn4')
+
+    def btn5():
+        print('btn5')
+
+    def btn6():
+        print('btn6')
+
+    btns = [btn1, btn2, btn3, btn4, btn5, btn6]
+    
 

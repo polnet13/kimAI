@@ -15,6 +15,9 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QSlider" name="playSlider">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -134,7 +137,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_control">
      <attribute name="title">
@@ -147,7 +150,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>280</y>
+        <y>410</y>
         <width>301</width>
         <height>19</height>
        </rect>
@@ -163,7 +166,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>310</y>
+        <y>440</y>
         <width>211</width>
         <height>19</height>
        </rect>
@@ -181,7 +184,7 @@
         <x>10</x>
         <y>10</y>
         <width>311</width>
-        <height>261</height>
+        <height>391</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="frame_option">
@@ -196,102 +199,6 @@
        </property>
       </layout>
      </widget>
-     <widget class="QPushButton" name="pushButton_1">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>340</y>
-        <width>141</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_2">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>380</y>
-        <width>141</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_3">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>420</y>
-        <width>141</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_4">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>169</x>
-        <y>340</y>
-        <width>141</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_5">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>170</x>
-        <y>380</y>
-        <width>141</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_6">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>170</x>
-        <y>420</y>
-        <width>141</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
     </widget>
     <widget class="QWidget" name="tab_multi">
      <attribute name="title">
@@ -303,7 +210,7 @@
         <x>20</x>
         <y>60</y>
         <width>291</width>
-        <height>401</height>
+        <height>391</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="vLayout_dongzip_statusbar"/>
@@ -373,7 +280,7 @@
         <x>10</x>
         <y>10</y>
         <width>311</width>
-        <height>461</height>
+        <height>441</height>
        </rect>
       </property>
      </widget>
@@ -495,8 +402,8 @@
    <slot>slot_btn_open_complete()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1022</x>
-     <y>585</y>
+     <x>1024</x>
+     <y>106</y>
     </hint>
     <hint type="destinationlabel">
      <x>969</x>
@@ -511,8 +418,8 @@
    <slot>slot_btn_multi_reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>934</x>
-     <y>587</y>
+     <x>936</x>
+     <y>106</y>
     </hint>
     <hint type="destinationlabel">
      <x>665</x>
@@ -527,8 +434,8 @@
    <slot>slot_btn_multi_open()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>846</x>
-     <y>588</y>
+     <x>848</x>
+     <y>106</y>
     </hint>
     <hint type="destinationlabel">
      <x>727</x>

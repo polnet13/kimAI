@@ -10,24 +10,25 @@ from control import tools
 class DetectorCCTV:
 
     tag = 'CCTV_플레이어'
-    arg_dict = {
+    slider_dict = {
         '움직임_픽셀차이': 5,
         '감지_민감도': 1,
         '띄엄띄엄_보기':1,
         '밝기':0
         }
     models = {
-        'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt')),
+        'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')),
         'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
     columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
-    
+    btn_names = ['btn_1', 'btn_2', 'btn_3', 'btn_4', 'btn_5', 'btn_6']
 
-    def setup(): 
+
+    def setup():
         # 슬라이더 설정
         DT.clear()
-        DT.setValue(DetectorCCTV.tag, DetectorCCTV.arg_dict)
+        DT.setSliderValue(DetectorCCTV.tag, DetectorCCTV.slider_dict)
         DT.setDf(columns = DetectorCCTV.columns)
 
     
@@ -144,6 +145,31 @@ class DetectorCCTV:
         # 영상에서 1인 부분의 갯수를 셈
         diff_cnt = cv2.countNonZero(diff)
         return diff_cnt, diff
+    
+
+    #####################
+    ## 커스텀 버튼 함수 ##
+    #####################
+
+    def btn1():
+        print('btn1')
+
+    def btn2():
+        print('btn2')
+
+    def btn3():
+        print('btn3')
+
+    def btn4():
+        print('btn4')
+
+    def btn5():
+        print('btn5')
+
+    def btn6():
+        print('btn6')
+
+    btns = [btn1, btn2, btn3, btn4, btn5, btn6]
     
 
 

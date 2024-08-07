@@ -24,7 +24,7 @@ from huggingface_hub import hf_hub_download
 class DetectorMosaic_v2:
 
     tag = '모자이크'
-    arg_dict = {
+    slider_dict = {
         '민감도':1,
         '가림정도':10,
         }
@@ -34,13 +34,20 @@ class DetectorMosaic_v2:
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
     columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
-    
+    # 커스텀 버튼 설정
+    btn_names = ['시작', '끝', '분석', '추가(프레임)', '추가(전체)', '작업시작']
 
+    
     def setup():
+        '''
+        모델이 초기화 될 때 실행되는 함수
+        '''
         # 슬라이더 설정
         DT.clear()
-        DT.setValue(DetectorMosaic_v2.tag, DetectorMosaic_v2.arg_dict)
+        DT.setSliderValue(DetectorMosaic_v2.tag, DetectorMosaic_v2.slider_dict)
         DT.setDf(columns = DetectorMosaic_v2.columns)
+
+ 
 
 
     #######################
@@ -171,3 +178,29 @@ class DetectorMosaic_v2:
 
     def detlete_tableview_row():
         pass
+
+
+    #####################
+    ## 커스텀 버튼 함수 ##
+    #####################
+
+    def btn1():
+        print('btn1')
+
+    def btn2():
+        print('btn2')
+
+    def btn3():
+        print('btn3')
+
+    def btn4():
+        print('btn4')
+
+    def btn5():
+        print('btn5')
+
+    def btn6():
+        print('btn6')
+
+    btns = [btn1, btn2, btn3, btn4, btn5, btn6]
+    

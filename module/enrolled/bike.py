@@ -19,7 +19,7 @@ import settings
 class DetectorBike():
 
     tag = '이륜차_번호판_감지'
-    arg_dict = {
+    slider_dict = {
         '감지_민감도':1,
         }
     models = {
@@ -28,13 +28,17 @@ class DetectorBike():
         'reader': OcrReader(),
     }
     columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
+    btn_names = ['btn_1', 'btn_2', 'btn_3', 'btn_4', 'btn_5', 'btn_6']
     
     img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
     df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
     track_ids = {}
     
-    def setup():
-        print('setup()')
+    def setup(): 
+        # 슬라이더 설정
+        DT.clear()
+        DT.setSliderValue(DetectorBike.tag, DetectorBike.slider_dict)
+        DT.setDf(columns = DetectorBike.columns)
     
  
     ##############
@@ -60,7 +64,6 @@ class DetectorBike():
         except:
             DetectorBike.models['base'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt'))
             detections = DetectorBike.models['base'].track(frame, persist=True)[0]
-        print('탐지 중')
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
             xmin, ymin, xmax, ymax  = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
@@ -72,7 +75,7 @@ class DetectorBike():
             if _label_number != 3:
                 continue
             # 임계값 이하는 생략 하라는 코드
-            thr = DT.arg_dict[DetectorBike.tag]['감지_민감도'] 
+            thr = DT.sliderDict[DetectorBike.tag]['감지_민감도'] 
             if _confidence < thr/100:
                 continue
             # 프레임의 절대좌표 => 상대좌표 => 오리지날 이미지의 절대좌표
@@ -170,140 +173,29 @@ class DetectorBike():
         return roi_img, True
 
 
+    #####################
+    ## 커스텀 버튼 함수 ##
+    #####################
 
-class MultiBike():
-    '''
-    Process 모듈을 상속 받아서
-    detect_bike() 오토바이를 탐지 하여 tracking 하는 함수
-    detect_nbp() tracking 된 오토바이의 번호판을 탐지하는 함수
-    ocr_nbp() 번호판 이미지를 OCR하여 번호판을 추출하는 함수
-    nbp_tracking_sort() 가장 확률이 높은 순으로 3개 선택하는 함수
-    '''
-    tag = '이륜차 탐지(멀티)'
+    def btn1():
+        print('btn1')
 
-    def __init__(self, fileName):
-        print(self.tag)
-        self.queue = None
-        # 경로 설정
-        self.base = os.path.dirname(fileName)
-        self.fileName = os.path.basename(fileName)
-        self.output_path = os.path.dirname(os.path.dirname(__file__))
-        self.output_path = os.path.join(self.output_path, 'output')
-        # 아웃풋 경로 생성
-        if not os.path.exists(self.output_path):
-            os.makedirs(self.output_path)
-        # cv2 이벤트 감지
-        self.roi_frame_1 = None
-        self.roi_frame_2 = None
-        self.roi_frame_3 = None
-        self.difframe = None
-        self.move_thr = 30
-        self.diff_max = 11       # 영상 차이 픽셀의 개수(이것 이상이면 움직임이 있다고 결정)
-        self.roi_color = (0, 0, 255)
-        self.thr = 5
+    def btn2():
+        print('btn2')
 
+    def btn3():
+        print('btn3')
 
-    def multi_process(self):
-        '''동집 실질적인 작업 함수'''
-        file = os.path.join(self.base, self.fileName)
-        self.cap = cv2.VideoCapture(file)
-        self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        # 전체 프레임 가져오기
-        total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.percentage = 0
-        false = 0
-        # 아웃풋 경로 생성
-        if not os.path.exists(os.path.join(self.base, 'output')):
-            os.makedirs(os.path.join(self.base, 'output'))
-        outfile = os.path.join(self.base, 'output', f'{self.fileName}.mp4')
-        # 비디오 생성
-        self.video = cv2.VideoWriter(outfile, cv2.VideoWriter_fourcc(*'mp4v'), self.fps, (self.width, self.height))
-        frame_cnt = 0
-        # 루프 돌기
-        while True: # 동영상이 올바로 열렸는지
-            ret, self.img = self.cap.read() 
-            curent_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES) 
-            # 상태바 업데이트를 위해 작업 진행률을 계산
-            self.percentage_1 = self.percentage
-            self.percentage_2 = round(curent_frame/total_frames*100)
-            if self.percentage_1 != self.percentage_2:
-                self.percentage = self.percentage_2
-            self.queue.put([self.percentage-2])
-            # 프레임 처리
-            if not ret:
-                false += 1
-                self.cap.set(cv2.CAP_PROP_POS_FRAMES, curent_frame+1)
-                if curent_frame >= total_frames:
-                    break
-            else:
-                false=0
-                roi_img = tools.get_roi_img(
-                    self.img, 
-                    self.x1, self.y1, self.x2, self.y2)
-                # ROI 부분만 움직임 감지
-                roi_img, detect_bike_bool, contours = self.detect_bike(
-                    roi_img, self.move_thr)
-                # 움직임이 없는 경우 루프 건너뜀
-                if detect_bike_bool == False:
-                    continue
-                # # ROI 부분만 욜로 디텍션
-                # 컨투어 표시
-                tools.draw_contours(roi_img, contours)        
-                # ROI 이미지를 원본이미지에 합성
-                img = tools.merge_roi_img(self.img, roi_img, self.x1, self.y1)
-                # 녹화 옵션
-                cv2.rectangle(img, (self.x1, self.y1),(self.x2, self.y2),(0,255,0), 1)
-                self.video.write(img) 
-                frame_cnt += 1
-            if false > 2:
-                break
-        # total_frames/fps
-        message = ['done', total_frames, frame_cnt, file]
-        self.queue.put(message)
-        self.cap.release()
-        self.video.release()
+    def btn4():
+        print('btn4')
 
+    def btn5():
+        print('btn5')
 
-    def detect_bike(self, img):
-        '''
-        WorkerCCTV.detect_bike()
-        이미지 3개를 받아서 흑백으로 변환(빠른 연산을 위해서)
-        1,2프레임과 2,3프레임의 차이를 구하고,
-        두 차이 이미지를 비교하여 움직임이 있는 부분을 찾아내는 함수
-        return plot_img, 움직임 Bool, contours
-        '''
-        # 디텍트 바이크
-        # 번호판 roi 
-        print('detect_bike()')
+    def btn6():
+        print('btn6')
 
-    def detect_nbp(self, img):
-        '''
-        이미지를 받아서 번호판을 디텍트하는 함수
-        return plot_img, 번호판 좌표
-        '''
-        # 디텍트 넘버플레이트
-        # 번호판 roi
-        print('detect_nbp()')
-
-    def ocr_nbp(self, img):
-        '''
-        번호판 이미지를 받아서 OCR을 수행하는 함수
-        return OCR 결과
-        [('경기', 0.7),('하남',0.7),('가',0.7),('1234',0.7)]
-        '''
-        # OCR
-        print('ocr_nbp()')
-
-    def nbp_tracking_sort(self, nbp_ocr_list):
-        '''
-        OCR 결과를 받아서 정렬하는 함수
-        return 정렬된 OCR 결과
-        [('경기', 0.7),('하남',0.7),('가',0.7)]
-        '''
-        # 정렬
-        print('nbp_tracking_sort()')
-        # return nbp_list
-        pass
+    btns = [btn1, btn2, btn3, btn4, btn5, btn6]
+    
     
     

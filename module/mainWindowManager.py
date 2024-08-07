@@ -24,6 +24,7 @@ from PySide6.QtUiTools import QUiLoader
 import settings
 from module.sharedData import DT
 from module.modelLoader import ModelClass
+from module import cctv_multi
 
 
 
@@ -72,7 +73,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 모델 드롭다운 메뉴
         detectors = tools.get_classes(enrolled)
         for detector in detectors:
-            DT.setValue(detector.tag, detector.arg_dict)
+            DT.setSliderValue(detector.tag, detector.slider_dict)
             DT.enrollDetectors(detector.tag, detector)
         self.modelclass = ModelClass()
         self.frame_option.addLayout(self.modelclass.layout, 11)
@@ -139,28 +140,18 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             subprocess.run(['xdg-open', path])
 
 
-    def player_fileopen(self):
-        # 이미지 처리
-        self.player.open(DT.fileName)
-        self.reset_roi()
-        self.statusBar().showMessage(f'파일 경로: {DT.fileName}')
-        # 영상의 전체 프레임수를 가지고 옴
-        self.label_xy.setText(f'해상도: {DT.width}*{DT.height}')
-        self.playSlider.setMaximum(DT.total_frames -1)
-        self.label_fps.setText(f'fps : {DT.fps}')
-        DT.setRoiPoint(DT.img.shape)
-        self.update()
-        self.display_img()
-        
+
     def slot_btn_play(self):
         '''
         qimage 객체로 변경해서 출력하는 것의 속도 측정
         '''
         _play_status = not DT.play_status
         DT.setPlayStatus(_play_status)
-        if DT.setPlayStatus:
+        self.playSlider.setEnabled(not _play_status)
+        if DT.play_status:
             # 타임이벤트 생성
             self.timer = QTimer()
+            # self.timer.timeout.connect(self.play)
             self.timer.timeout.connect(self.play)
             self.timer.start(1)
         else:
@@ -170,7 +161,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     # 이벤트 감지       
     def play(self):
         '''
-        cap_read() 함수는 cv2.VideoCapture 객체를 통해 프레임을 읽어오고,
+        핵심: slot_btn_play()에서 호출이 반복되어 프레임을 처리하고 화면에 출력
         '''
         # 프레임을 읽어옴
         self.player.cap_read()
@@ -183,7 +174,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             DT.play_status = False
             self.timer.stop()
             DT.setCapNum(0)
-        # 슬라이더 업데이트
+        # 슬라이더 업데이트: 슬라이더 업데이트는 캡넘버만 수정하도록
         self.playSlider.setValue(DT.cap_num)
         # 이미지가 없을 때
         if DT.img is None:
@@ -191,6 +182,40 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 재생시간 업데이트
         frameTimer = time.strftime('%H:%M:%S', time.gmtime(DT.cap_num/DT.fps))
         self.playTimer.setText(f'{frameTimer}')
+        #######################################################################
+        # 분석용 이미지로 처리
+        if self.check_realsize.isChecked():
+            img = DT.img
+            x1, y1, x2, y2 = DT.roi_point[0]
+            print(x1, y1, x2, y2)
+        else:
+            img = tools.resize_img(DT.img, 680)
+            x1, y1, x2, y2 = DT.roi_point[1]
+        roi_img = img[y1:y2, x1:x2]
+        roi_img, move_detect_bool = DT.detector.detect_move(roi_img)
+        # 움직임이 없는 경우 원본 이미지 출력
+        if move_detect_bool == False:
+            self.display_img(img, (0,0,255))
+            return
+        #######################################################################
+        # ROI 부분만 욜로 디텍션
+        #######################################################################
+        if self.checkbox_yolo.isChecked():
+            # 이후 추가 디텍션은 원본이미지로 수행함
+            roi_img, text  = DT.detector.detect_yolo_track(roi_img, DT.cap_num)
+            # roi_img 사용 : cctv, multicctv
+            # roi 무시: bike, 모자이크함
+            if text:
+                self.textBrowser.append(text)
+                self.textBrowser.setFocus()
+            if not DT.df.empty:
+                self.df_to_tableview() 
+        #################################################################################
+        # self.img에 roi_img를 붙여서 출력
+        img[y1:y2, x1:x2] = roi_img
+        self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
+        #
+        self.display_img(img, (0,255,0))
 
 
     def slot_btn_multi_open(self):
@@ -219,6 +244,25 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.make_queue_and_progress_bars(DT.fileNames)
 
 
+    def player_fileopen(self):
+        '''
+        DT의 현재 파일을 불러와서 GUI에 반영하고
+        디스플레이 함수 호출
+        '''
+        # 이미지 처리
+        self.player.open(DT.fileName)
+        self.reset_roi()
+        self.statusBar().showMessage(f'파일 경로: {DT.fileName}')
+        # 영상의 전체 프레임수를 가지고 옴
+        self.label_xy.setText(f'해상도: {DT.width}*{DT.height}')
+        self.playSlider.setMaximum(DT.total_frames -1)
+        self.label_fps.setText(f'fps : {DT.fps}')
+        DT.setRoiPoint(DT.img.shape)
+        self.update()
+        self.display_img()
+        
+
+
         
     def start_multi(self):
         '''
@@ -228,8 +272,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if self.flag_start_btn is True:
             return
         # 메뉴 넘버 따오는 함수 추가예정
-        menu_number = 0
-        self.make_objects(menu_number)
+        self.objects = [cctv_multi.MultiCCTV(file) for file in DT.fileNames]
         self.object_queue_to_worker()
         self.run_workers()
         self.flag_start_btn= True
@@ -310,45 +353,15 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     ##################
     def play_slider_moved(self, value):
         '''
-        슬라이더가 움직일 때 이미지 처리하는 '핵심' 함수
+        stop 상태에서만 슬러이더 움직일 수 있음
         '''
         # 공통 코드 
-        self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
-        DT.setCapNum(value)
-        self.player.cap_read()
-        # 분석용 이미지로 처리
-        if self.check_realsize.isChecked():
-            img = DT.img
-            x1, y1, x2, y2 = DT.roi_point[0]
-            print(x1, y1, x2, y2)
-        else:
-            img = tools.resize_img(DT.img, 680)
-            x1, y1, x2, y2 = DT.roi_point[1]
-        roi_img = img[y1:y2, x1:x2]
-        roi_img, move_detect_bool = DT.detector.detect_move(roi_img)
-
-        # 움직임이 없는 경우 원본 이미지 출력
-        if move_detect_bool == False:
-            self.display_img(img, (0,0,255))
-            return
-        # ROI 부분만 욜로 디텍션
-        if self.checkbox_yolo.isChecked():
-            # 이후 추가 디텍션은 원본이미지로 수행함
-            roi_img, text  = DT.detector.detect_yolo_track(roi_img, value)
-            # roi_img 사용 : cctv, multicctv
-            # roi 무시: bike, 모자이크함
-            if text:
-                self.textBrowser.append(text)
-                self.textBrowser.setFocus()
-            if not DT.df.empty:
-                self.df_to_tableview() 
-        #################################################################################
-        # self.img에 roi_img를 붙여서 출력
-        img[y1:y2, x1:x2] = roi_img
-        self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
-        #
-
-        self.display_img(img, (0,255,0))
+        if DT.play_status == False:
+            self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
+            DT.setCapNum(value)
+            self.player.cap_read()
+            self.display_img()
+        
 
         
             
@@ -406,6 +419,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
         
     def mouseMoveEvent(self, event):
+        img = None
         if DT.play_status:
             return
         x, y = event.pos().x(), event.pos().y()
@@ -416,7 +430,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             return
         x, y = tools.shape_to_adjust(x, y)
         if self.check_realsize.isChecked():
-            img = DT.img
+            img = DT.img.copy()
         else:
             img = tools.resize_img(DT.img, 680)
         DT.setRoi((DT.roi[0], DT.roi[1], x, y))
@@ -574,21 +588,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                 if worker.is_alive():
                     worker.terminate()
 
-
-    # 객체 생성은 여기서 전부 해야 함
-    def make_objects(self, menu_number=0):
-        '''
-        멀티 작업 객체 생성
-        0: CCTV 분석
-        1: 오토바이 분석
-        '''
-        if menu_number == 0:
-            self.objects = [enrolled.MultiCCTV(
-                file, DT.roi[0], DT.roi[1], DT.roi[2], DT.roi[3], self.img_shape
-            ) for i, file in enumerate(DT.fileNames)]
-        if menu_number == 1:
-            pass
-
+ 
 
     def clear_status_bars(self):
         '''상태바를 모두 제거'''

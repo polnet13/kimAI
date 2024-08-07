@@ -8,10 +8,11 @@ class DT:
     '''
     DT: 앱에서 공유할 Data 와 입출력 매서드를 정의한 클래스
 
-    DT.arg_dict: {'태그':{'민감도':3}, ...} 찾을 때: DT.arg_dict['태그']['민감도']
+    DT.sliderDict: {'태그':{'민감도':3}, ...} 찾을 때: DT.sliderDict['태그']['민감도']
     ''' 
 
-    arg_dict = {}  # 슬라이더 변수 저장: 
+    sliderDict = {}  # 슬라이더 변수 저장: 
+    valDict = {}  # 슬라이더 제외 변수 저장
     detector_dict = {}  # 디텍터 클래스 저장 ex) {DetectorMosaic.tag: DetectorMosaic, ...}
     selected_mode = None  # 현재 드롭다운에서 선택된 모드
     detector = None   # 현재 선택된 디텍터 (모델로더의 드롭다운 변경시 초기화)
@@ -37,7 +38,13 @@ class DT:
     roi = (0,0,1,1) # (x1, y1, x2, y2) 상대적좌표(백분율)
     roi_point = [(0,0,0,0), (0,0,0,0)] # [원본이미지 좌표, 비디오(x: 680) 좌표] / roi 조정때, 
     columns=['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
- 
+    # 멀티 관련
+    queue = None
+    flag_multiCCTV = False
+    
+    @classmethod
+    def setFlagmulticctv(cls, bool):
+        cls.flag_multiCCTV = bool
 
 
     @classmethod
@@ -52,6 +59,7 @@ class DT:
         '''
         cls.df = pd.DataFrame(columns=cls.columns) 
         cls.detector = cls.detector_dict[cls.selected_mode]
+        cls.detector.setup()
         pass
 
     @classmethod
@@ -116,8 +124,13 @@ class DT:
         return
     
     @classmethod
-    def setValue(cls, tag, _arg_dict):
-        cls.arg_dict[tag] = _arg_dict
+    def addValue(cls, _tag_name, _valDict):
+        '''삭제 ㅇ예정'''
+        cls.valDict[_tag_name] = _valDict
+
+    @classmethod
+    def setSliderValue(cls, _tag_name, _sliderDict):
+        cls.sliderDict[_tag_name] = _sliderDict
 
     @classmethod
     def enrollDetectors(cls, tag, _model_dict):
@@ -129,17 +142,17 @@ class DT:
         str: 'tag', '모자이크'
         key: '민감도'
         '''
-        return cls.arg_dict[tag][arg]
+        return cls.sliderDict[tag][arg]
 
     @classmethod
     def clear(cls):
-        cls.arg_dict = {}
+        cls.sliderDict = {}
         cls.df = None
 
     @classmethod
     def all(cls):
-        print(cls.arg_dict)
-        return cls.arg_dict
+        print(cls.sliderDict)
+        return cls.sliderDict
     
     @classmethod
     def getDetector(cls):

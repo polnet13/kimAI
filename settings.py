@@ -4,6 +4,7 @@ import sys
 
 # BASE_DIR
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUT_DIR = os.path.join(BASE_DIR, 'output')
 
 # OCR 커스텀
 model_name = 'best_norm_ED'

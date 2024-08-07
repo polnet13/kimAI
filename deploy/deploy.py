@@ -2,7 +2,7 @@ import os
 import subprocess
 
 
-path = os.path.abspath(os.path.dirname(__file__))  # 현재 파일의 디렉토리 경로
+path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))  # 현재 파일의 디렉토리 경로
 os.chdir(path)  # 프로젝트 디렉토리로 이동
 
 

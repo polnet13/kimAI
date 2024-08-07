@@ -12,7 +12,7 @@ import settings
 class MultiCCTV:
     
     tag = 'CCTV_멀티작업'
-    arg_dict = {
+    slider_dict = {
         '움직임_픽셀차이': 5,
         '감지_민감도': 1,
         '띄엄띄엄_보기':1,
@@ -30,15 +30,14 @@ class MultiCCTV:
 
 
 
-    def __init__(self, fileName, x1, y1, x2, y2, shape):
+    def __init__(self, fileName):
         # x1, y1, x2, y2 는 상대적 좌표임
 
         # 슬라이더 설정
         DT.clear()
-        DT.setValue(MultiCCTV.tag, MultiCCTV.arg_dict)
+        DT.setSliderValue(MultiCCTV.tag, MultiCCTV.slider_dict)
         # self.arg = ModelClass(MultiCCTV.arg_dict)
         super().__init__()
-        self.tag = MultiCCTV.tag
         self.track = False
         self.queue = None
         # 경로 설정
@@ -50,7 +49,8 @@ class MultiCCTV:
         if not os.path.exists(self.output_path):
             os.makedirs(self.output_path)
         # 비디오 파일의 이미지 쉐입을 가져옴
-        self.x1, self.y1, self.x2, self.y2 = tools.rel_to_abs(shape, x1, y1, x2, y2)
+        x1, y1, x2, y2 = DT.roi
+        self.x1, self.y1, self.x2, self.y2 = tools.rel_to_abs(DT.img.shape, x1, y1, x2, y2)
         # cv2 이벤트 감지
         self.roi_frame_1 = None
         self.roi_frame_2 = None
@@ -59,7 +59,7 @@ class MultiCCTV:
         self.move_thr = 30
         self.roi_color = (0, 0, 255)
         self.thr = 20
-        self.diff_max = DT.getValue(MultiCCTV.tag, '움직임_픽셀차이')
+        self.diff_max = 20
 
 
     def multi_process(self):
@@ -179,5 +179,3 @@ class MultiCCTV:
     def set_roi(self, x1, y1, x2, y2):
         self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
         
-                
- 

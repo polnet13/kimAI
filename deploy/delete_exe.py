@@ -5,7 +5,7 @@
 
 import os 
 
-wd = os.path.abspath(os.path.dirname(__file__))
+wd = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 deletes_dir = ['build', 'dist']
 deletes_dir = [ os.path.join(wd, item, 'main') for item in deletes_dir]
 
