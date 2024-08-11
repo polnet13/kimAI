@@ -34,7 +34,6 @@ class MultiCCTV:
         # x1, y1, x2, y2 는 상대적 좌표임
 
         # 슬라이더 설정
-        DT.clear()
         DT.setSliderValue(MultiCCTV.tag, MultiCCTV.slider_dict)
         # self.arg = ModelClass(MultiCCTV.arg_dict)
         super().__init__()
