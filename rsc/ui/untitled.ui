@@ -243,9 +243,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>80</y>
+        <y>110</y>
         <width>311</width>
-        <height>391</height>
+        <height>361</height>
        </rect>
       </property>
      </widget>
@@ -286,6 +286,29 @@
       </property>
       <property name="text">
        <string>관심영역</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_fps_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>제외목록</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>70</y>
+        <width>221</width>
+        <height>21</height>
+       </rect>
       </property>
      </widget>
     </widget>

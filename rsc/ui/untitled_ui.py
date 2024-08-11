@@ -16,9 +16,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QHeaderView,
-    QLabel, QMainWindow, QPushButton, QSizePolicy,
-    QSlider, QStatusBar, QTabWidget, QTableView,
-    QTextBrowser, QToolButton, QVBoxLayout, QWidget)
+    QLabel, QLineEdit, QMainWindow, QPushButton,
+    QSizePolicy, QSlider, QStatusBar, QTabWidget,
+    QTableView, QTextBrowser, QToolButton, QVBoxLayout,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -95,7 +96,7 @@ class Ui_MainWindow(object):
         self.tab_info.setObjectName(u"tab_info")
         self.textBrowser = QTextBrowser(self.tab_info)
         self.textBrowser.setObjectName(u"textBrowser")
-        self.textBrowser.setGeometry(QRect(10, 80, 311, 391))
+        self.textBrowser.setGeometry(QRect(10, 110, 311, 361))
         self.label_xy = QLabel(self.tab_info)
         self.label_xy.setObjectName(u"label_xy")
         self.label_xy.setGeometry(QRect(10, 10, 299, 20))
@@ -105,6 +106,12 @@ class Ui_MainWindow(object):
         self.label_roi = QLabel(self.tab_info)
         self.label_roi.setObjectName(u"label_roi")
         self.label_roi.setGeometry(QRect(10, 30, 299, 21))
+        self.label_fps_2 = QLabel(self.tab_info)
+        self.label_fps_2.setObjectName(u"label_fps_2")
+        self.label_fps_2.setGeometry(QRect(10, 70, 71, 20))
+        self.lineEdit = QLineEdit(self.tab_info)
+        self.lineEdit.setObjectName(u"lineEdit")
+        self.lineEdit.setGeometry(QRect(90, 70, 221, 21))
         self.tabWidget.addTab(self.tab_info, "")
         self.label_cap_num = QLabel(self.centralwidget)
         self.label_cap_num.setObjectName(u"label_cap_num")
@@ -158,6 +165,7 @@ class Ui_MainWindow(object):
         self.label_xy.setText(QCoreApplication.translate("MainWindow", u"\ud574\uc0c1\ub3c4", None))
         self.label_fps.setText(QCoreApplication.translate("MainWindow", u"\ud504\ub808\uc784/\ucd08", None))
         self.label_roi.setText(QCoreApplication.translate("MainWindow", u"\uad00\uc2ec\uc601\uc5ed", None))
+        self.label_fps_2.setText(QCoreApplication.translate("MainWindow", u"\uc81c\uc678\ubaa9\ub85d", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_info), QCoreApplication.translate("MainWindow", u"\uc548\ub0b4", None))
         self.label_cap_num.setText(QCoreApplication.translate("MainWindow", u"\ud504\ub808\uc784 \ubc88\ud638", None))
 #if QT_CONFIG(tooltip)
