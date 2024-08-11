@@ -45,7 +45,7 @@ class OcrReader:
                 user_network_directory= path,
                 recog_network= model_name)
         # easyocr reader 생성, easyocr 기본모델로 실행
-        self.reader2 = Reader(['ko'])
+        # self.reader2 = Reader(['ko'])
         self.text_list = text_list
         self.giho = giho
 
@@ -66,26 +66,20 @@ class OcrReader:
         result2_num =  self.reader1.readtext(img_num, allowlist=allowlist_num)
         # 시
         if len(result2_si) == 0:
-            print('시: 노 디텍션')
             result2_si = None
         else:
             for (bbox, string, confidence) in result2_si:
-                print(f"시: {string}({confidence}) {bbox}")
                 result2_si = self.matching(string, self.text_list)
         # 기호
         if len(result2_giho) == 0:
-            print('기호: 노 디텍션')
             result2_giho = None
         else:
             for (bbox, string, confidence) in result2_giho:
-                print(f"기호: {string}({confidence}) {bbox}")
                 result2_giho = self.matching(string, self.giho)
         # 숫자      
         try:
-            print('넘: ', result2_num[0][1][:4], result2_num[0])
             result2_num = int(result2_num[0][1][:4])
         except:
-            print(result2_num)
             result2_num = None
         return result2_si, result2_giho, result2_num
 
@@ -110,7 +104,6 @@ class OcrReader:
             print(f"{text} => {matched_string} (유사도: {max_score}% 매칭)")
             text = matched_string
         else:
-            print(f"{text} : 일치하는 단어가 없습니다.")
             text = None
         return text
 
