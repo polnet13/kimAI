@@ -31,6 +31,11 @@ class PlayerClass:
             _total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))  
             _fps = int(self.cap.get(cv2.CAP_PROP_FPS))
             _, original_img = self.cap.read() 
+            _img = tools.resize_img(original_img, 680)
+            DT.setOriginalShape(original_img.shape[:2])
+            DT.setResizedShape(_img.shape[:2])
+            print('original_shape:', original_img.shape[:2])
+            print('resized_shape:', _img.shape[:2])
             DT.setWidth(_width)
             DT.setHeight(_height)        
             DT.setTotalFrames(_total_frames)
@@ -48,10 +53,13 @@ class PlayerClass:
         ret, original_img = self.cap.read() 
         DT.setImg(original_img)
         if ret:
-            _curent_frame = int( self.cap.get(cv2.CAP_PROP_POS_FRAMES))
-            DT.setCapNum(_curent_frame)
+            _curent_frame = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
+            DT.setCapNum(_curent_frame-1)
         else:
             DT.setPlayStatus(False)
             DT.setCapNum(0)
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+
+    ## 실제 프레임하고 안맞음 311-069: 240정도 14300 |  60프레임당 1정도 엇나감
                 

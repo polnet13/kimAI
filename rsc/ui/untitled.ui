@@ -33,7 +33,7 @@
    <widget class="QPushButton" name="btn_region_reset">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>90</x>
       <y>580</y>
       <width>111</width>
       <height>31</height>
@@ -104,7 +104,7 @@
    <widget class="QPushButton" name="btn_init_detection">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>210</x>
       <y>580</y>
       <width>131</width>
       <height>31</height>
@@ -117,7 +117,7 @@
    <widget class="QPushButton" name="btn_page_print">
     <property name="geometry">
      <rect>
-      <x>550</x>
+      <x>560</x>
       <y>580</y>
       <width>111</width>
       <height>31</height>
@@ -133,58 +133,23 @@
       <x>780</x>
       <y>40</y>
       <width>331</width>
-      <height>491</height>
+      <height>511</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_control">
      <attribute name="title">
       <string>컨트롤</string>
      </attribute>
-     <widget class="QCheckBox" name="check_realsize">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>410</y>
-        <width>301</width>
-        <height>19</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>실제 사이즈로 분석</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="checkbox_yolo">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>440</y>
-        <width>211</width>
-        <height>19</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>AI 감지</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-     </widget>
      <widget class="QWidget" name="verticalLayoutWidget">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>10</y>
         <width>311</width>
-        <height>391</height>
+        <height>461</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="frame_option">
@@ -210,7 +175,7 @@
         <x>20</x>
         <y>60</y>
         <width>291</width>
-        <height>391</height>
+        <height>411</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="vLayout_dongzip_statusbar"/>
@@ -265,7 +230,7 @@
         <x>10</x>
         <y>10</y>
         <width>311</width>
-        <height>441</height>
+        <height>461</height>
        </rect>
       </property>
      </widget>
@@ -278,52 +243,52 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>10</y>
+        <y>80</y>
         <width>311</width>
-        <height>441</height>
+        <height>391</height>
        </rect>
       </property>
      </widget>
+     <widget class="QLabel" name="label_xy">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>299</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>해상도</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_fps">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>299</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>프레임/초</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_roi">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>299</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>관심영역</string>
+      </property>
+     </widget>
     </widget>
-   </widget>
-   <widget class="QLabel" name="label_fps">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>580</y>
-      <width>299</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>프레임/초</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_xy">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>540</y>
-      <width>299</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>해상도</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_roi">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>560</y>
-      <width>299</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>관심영역</string>
-    </property>
    </widget>
    <widget class="QLabel" name="label_cap_num">
     <property name="geometry">
@@ -336,6 +301,44 @@
     </property>
     <property name="text">
      <string>프레임 번호</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="check_realsize">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>560</y>
+      <width>161</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>해상도가 높은 경우 실제 사이즈로 분석하면 느려질 수 있음</string>
+    </property>
+    <property name="text">
+     <string>실제 사이즈로 분석</string>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkbox_yolo">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>580</y>
+      <width>161</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>AI 감지</string>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
     </property>
    </widget>
   </widget>
@@ -443,6 +446,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btn_init_detection</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>slot_btn_df_reset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>588</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>356</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_page_print</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>slot_btn_print()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>617</x>
+     <y>592</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>542</x>
+     <y>593</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slot_btn_pageprint()</slot>
@@ -454,5 +489,7 @@
   <slot>slot_btn_bike()</slot>
   <slot>slot_btn_multi_open()</slot>
   <slot>slot_btn_multi_reset()</slot>
+  <slot>slot_btn_df_reset()</slot>
+  <slot>slot_btn_print()</slot>
  </slots>
 </ui>

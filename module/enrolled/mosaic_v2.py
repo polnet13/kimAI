@@ -8,8 +8,8 @@ import pandas as pd
 import settings
 from module.modelLoader import ModelClass
 from module.sharedData import DT
-from huggingface_hub import hf_hub_download
-
+from PySide6.QtCore import Signal
+from PySide6.QtCore import QObject
 
 
 # ToDo
@@ -21,7 +21,7 @@ from huggingface_hub import hf_hub_download
 # 3. 판다스로 데이터 저장
 
 
-class DetectorMosaic_v2:
+class DetectorMosaic_v2(QObject):
 
     tag = '모자이크'
     slider_dict = {
@@ -33,11 +33,20 @@ class DetectorMosaic_v2:
         'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
-    columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
     # 커스텀 버튼 설정
     btn_names = ['시작', '끝', '분석', '추가(프레임)', '추가(전체)', '작업시작']
 
-    
+    # 시그널
+    reset = Signal()
+    signal_start = Signal(int)
+    signal_end = Signal(int)
+
+ 
+    def __init__(self):
+        super().__init__()
+        self.make_btn_list()
+
+
     def setup():
         '''
         모델이 초기화 될 때 실행되는 함수
@@ -45,72 +54,28 @@ class DetectorMosaic_v2:
         # 슬라이더 설정
         DT.clear()
         DT.setSliderValue(DetectorMosaic_v2.tag, DetectorMosaic_v2.slider_dict)
-        DT.setDf(columns = DetectorMosaic_v2.columns)
-
- 
-
-
+        DT.dfReset()
     #######################
     ## 슬롯함수 오버라이드 ##
     ######################## 
     # yolo 이미지 디텍션 함수
-    def detect_yolo_track(frame, cap_num):
-        '''화
-        이 함수에서 실질적인 탐지 작업을 수행함
-        input: origin_img
-
-        output
-        frame: 원본 해상도의 욜로 처리된 이미지
-        img: cv2 이미지(바운딩 박스 처리된 이미지)
-        track_id: 추적된 객체의 id값
+    def detect_yolo_track(frame, cap_num, realsize_bool):
+        '''
+        모자이크에서는 플레이로 사용하고
+        모자이크 처리 함수는 별도(self.mosaic_frame_list)로 사용함
         ''' 
         text = ''
-        try:
-            detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
-        except Exception as e:
-            print(e)
-            # 욜로 트래커 초기화
-            DetectorMosaic_v2.models['model'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt'))
-            detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
-        # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
-        for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
-            _cap_number = 0
-            xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
-            
-            try:
-                track_id, _confidence, _label_number = int(data[4]), float(data[5]), int(data[6])
-            except IndexError:
-                continue
-            # 검출대상 설정
-            # (0, 'person'), (2, 'car'), (3, 'motorcycle'), (5, 'bus'), (7, 'truck'), (9, 'traffic light')
-            if _label_number not in [0,2,3,5,7,9]:
-                continue
-            # 임계값 이하는 생략 하라는 코드
-            thr = DT.getValue(DetectorMosaic_v2.tag, '민감도')
-            if _confidence < thr/100:
-                continue
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 1)
-            cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
-            # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
-            if DT.play_status:
-                # xmin, ymin, xmax, ymax의 값은 roi_img의 상대좌표인데, 이를 전체 이미지에서의 상대좌표로 변환(전체 이미지 shape은 DT.img.shape)
-                xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
-                # df, temp_df 정리
-                DT.df_temp = pd.concat([DT.df_temp, pd.DataFrame([[track_id, cap_num, xmin, ymin, xmax, ymax]], columns=DT.df.columns)], ignore_index=True)
-                result_df = DT.df_temp.loc[DT.df_temp.groupby('객체ID')['프레임번호'].idxmin()]
-                DT.mosaic_df(result_df)
         return frame, text
 
-        #     # 검출된 객체 모자이크 정보 df 저장
-        #     detected_img = frame[ymin:ymax, xmin:xmax]  
-        #     ratio = DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600
-        #     img = tools.mosaic(detected_img, xmin, ymin, xmax, ymax, ratio=ratio, full=True)
 
-        #     # 모자이크 처리 원본에 삽입
-        #     if img is not None:
-        #         frame[ymin:ymax, xmin:xmax] = img
-        # return frame, text
-    
+    @classmethod
+    def make_plot_df(cls):
+        '''df 에서 출력할 df_plot 생성'''
+        frame_list = range(int(DT.start_point), int(DT.end_point+1))
+        DT.df_plot = pd.DataFrame(data=frame_list, columns=['frame'])
+
+
+
     def drop(index, inplace=True):
         DT.applyDrop(index, inplace=True)   
 
@@ -120,6 +85,18 @@ class DetectorMosaic_v2:
         모자이크 모드에서는 사용하지 않음                    
         '''
         return roi_img, True
+    
+    def plot_df_to_img(img, cap_num):
+        img = img.copy()
+        df = DT.df
+        cap_num = int(cap_num)
+        df = df[df['frame']== cap_num]
+        for index, row in df.iterrows():
+            xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']  # roi에서의 상대적 좌표
+            xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)  # roi에서 전체 이미지로 좌표 변환
+            img = tools.mosaic(img, xmin, ymin, xmax, ymax, ratio=DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600)
+            img = cv2.putText(img, f'{row["ID"]}', (xmin, ymin-5), cv2.FONT_ITALIC, 1, (255,255,255), 2)
+        return img
 
 
     def detect_nbp_mosaic(bike_img):
@@ -179,28 +156,77 @@ class DetectorMosaic_v2:
     def detlete_tableview_row():
         pass
 
-
+    def mosaic_frame_list(self, frame_list):
+        '''프레임 리스트를 넣어주면 모자이크 처리하는 함수'''
+        for frame in frame_list:
+            print('cap_num: ', frame)
+        # try:
+        #     detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
+        # except Exception as e:
+        #     print(e)
+        #     # 욜로 트래커 초기화
+        #     DetectorMosaic_v2.models['model'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt'))
+        #     detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
+        # # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
+        # for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
+        #     _cap_number = 0
+        #     if len(data) < 7:  # data 리스트의 길이가 7보다 작은 경우 해당 데이터를 건너뛰도록 합니다. 이를 통해 인덱스 오류를 방지
+        #         continue
+        #     xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
+        #     track_id, confidence, label = int(data[4]), float(data[5]), int(data[6])
+        #     # 검출대상 설정
+        #     # (0, 'person'), (2, 'car'), (3, 'motorcycle'), (5, 'bus'), (7, 'truck'), (9, 'traffic light')
+        #     if label not in [0,2,3,5,7,9]:
+        #         continue
+        #     # 임계값 이하는 생략 하라는 코드
+        #     thr = DT.getValue(DetectorMosaic_v2.tag, '민감도')
+        #     if confidence < thr/100:
+        #         continue
+        #     cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 1)
+        #     cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
+        #     # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
+        #     if DT.play_status:
+        #         # xmin, ymin, xmax, ymax의 값은 roi_img의 상대좌표인데, 이를 전체 이미지에서의 상대좌표로 변환(전체 이미지 shape은 DT.img.shape)
+        #         xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
+        #         # df, temp_df 정리
+        #         DT.detection_add(DT.cap_num, track_id, label, xmin, ymin, xmax, ymax, confidence)
     #####################
     ## 커스텀 버튼 함수 ##
     #####################
 
-    def btn1():
-        print('btn1')
+    def btn1(self):
+        DT.start_point = DT.cap_num
+        self.signal_start.emit(DT.start_point)
+        print('시작: ', DT.start_point)
 
-    def btn2():
-        print('btn2')
 
-    def btn3():
-        print('btn3')
+    def btn2(self):
+        DT.end_point = DT.cap_num
+        self.signal_end.emit(DT.end_point)
+        print('끝: ', DT.end_point)
 
-    def btn4():
-        print('btn4')
+    def btn3(self):
+        if DT.df_plot.empty:
+            process_frame = range(DT.total_frame+1)
+        else:
+            process_frame = DT.df_plot['frame']
+        self.mosaic_frame_list(process_frame)
+        print('''
+분석 버튼을 눌렀을 때
+DT.start_point와 DT.end_point 값이 존재 => 해당 구간을 df에 저장
+값이 없으면 0 부터 total_frame 까지 df에 저장
+              ''')
 
-    def btn5():
-        print('btn5')
+    def btn4(self):
+        print('btn4: 프레임 모자이크 추가 => df에 저장')
 
-    def btn6():
-        print('btn6')
+    def btn5(self):
+        print('btn5: 전체 프레임에 roi값 모자이크 추가 => df에 저장')
 
-    btns = [btn1, btn2, btn3, btn4, btn5, btn6]
+    def btn6(self):
+        print('df에 저장된 값으로 모자이크 처리 후 영상 저장 => 폴더 열기')
+
+    # 버튼 리스트
+    def make_btn_list(self):
+        self.btns = [self.btn1, self.btn2, self.btn3, self.btn4, self.btn5, self.btn6]
     

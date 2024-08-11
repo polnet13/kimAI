@@ -2,7 +2,7 @@ import cv2
 import os, time
 import inspect
 from module.sharedData import DT
-
+from control import tools   
 
 def sort_roi(x1, y1, x2, y2):
     '''
@@ -14,7 +14,6 @@ def sort_roi(x1, y1, x2, y2):
     if y1 > y2:
         y1, y2 = y2, y1
     return x1, y1, x2, y2
-
 
 
 def resize_img(plot_img, x_res):
@@ -75,22 +74,22 @@ def rel_to_abs(img_shape, xmin, ymin, xmax, ymax):
     img_shape = img.shape
     '''
     # 욜로 디텍션 결과로 얻은 xmin, ymin, xmax, ymax의 상대적 좌표 값을 이미지의 사이즈에 맞게 변환
-    height, width = img_shape[:2]
-    xmin = int(xmin * width)
-    ymin = int(ymin * height)
-    xmax = int(xmax * width)
-    ymax = int(ymax * height)
+    h, w = img_shape[:2]
+    xmin = int(xmin * w)
+    ymin = int(ymin * h)
+    xmax = int(xmax * w)
+    ymax = int(ymax * h)
     return xmin, ymin, xmax, ymax
 
 def abs_to_rel(img_shape, xmin, ymin, xmax, ymax):
     '''
     이미지 쉐입과 절대적 좌표 => 상대적 좌표로 변환
     '''
-    height, width = img_shape[:2]
-    xmin = xmin / width
-    ymin = ymin / height
-    xmax = xmax / width
-    ymax = ymax / height
+    h, w = img_shape[:2]
+    xmin = xmin / w
+    ymin = ymin / h
+    xmax = xmax / w
+    ymax = ymax / h
     return xmin, ymin, xmax, ymax
 
 def plot_df_to_obj_img(img, cap_num):
@@ -99,14 +98,15 @@ def plot_df_to_obj_img(img, cap_num):
     처리: DT.df 정보를 이용하여 이미지에 바운딩 박스를 그림
     출력: img
     '''
+    img = img.copy()
     df = DT.df
     cap_num = int(cap_num)
-    df = df[df['프레임번호']== cap_num]
+    df = df[df['frame']== cap_num]
     for index, row in df.iterrows():
-        xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']
-        xmin, ymin, xmax, ymax = rel_to_abs(img.shape, xmin, ymin, xmax, ymax)
+        xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']  # roi에서의 상대적 좌표
+        xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)  # roi에서 전체 이미지로 좌표 변환
         img = cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 5)
-        img = cv2.putText(img, f'{row["객체ID"]}', (xmin, ymin-5), cv2.FONT_ITALIC, 1, (255,255,255), 2)
+        img = cv2.putText(img, f'{row["ID"]}', (xmin, ymin-5), cv2.FONT_ITALIC, 1, (255,255,255), 2)
     return img
 
 
@@ -120,6 +120,7 @@ def makeText(text, filepath):
 
 def roiImg_to_oigin(roi_img_shape, xmin, ymin, xmax, ymax):
     '''
+    목표: 입력좌표는 roi에서의 상대적 좌표임 이것을 전체 이미지에서의 상대적 좌표로 변환
     [입력]
     roi_min_point: (xmin, ymin)
     roi_img.shape: (w, h)
@@ -128,12 +129,11 @@ def roiImg_to_oigin(roi_img_shape, xmin, ymin, xmax, ymax):
     [출력]
     original_xmin, original_ymin, original_xmax, original_ymax
     '''
-    x, y = DT.roi_point[1][:2]
     xmin, ymin, xmax, ymax = rel_to_abs(roi_img_shape, xmin, ymin, xmax, ymax)
-    original_xmin = xmin + x
-    original_ymin = ymin + y
-    original_xmax = xmax + x
-    original_ymax = ymax + y
+    original_xmin = DT.roi_point[0][0] + xmin
+    original_ymin = DT.roi_point[0][1] + ymin
+    original_xmax = DT.roi_point[0][0] + xmax
+    original_ymax = DT.roi_point[0][1] + ymax
     return original_xmin, original_ymin, original_xmax, original_ymax
 
 # 이미지를 입력 받으면 모자이크 처리된 이미지를 반환

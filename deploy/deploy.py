@@ -7,7 +7,7 @@ os.chdir(path)  # 프로젝트 디렉토리로 이동
 
 
 # 옵션 설정
-onefile = True
+onefile = False
 console = False
 
 # 제외할 파일과 폴더를 지정
@@ -26,6 +26,8 @@ add_data_options = [f'--add-data "{item};{item}"' for item in files_and_folders 
 other_options = []
 if onefile:
     other_options.append('--onefile')
+else:
+    other_options.append('--onedir')
 console_text = '--console' if console else '--noconsole'
 ultralytics_module = 'rsc/ultralytics'  # ultralytics 모듈을 추가
 other_options.append(console_text)

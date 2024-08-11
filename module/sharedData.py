@@ -16,13 +16,23 @@ class DT:
     detector_dict = {}  # 디텍터 클래스 저장 ex) {DetectorMosaic.tag: DetectorMosaic, ...}
     selected_mode = None  # 현재 드롭다운에서 선택된 모드
     detector = None   # 현재 선택된 디텍터 (모델로더의 드롭다운 변경시 초기화)
+    roi = (0,0,1,1) # (x1, y1, x2, y2) 상대적좌표(백분율)
+    # roi_point: plot_img 함수에서 매번 값을 계산하면 오버헤드 발생해서 미리 따는거임
+    roi_point = [(0,0,0,0), (0,0,0,0)] # [ orignal_roi, resized_roi ] 
+    original_shape = (0,0)
+    resized_shape = (0,0)
     roi_frame_1 = None   # 움직임 감지를 위한 프레임 저장
     roi_frame_2 = None
     roi_frame_3 = None
+    move_slider_scale = 1  # 움직임 감지 슬라이더 배율(해상도에 따라 조절) 
     roi_color = (0, 0, 255)   # 움직임 감지 ROI 색상
     track_ids = {}  # 추적된 객체의 id값
-    df = pd.DataFrame(columns=['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']) 
-    df_temp = pd.DataFrame(columns=['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']) 
+    detection_list = []  # df 로 만들면 항상 리셋 시켜야 됨
+    columns=['frame', 'ID', 'label', 'x1', 'y1', 'x2', 'y2', 'thr']
+    # 데이터 프레임
+    df = pd.DataFrame(columns=columns)  # 전체 저장
+    df_temp = pd.DataFrame(columns=columns)  # df에 추가하기 전에 임시로 저장
+    df_plot = pd.DataFrame(columns=columns)  # 출력전에 정리해서 저장
     # 플레이어 관련
     img = None  # 오리지날 이미지임 / 보관하고 있다가 출력할 때 또는 부분에서 이미지 디텍션할 때
     play_status = False
@@ -30,18 +40,71 @@ class DT:
     cap_num = 0
     total_frames = 0
     fpst = 0
+    width = 0
+    height = 0
+    check_realsize = False
+    # 시작, 종료점
+    start_point = ''
+    end_point = ''
     # 메인 윈도우 관련
     fileNames = None
     fileName = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
-    width = 0
-    height = 0
-    roi = (0,0,1,1) # (x1, y1, x2, y2) 상대적좌표(백분율)
-    roi_point = [(0,0,0,0), (0,0,0,0)] # [원본이미지 좌표, 비디오(x: 680) 좌표] / roi 조정때, 
-    columns=['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
     # 멀티 관련
     queue = None
     flag_multiCCTV = False
     
+
+    
+    @classmethod
+    def setMoveSliderScale(cls):
+        '''
+        영상이 바뀌거나 => player_fileopen
+        디텍터가 바뀌거나 => cls.setDetector
+        checkbox_realsize가 바뀔때 => mainwindwo.slot_btn_df_reset
+        roi가 바뀔때 => mainwindow.mouseReleaseEvent
+        '''
+        cls.move_slider_scale = 1
+        if cls.check_realsize:
+            resolution = DT.roi_point[0]
+        else:
+            resolution = DT.roi_point[1]
+        w = resolution[2]-resolution[0]
+        h = resolution[3]-resolution[1]
+        m = min(w, h)
+        multiply = m**2
+        magic_num = 10000  # 200픽셀당 1인데 슬라이더값 디폴트가 50이라 200*50
+        result = int(multiply/magic_num)
+        if result > 1:
+            cls.move_slider_scale = result
+
+
+    @classmethod
+    def setRealsize(cls, bool):
+        cls.check_realsize = bool
+
+    @classmethod
+    def detection_add(cls, cap_num, track_id, label, x1, y1, x2, y2, thr):
+        # 이전버전 roiTemp_add와 동일한 기능
+        '''캡 정보를 리스트로 저장만 하다가 플레이 상태가 아닐 때 df로 변환'''
+        x1 = round(x1, 2)
+        y1 = round(y1, 2)
+        x2 = round(x2, 2)
+        y2 = round(y2, 2)
+        thr = round(thr, 2)
+        cls.detection_list.append((cap_num, track_id, label, x1, y1, x2, y2, thr))
+
+    @classmethod
+    def roiTemp_clear(cls):
+        pass
+        # cls.detection_list.clear()
+
+    @classmethod
+    def detection_list_to_df(cls):
+        cls.df_temp = pd.DataFrame(cls.detection_list, columns=cls.columns)
+        cls.df_temp = cls.df_temp.dropna(axis=1, how='all')
+        cls.detection_list.clear()
+        cls.df = pd.concat([cls.df, cls.df_temp], ignore_index=True)
+
     @classmethod
     def setFlagmulticctv(cls, bool):
         cls.flag_multiCCTV = bool
@@ -50,27 +113,43 @@ class DT:
     @classmethod
     def setSelectedMode(cls, selected_menu_text):
         cls.selected_mode = selected_menu_text
+        cls.detector = cls.detector_dict[cls.selected_mode]
 
     @classmethod
     def reset(cls):
         '''
         디텍터 초기화 코드
-
         '''
+        cls.df = None
         cls.df = pd.DataFrame(columns=cls.columns) 
         cls.detector = cls.detector_dict[cls.selected_mode]
-        cls.detector.setup()
-        pass
+        DT.dfReset()
+        DT.setSliderValue(DT.detector_dict[DT.selected_mode].tag, 
+                          DT.detector_dict[DT.selected_mode].slider_dict)
+        # cls.detector 객체에 df 속성이 있는 지 확인하는 코드
+        if hasattr(cls.detector, 'df'):
+            cls.detector.reset_df()
+        
 
     @classmethod
-    def setRoiPoint(cls, img_shape):
+    def setRoiPoint(cls):
         '''
         roi_point = (900, 400)
         원본이미지와 GUI 화면용 이미지의 ROI 좌표를 생성
         '''
         xmin, ymin, xmax, ymax = cls.roi
         cls.roi_point[0] = (tools.rel_to_abs(DT.img.shape, xmin, ymin, xmax, ymax))
-        cls.roi_point[1] = (tools.rel_to_abs(img_shape, xmin, ymin, xmax, ymax))
+        cls.roi_point[1] = (tools.rel_to_abs(DT.resized_shape, xmin, ymin, xmax, ymax))
+        cls.setMoveSliderScale
+
+
+    @classmethod
+    def setResizedShape(cls, shape):
+        cls.resized_shape = shape
+
+    @classmethod
+    def setOriginalShape(cls, shape):
+        cls.original_shape = shape
 
     @classmethod
     def setImg(cls, img):
@@ -121,6 +200,7 @@ class DT:
     @classmethod
     def setDetector(cls, tag):
         cls.detector = cls.detector_dict[tag]
+        cls.setMoveSliderScale()
         return
     
     @classmethod
@@ -144,10 +224,6 @@ class DT:
         '''
         return cls.sliderDict[tag][arg]
 
-    @classmethod
-    def clear(cls):
-        cls.sliderDict = {}
-        cls.df = None
 
     @classmethod
     def all(cls):
@@ -187,13 +263,12 @@ class DT:
 
 
     @classmethod
-    def setDf(cls, columns):
+    def dfReset(cls):
         '''
-        data: [[0, 0]]
-        columns: ['객체ID', '프레임번호']
+        df컨트롤
         '''
-        cls.df = pd.DataFrame(columns=columns)
-        cls.df_temp = pd.DataFrame(columns=columns)
+        cls.df = pd.DataFrame(columns=DT.columns)
+        cls.df_plot = pd.DataFrame(columns=DT.columns)
 
     @classmethod
     def mosaic_df(cls, obj_id):
@@ -203,7 +278,7 @@ class DT:
         # DT.df는 temp_df로 다시 생성하는 함수
         # 해당 객체ID를 가진 행을 삭제
         '''
-        df = cls.df_temp
+        df = cls.df_plot
         cls.df = df
 
 
@@ -212,6 +287,5 @@ class DT:
         '''
         drop the row by index
         '''
-        index = cls.df.index[index]
         cls.df = cls.df.drop(index).reset_index(drop=True)
 

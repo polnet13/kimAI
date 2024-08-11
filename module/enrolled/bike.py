@@ -10,13 +10,12 @@ from module import generic
 # from module.generic import CustomBaseClass
 from module.sharedData import DT
 import settings
+from PySide6.QtCore import Signal
+from PySide6.QtCore import QObject
 
+ 
 
-# class definition:
-
-
-
-class DetectorBike():
+class DetectorBike(QObject):
 
     tag = '이륜차_번호판_감지'
     slider_dict = {
@@ -27,26 +26,25 @@ class DetectorBike():
         'model_nbp': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'reader': OcrReader(),
     }
-    columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
     btn_names = ['btn_1', 'btn_2', 'btn_3', 'btn_4', 'btn_5', 'btn_6']
     
+    # 시그널
+    reset = Signal()
+    signal_start = Signal(int)
+    signal_end = Signal(int)
+
+    # 변수
     img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
     df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
     track_ids = {}
-    
-    def setup(): 
-        # 슬라이더 설정
-        DT.clear()
-        DT.setSliderValue(DetectorBike.tag, DetectorBike.slider_dict)
-        DT.setDf(columns = DetectorBike.columns)
-    
+    df = pd.DataFrame(columns=DT.columns)
  
     ##############
     ## 슬롯함수 ##
     ##############
     
     # yolo 이미지 디텍션 함수
-    def detect_yolo_track(frame, cap_num):
+    def detect_yolo_track(frame, cap_num, realsize_bool):
         '''
         이 함수에서 실질적인 탐지 작업을 수행함
         input: origin_img
@@ -56,8 +54,6 @@ class DetectorBike():
         img: cv2 이미지(바운딩 박스 처리된 이미지)
         track_id: 추적된 객체의 id값
         ''' 
-        # 이미지에 디텍션값을 넣으면 roi가 되는 함수를 만들어야 됨
-        # 함수명은 detct_make_roiimg
         text = ''
         try:
             detections = DetectorBike.models['base'].track(frame, persist=True)[0]
@@ -68,33 +64,44 @@ class DetectorBike():
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
             xmin, ymin, xmax, ymax  = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
             try:
-                track_id, _confidence, _label_number = int(data[4]), float(data[5]), int(data[6])
+                track_id, confidence, label = int(data[4]), float(data[5]), int(data[6])
             except IndexError:
                 continue
-            # 오토바이만 검출하도록 함
-            if _label_number != 3:
+            # 오토바이(3), 신호등(9)만 검출하도록 함
+            if label not in [3, 9]:
                 continue
             # 임계값 이하는 생략 하라는 코드
             thr = DT.sliderDict[DetectorBike.tag]['감지_민감도'] 
-            if _confidence < thr/100:
+            if confidence < thr/100:
                 continue
-            # 프레임의 절대좌표 => 상대좌표 => 오리지날 이미지의 절대좌표
+
             xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
+            if DT.play_status:
+                DT.detection_add(DT.cap_num, track_id, label, xmin, ymin, xmax, ymax, confidence)
             xmin, ymin, xmax, ymax = tools.rel_to_abs(DT.img.shape, xmin, ymin, xmax, ymax)
-            bike_img = DT.img[ymin:ymax, xmin:xmax]
             # 번호판 이미지 검출
-            nbp_img = DetectorBike.detect_nbp_img(bike_img)
-            # 휘어진 번호판 이미지 처리
-            try:
-                nbp_img = DetectorBike.nbp_transform(nbp_img)
-            except:
-                return frame, None
-            # ocr 처리
-            if nbp_img is not None:
-                si, giho, num = DetectorBike.models['reader'].read(nbp_img)
-                _df = pd.DataFrame({'si':[si], 'giho':[giho], 'num':[num]})
-                DetectorBike.df = pd.concat([DetectorBike.df, _df], ignore_index=True)
-                frame[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img
+            # 프레임의 절대좌표 => 상대좌표 => 오리지날 이미지의 절대좌표
+            if label == 9:
+                # 신호등 처리
+                signal_light_img = DT.img[ymin:ymax, xmin:xmax]
+                # frame의 6/10 위치에 신호등 이미지 삽입
+                x = int(frame.shape[0]/10*6)
+                frame[200:x+signal_light_img.shape[0], 0:signal_light_img.shape[1]] = signal_light_img
+            if label == 3:
+                bike_img = DT.img[ymin:ymax, xmin:xmax]
+                nbp_img = DetectorBike.detect_nbp_img(bike_img)
+                # 휘어진 번호판 이미지 처리
+                try:
+                    nbp_img = DetectorBike.nbp_transform(nbp_img)
+                except:
+                    return frame, None
+                # ocr 처리
+                if nbp_img is not None:
+                    si, giho, num = DetectorBike.models['reader'].read(nbp_img)
+                    text = f'{si} {giho} {num}'
+                    _df = pd.DataFrame({'si':[si], 'giho':[giho], 'num':[num]})
+                    DetectorBike.df = pd.concat([DetectorBike.df, _df], ignore_index=True)
+                    frame[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img
         try:
             s = DetectorBike.df['si'].value_counts().idxmax()
             g = DetectorBike.df['giho'].value_counts().idxmax()
@@ -112,6 +119,9 @@ class DetectorBike():
         성공: 번호판 이미지
         실패: None
         ''' 
+        if bike_img is None or bike_img.shape[0] == 0 or bike_img.shape[1] == 0:
+            print(bike_img.shape)
+            return
         roi_img = None
         detection = DetectorBike.models['model_nbp'](bike_img)[0]
         # 번호판 검출
@@ -171,6 +181,13 @@ class DetectorBike():
         return 값의 3번째는 True로 주어야 메인윈도우메니저의 무브 디텍트에서 안잡힘                 
         '''
         return roi_img, True
+    
+    def make_plot_df():
+        DT.df_plot = DT.df.copy()
+
+    @classmethod
+    def reset_df(cls):
+        cls.df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
 
 
     #####################

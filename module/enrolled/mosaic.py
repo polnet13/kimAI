@@ -8,7 +8,6 @@ import pandas as pd
 import settings
 from module.modelLoader import ModelClass
 from module.sharedData import DT
-from huggingface_hub import hf_hub_download
 
 
  
@@ -26,21 +25,22 @@ class DetectorMosaic():
         'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
-    columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
     btn_names = ['시작', '끝', '분석', '추가(프레임)', '추가(전체)', '작업시작']
+
+    
     
     def setup(): 
         # 슬라이더 설정
         DT.clear()
         DT.setSliderValue(DetectorMosaic.tag, DetectorMosaic.slider_dict)
-        DT.setDf(columns = DetectorMosaic.columns)
+        DT.dfReset()
  
 
     ##############
     ## 슬롯함수 ##
     ##############
     # yolo 이미지 디텍션 함수
-    def detect_yolo_track(frame, cap_num):
+    def detect_yolo_track(frame, cap_num, realsize_bool):
         '''
         이 함수에서 실질적인 탐지 작업을 수행함
         input: origin_img, thr
