@@ -31,6 +31,7 @@ class DetectorCCTV(QObject):
     reset = Signal()
     signal_start = Signal(int)
     signal_end = Signal(int)
+    signal_df_to_tableview_df = Signal()
 
     def setup():
         # 슬라이더 설정

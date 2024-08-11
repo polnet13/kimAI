@@ -88,6 +88,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.modelclass.tableview_df.clicked.connect(self.on_item_clicked)
         self.check_realsize.stateChanged.connect(self.slot_btn_df_reset)
         self.modelclass.reset.connect(self.slot_btn_df_reset)
+        
 
 
  
@@ -193,14 +194,17 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.timer.start(1)
         if DT.play_status == False:
             self.timer.stop()
-            DT.detection_list_to_df()
-            if not DT.df.empty:
-                print('not DT.df.empty')
-                print(len(DT.df))
-                DT.detector.make_plot_df()
-            if not DT.df_plot.empty:
-                print('not DT.df_plot.empty')
-                self.modelclass.df_to_tableview_df()
+            self.df_to_tableview()
+
+    def df_to_tableview(self):
+        DT.detection_list_to_df()
+        if not DT.df.empty:
+            print('not DT.df.empty')
+            print(len(DT.df))
+            DT.detector.make_plot_df()
+        if not DT.df_plot.empty:
+            print('not DT.df_plot.empty')
+            self.modelclass.df_to_tableview_df()
 
 
     # 이벤트 감지       
@@ -490,17 +494,17 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.label_bright.setText(str(value))
     
 
-    # df => 리스트뷰
-    def df_to_tableview(self):
-        # 모델 초기화를 데터 추가 전에 수행
-        self.qmodel = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
-        columns = DT.df.columns
-        self.qmodel.setColumnCount(len(columns))
-        self.qmodel.setHorizontalHeaderLabels(columns)
-        for row in range(len(DT.df)):
-            value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df.iloc[row]]
-            self.qmodel.appendRow(value_objs)
-        self.tableView.setModel(self.qmodel)
+    # # df => 리스트뷰
+    # def df_to_tableview(self):
+    #     # 모델 초기화를 데터 추가 전에 수행
+    #     self.qmodel = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
+    #     columns = DT.df.columns
+    #     self.qmodel.setColumnCount(len(columns))
+    #     self.qmodel.setHorizontalHeaderLabels(columns)
+    #     for row in range(len(DT.df)):
+    #         value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df.iloc[row]]
+    #         self.qmodel.appendRow(value_objs)
+    #     self.tableView.setModel(self.qmodel)
 
 
 

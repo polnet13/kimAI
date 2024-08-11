@@ -94,8 +94,10 @@ class ModelClass(QObject):
             # 버튼 이벤트 연결
             button.clicked.connect(self.detector.btns[i])
         # 모델 생성은 변수들 초기화 후 마지막으로 진행
+        # 시그널 연결
         self.detector.signal_start.connect(self.receive_start)
         self.detector.signal_end.connect(self.receive_end)
+        self.detector.signal_df_to_tableview_df.connect(self.df_to_tableview_df)
         self.reset.emit()
 
     def update_label(self, value, selected_menu_text, label1, label2, arg):
@@ -112,9 +114,6 @@ class ModelClass(QObject):
         if value+1 < DT.start_point:
             return
         self.btn_container.itemAt(1).widget().setText(f'끝({value})')
-        DT.detector.make_plot_df()
-        self.df_to_tableview_df()
-        self.tableview_df.update()
 
     
     #########################
@@ -141,6 +140,8 @@ class ModelClass(QObject):
             value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df_plot.iloc[row]]
             self.qmodel.appendRow(value_objs)
         self.tableview_df.setModel(self.qmodel)
+        print('df_to_tableview_df 실행')
+        print(DT.df_plot)
 
  
         

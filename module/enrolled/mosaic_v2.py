@@ -40,6 +40,7 @@ class DetectorMosaic_v2(QObject):
     reset = Signal()
     signal_start = Signal(int)
     signal_end = Signal(int)
+    signal_df_to_tableview_df = Signal()
 
  
     def __init__(self):
@@ -67,14 +68,7 @@ class DetectorMosaic_v2(QObject):
         text = ''
         return frame, text
 
-
-    @classmethod
-    def make_plot_df(cls):
-        '''df 에서 출력할 df_plot 생성'''
-        frame_list = range(int(DT.start_point), int(DT.end_point+1))
-        DT.df_plot = pd.DataFrame(data=frame_list, columns=['frame'])
-
-
+ 
 
     def drop(index, inplace=True):
         DT.applyDrop(index, inplace=True)   
@@ -156,40 +150,52 @@ class DetectorMosaic_v2(QObject):
     def detlete_tableview_row():
         pass
 
-    def mosaic_frame_list(self, frame_list):
+    def start_end_analyze(self, start, end):
         '''프레임 리스트를 넣어주면 모자이크 처리하는 함수'''
-        for frame in frame_list:
-            print('cap_num: ', frame)
-        # try:
-        #     detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
-        # except Exception as e:
-        #     print(e)
-        #     # 욜로 트래커 초기화
-        #     DetectorMosaic_v2.models['model'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt'))
-        #     detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
-        # # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
-        # for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
-        #     _cap_number = 0
-        #     if len(data) < 7:  # data 리스트의 길이가 7보다 작은 경우 해당 데이터를 건너뛰도록 합니다. 이를 통해 인덱스 오류를 방지
-        #         continue
-        #     xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
-        #     track_id, confidence, label = int(data[4]), float(data[5]), int(data[6])
-        #     # 검출대상 설정
-        #     # (0, 'person'), (2, 'car'), (3, 'motorcycle'), (5, 'bus'), (7, 'truck'), (9, 'traffic light')
-        #     if label not in [0,2,3,5,7,9]:
-        #         continue
-        #     # 임계값 이하는 생략 하라는 코드
-        #     thr = DT.getValue(DetectorMosaic_v2.tag, '민감도')
-        #     if confidence < thr/100:
-        #         continue
-        #     cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 1)
-        #     cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
-        #     # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
-        #     if DT.play_status:
-        #         # xmin, ymin, xmax, ymax의 값은 roi_img의 상대좌표인데, 이를 전체 이미지에서의 상대좌표로 변환(전체 이미지 shape은 DT.img.shape)
-        #         xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
-        #         # df, temp_df 정리
-        #         DT.detection_add(DT.cap_num, track_id, label, xmin, ymin, xmax, ymax, confidence)
+        # 캡셋을 해서 시작점 설정
+        cap_num = start
+        self.cap = cv2.VideoCapture(DT.fileName)
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, cap_num)
+        while cap_num < end+1:
+            ret, frame = self.cap.read()
+            cap_num = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
+            print(cap_num)
+            # cap_num = cap.get(프레임) 
+            try:
+                detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
+            except Exception as e:
+                print(e)
+                # 욜로 트래커 초기화
+                DetectorMosaic_v2.models['model'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt'))
+                detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
+            # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
+            for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
+                if len(data) < 7:  # data 리스트의 길이가 7보다 작은 경우 해당 데이터를 건너뛰도록 합니다. 이를 통해 인덱스 오류를 방지
+                    continue
+                xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
+                track_id, confidence, label = int(data[4]), float(data[5]), int(data[6])
+                # 검출대상 설정
+                # (0, 'person'), (2, 'car'), (3, 'motorcycle'), (5, 'bus'), (7, 'truck'), (9, 'traffic light')
+                if label not in [0,2,3,5,7,9]:
+                    continue
+                # 임계값 이하는 생략 하라는 코드
+                thr = DT.getValue(DetectorMosaic_v2.tag, '민감도')
+                if confidence < thr/100:
+                    continue
+                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 1)
+                cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
+                # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
+                # xmin, ymin, xmax, ymax의 값은 roi_img의 상대좌표인데, 이를 전체 이미지에서의 상대좌표로 변환(전체 이미지 shape은 DT.img.shape)
+                xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
+                # df, temp_df 정리
+                DT.detection_add(cap_num-1, track_id, label, xmin, ymin, xmax, ymax, confidence)
+        DT.df = pd.DataFrame(DT.detection_list, columns=DT.columns)
+        DT.detection_list.clear()
+        DT.df_plot = pd.DataFrame({'frame': DT.df['frame']})
+        r = range(DT.start_point, DT.end_point+1)
+        df = pd.DataFrame({'frame': r})
+        DT.df_plot = pd.concat([DT.df_plot, df], axis=0).drop_duplicates()
+        self.signal_df_to_tableview_df.emit()
     #####################
     ## 커스텀 버튼 함수 ##
     #####################
@@ -206,11 +212,13 @@ class DetectorMosaic_v2(QObject):
         print('끝: ', DT.end_point)
 
     def btn3(self):
-        if DT.df_plot.empty:
-            process_frame = range(DT.total_frame+1)
-        else:
-            process_frame = DT.df_plot['frame']
-        self.mosaic_frame_list(process_frame)
+        start = DT.start_point if DT.start_point else 0
+        end = DT.end_point if DT.end_point else DT.total_frame
+        # if DT.df_plot.empty:
+        #     process_frame = range(DT.total_frame+1)
+        # else:
+        #     process_frame = DT.df_plot['frame']
+        self.start_end_analyze(start, end)
         print('''
 분석 버튼을 눌렀을 때
 DT.start_point와 DT.end_point 값이 존재 => 해당 구간을 df에 저장

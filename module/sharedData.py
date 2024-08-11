@@ -44,8 +44,8 @@ class DT:
     height = 0
     check_realsize = False
     # 시작, 종료점
-    start_point = ''
-    end_point = ''
+    start_point = None
+    end_point = None
     # 메인 윈도우 관련
     fileNames = None
     fileName = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
@@ -94,16 +94,18 @@ class DT:
         cls.detection_list.append((cap_num, track_id, label, x1, y1, x2, y2, thr))
 
     @classmethod
-    def roiTemp_clear(cls):
-        pass
-        # cls.detection_list.clear()
-
-    @classmethod
     def detection_list_to_df(cls):
         cls.df_temp = pd.DataFrame(cls.detection_list, columns=cls.columns)
         cls.df_temp = cls.df_temp.dropna(axis=1, how='all')
         cls.detection_list.clear()
         cls.df = pd.concat([cls.df, cls.df_temp], ignore_index=True)
+    
+    
+    @classmethod
+    def roiTemp_clear(cls):
+        pass
+        # cls.detection_list.clear()
+
 
     @classmethod
     def setFlagmulticctv(cls, bool):
