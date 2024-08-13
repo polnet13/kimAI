@@ -155,6 +155,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
     def slot_btn_fileopen(self):
         _fileName, _ = QFileDialog.getOpenFileName(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
+        if _fileName == '':
+            return
         DT.setFileName(_fileName)
         self.slot_btn_df_reset()
         self.player_fileopen()
@@ -194,10 +196,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.timer.start(1)
         if DT.play_status == False:
             self.timer.stop()
+            DT.detection_list_to_df()
             self.df_to_tableview()
+            self.update()
 
     def df_to_tableview(self):
-        DT.detection_list_to_df()
+        
         if not DT.df.empty:
             print('not DT.df.empty')
             print(len(DT.df))
@@ -212,6 +216,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         핵심: slot_btn_play()에서 호출이 반복되어 프레임을 처리하고 화면에 출력
         '''
+        if DT.fileName is None:
+            DT.play_status = False
+            return
         # 프레임을 읽어옴
         self.start_time = time.time()
         self.player.cap_read()
@@ -427,6 +434,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             row += 1
             self.modelclass.tableview_df.selectRow(row)
         # 항목의 텍스트를 가져옴
+        if self.modelclass.qmodel.item(row, 0) is None:
+            return
         n = self.modelclass.qmodel.item(row, 0).text()
         n = float(n)
         # slider 위치를 n 값으로 이동
@@ -448,6 +457,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             row = self.modelclass.tableview_df.currentIndex().row()
             row -= 1
             self.modelclass.tableview_df.selectRow(row)
+        if self.modelclass.qmodel.item(row, 0) is None:
+            return
         # 항목의 텍스트를 가져옴
         n = self.modelclass.qmodel.item(row, 0).text()
         n = float(n)

@@ -57,10 +57,10 @@ class DetectorBike(QObject):
         ''' 
         text = ''
         try:
-            detections = DetectorBike.models['base'].track(frame, persist=True)[0]
+            detections = DetectorBike.models['base'].track(frame, persist=True, device='cpu')[0]
         except:
             DetectorBike.models['base'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt'))
-            detections = DetectorBike.models['base'].track(frame, persist=True)[0]
+            detections = DetectorBike.models['base'].track(frame, persist=True, device='cpu')[0]
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
             xmin, ymin, xmax, ymax  = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
@@ -87,8 +87,9 @@ class DetectorBike(QObject):
                 signal_light_img = DT.img[ymin:ymax, xmin:xmax]
                 # frame의 6/10 위치에 신호등 이미지 삽입
                 x = int(frame.shape[0]/10*6)
-                frame[200:x+signal_light_img.shape[0], 0:signal_light_img.shape[1]] = signal_light_img
+                frame[x:x+signal_light_img.shape[0], 0:signal_light_img.shape[1]] = signal_light_img
             if label == 3:
+                # 오토바이 처리
                 bike_img = DT.img[ymin:ymax, xmin:xmax]
                 nbp_img = DetectorBike.detect_nbp_img(bike_img)
                 # 휘어진 번호판 이미지 처리
@@ -96,7 +97,7 @@ class DetectorBike(QObject):
                     nbp_img = DetectorBike.nbp_transform(nbp_img)
                 except:
                     return frame, None
-                # ocr 처리
+                # ocr
                 if nbp_img is not None:
                     si, giho, num = DetectorBike.models['reader'].read(nbp_img)
                     text = f'{si} {giho} {num}'
@@ -175,6 +176,17 @@ class DetectorBike(QObject):
             pts[[2, 3]] = pts[[3, 2]]
         return pts
 
+    def plot_df_to_img(img, cap_num):
+        img = img.copy()
+        df = DT.df
+        cap_num = int(cap_num)
+        df = df[df['frame']== cap_num]
+        for index, row in df.iterrows():
+            xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']  # roi에서의 상대적 좌표
+            xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)  # roi에서 전체 이미지로 좌표 변환
+            img = cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+            img = cv2.putText(img, f'{row["ID"]}', (xmin, ymin-5), cv2.FONT_ITALIC, 1, (255,255,255), 2)
+        return img
 
     def detect_move(roi_img):
         '''

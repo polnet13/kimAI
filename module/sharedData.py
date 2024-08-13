@@ -48,7 +48,8 @@ class DT:
     end_point = None
     # 메인 윈도우 관련
     fileNames = None
-    fileName = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
+    fileName = None
+    # fileName = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
     # 멀티 관련
     queue = None
     flag_multiCCTV = False
