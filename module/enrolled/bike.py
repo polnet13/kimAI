@@ -22,7 +22,7 @@ class DetectorBike(QObject):
         '감지_민감도':1,
         }
     models = {
-        'base': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8s.pt')),
+        'base': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')),
         'model_nbp': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'reader': OcrReader(),
     }
@@ -125,7 +125,7 @@ class DetectorBike(QObject):
             print(bike_img.shape)
             return
         roi_img = None
-        detection = DetectorBike.models['model_nbp'](bike_img)[0]
+        detection = DetectorBike.models['model_nbp'](bike_img, device='cpu')[0]
         # 번호판 검출
         for data_nbp in detection.boxes.data.tolist():
             xmin, ymin, xmax, ymax = int(data_nbp[0]), int(data_nbp[1]), int(data_nbp[2]), int(data_nbp[3])

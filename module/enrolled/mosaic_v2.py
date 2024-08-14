@@ -29,7 +29,7 @@ class DetectorMosaic_v2(QObject):
         '가림정도':10,
         }
     models = {
-        'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8s.pt')),
+        'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')),
         'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
@@ -150,7 +150,7 @@ class DetectorMosaic_v2(QObject):
     def detlete_tableview_row():
         pass
 
-    def start_end_analyze(self, start, end):
+    def analyze(self, start, end):
         '''프레임 리스트를 넣어주면 모자이크 처리하는 함수'''
         # 캡셋을 해서 시작점 설정
         cap_num = start
@@ -218,7 +218,7 @@ class DetectorMosaic_v2(QObject):
         #     process_frame = range(DT.total_frame+1)
         # else:
         #     process_frame = DT.df_plot['frame']
-        self.start_end_analyze(start, end)
+        self.analyze(start, end)
         print('''
 분석 버튼을 눌렀을 때
 DT.start_point와 DT.end_point 값이 존재 => 해당 구간을 df에 저장

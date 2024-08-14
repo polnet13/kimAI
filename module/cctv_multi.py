@@ -6,6 +6,7 @@ from control import tools
 from module.modelLoader import ModelClass
 from module.sharedData import DT
 import settings
+import numpy as np
 
 
 
@@ -128,22 +129,27 @@ class MultiCCTV:
         두 차이 이미지를 비교하여 움직임이 있는 부분을 찾아내는 함수
         return plot_img, 움직임 Bool, contours
         '''
+        # 밝기 처리한 이미지를 리턴하므로 원본 이미지를 복사하여 사용
         plot_img = roi_img.copy()
         gray_img = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
         # ROI를 설정합니다.
-        self.roi_frame_1 = self.roi_frame_2 
-        self.roi_frame_2 = self.roi_frame_3 
-        self.roi_frame_3 = gray_img
+        DT.setRoiFrame(gray_img)
         # frame1, frame2, frame3이 하나라도 None이면 원본+밝기 이미지 출력
-        if self.roi_frame_1 is None or self.roi_frame_2 is None or self.roi_frame_3 is None:
-            self.roi_color = (0, 0, 255)
-            return plot_img, False, False
+        if DT.roi_frame_1 is None or DT.roi_frame_2 is None or DT.roi_frame_3 is None:
+            DT.setRoiColor((0, 0, 255))
+            return plot_img, False
         # 움직임 감지
         diff_cnt, diff_img = self.get_diff_img()
-    
         # 움직임이 임계값 이하인 경우 원본 출력
+        mean_brightness = np.mean(roi_img)
+        brightness = 1
+        if mean_brightness > 80:
+            brightness= 2
+        thr = 50
+        thr = thr * DT.move_slider_scale * brightness
         if diff_cnt < thr:
-            return plot_img, False, False
+            return plot_img, False
+        DT.setRoiColor((0, 255, 0))      
         # 영상에서 1인 부분이 thr 이상이면 움직임이 있다고 판단 영상출력을 하는데 움직임이 있는 부분은 빨간색으로 테두리를 표시
         contours, _ = cv2.findContours(diff_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         return plot_img, True, contours
@@ -158,8 +164,11 @@ class MultiCCTV:
         두 차이 이미지를 비교하여 움직임이 있는 부분을 찾아내는 함수
         ''' 
         # 1,2 프레임, 2,3 프레임 영상들의 차를 구함
-        diff_ab = cv2.absdiff(self.roi_frame_1, self.roi_frame_2)
-        diff_bc = cv2.absdiff(self.roi_frame_2, self.roi_frame_3)
+        if self.roi_frame_1.shape == self.roi_frame_2.shape and self.roi_frame_2.shape == self.roi_frame_3.shape:   
+            diff_ab = cv2.absdiff(self.roi_frame_1, self.roi_frame_2)
+            diff_bc = cv2.absdiff(self.roi_frame_2, self.roi_frame_3)
+        else:
+            return 0, None
 
         # 영상들의 차가 threshold 이상이면 값을 255(백색)으로 만들어줌
         # 수정필요: self.thr 슬라이더로 받기

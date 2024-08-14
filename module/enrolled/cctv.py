@@ -153,8 +153,11 @@ class DetectorCCTV(QObject):
         ''' 
         roi_frame_1, roi_frame_2, roi_frame_3 = DT.getRoiFrame()
         # 1,2 프레임, 2,3 프레임 영상들의 차를 구함
-        diff_ab = cv2.absdiff(roi_frame_1, roi_frame_2)
-        diff_bc = cv2.absdiff(roi_frame_2, roi_frame_3)
+        if roi_frame_1.shape == roi_frame_2.shape and roi_frame_2.shape == roi_frame_3.shape:
+            diff_ab = cv2.absdiff(roi_frame_1, roi_frame_2)
+            diff_bc = cv2.absdiff(roi_frame_2, roi_frame_3)
+        else: 
+            return 0, None
 
         # 영상들의 차가 threshold 이상이면 값을 255(백색)으로 만들어줌
         thr = DT.getValue(DetectorCCTV.tag, '감지_민감도')
