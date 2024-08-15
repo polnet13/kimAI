@@ -44,7 +44,7 @@ root
 
 # ui파일 => 파이썬 파일로 변환
 untitled.ui 파일 위치에서 명령어 실행
-pyside6-uic untitled.ui -o untitled_ui.py
+pyside6-uic untitled.ui -o untitled_ui.pymean_brightness
 
 # 0. 모델 작성
 Path: root/apps/model_setting/models.py

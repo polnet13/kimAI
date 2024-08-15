@@ -1,6 +1,5 @@
 import os
 from control import tools
-import settings
 import pandas as pd
 
 
@@ -10,7 +9,15 @@ class DT:
 
     DT.sliderDict: {'태그':{'민감도':3}, ...} 찾을 때: DT.sliderDict['태그']['민감도']
     ''' 
-
+    device = 'cpu'   # 'cuda' or 'cpu'
+    # BASE_DIR
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    OUT_DIR = os.path.join(BASE_DIR, 'output')
+    # OCR 커스텀
+    model_name = 'best_norm_ED'
+    model_alchitecture = 'None-VGG-BiLSTM-CTC-Seed1111'
+    OCR_MODEL = os.path.join(BASE_DIR, 'rsc', 'saved_models', model_alchitecture)
+    # 변수
     sliderDict = {}  # 슬라이더 변수 저장: 
     valDict = {}  # 슬라이더 제외 변수 저장
     detector_dict = {}  # 디텍터 클래스 저장 ex) {DetectorMosaic.tag: DetectorMosaic, ...}
@@ -24,8 +31,11 @@ class DT:
     roi_frame_1 = None   # 움직임 감지를 위한 프레임 저장
     roi_frame_2 = None
     roi_frame_3 = None
-    move_slider_scale = 1  # 움직임 감지 슬라이더 배율(해상도에 따라 조절) 
+    # 움직임
+    scale_multi_move_thr = 50   
+    scale_move_thr = 50
     roi_color = (0, 0, 255)   # 움직임 감지 ROI 색상
+    # 트래킹
     track_ids = {}  # 추적된 객체의 id값
     detection_list = []  # df 로 만들면 항상 리셋 시켜야 됨
     columns=['frame', 'ID', 'label', 'x1', 'y1', 'x2', 'y2', 'thr']
@@ -43,19 +53,38 @@ class DT:
     width = 0
     height = 0
     check_realsize = False
+    time_delay = 0
     # 시작, 종료점
     start_point = None
     end_point = None
     # 메인 윈도우 관련
     fileNames = None
     fileName = None
-    # fileName = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
     # 멀티 관련
     queue = None
     flag_multiCCTV = False
     
 
     
+
+    @classmethod
+    def setMultiMoveThr(cls, slider_value):
+        '''멀티 CCTV 분석시 움직임 감지 슬라이더 설정'''
+        slider_value = int(slider_value)
+        if DT.check_realsize:
+            point = DT.roi_point[0]
+        else:
+            point = DT.roi_point[1]
+        x1, x2, y1, y2 = point
+        w = x2-x1
+        h = y2-y1
+        m = min(w, h)
+        pic_count = m**2
+        magic_num = 10000  
+        cls.scale_multi_move_thr = pic_count/magic_num
+        print(f'슬라이더 스케일: {DT.scale_multi_move_thr}')
+
+
     @classmethod
     def setMoveSliderScale(cls):
         '''
@@ -64,7 +93,6 @@ class DT:
         checkbox_realsize가 바뀔때 => mainwindwo.slot_btn_df_reset
         roi가 바뀔때 => mainwindow.mouseReleaseEvent
         '''
-        cls.move_slider_scale = 1
         if cls.check_realsize:
             resolution = DT.roi_point[0]
         else:
@@ -72,11 +100,11 @@ class DT:
         w = resolution[2]-resolution[0]
         h = resolution[3]-resolution[1]
         m = min(w, h)
-        multiply = m**2
-        magic_num = 10000  # 200픽셀당 1인데 슬라이더값 디폴트가 50이라 200*50
-        result = int(multiply/magic_num)
-        if result > 1:
-            cls.move_slider_scale = result
+        pic_count = m**2  # roi의 최소변 제곱
+        magic_num = 15260
+        cls.scale_move_thr = pic_count/magic_num
+        print(f'슬라이더 스케일: {DT.scale_move_thr}')
+
 
 
     @classmethod
@@ -191,14 +219,9 @@ class DT:
     def setRoi(cls, tuple):
         '''백분율 튜플 (x1, y1, x2, y2)'''
         cls.roi = tuple
-
-    @classmethod
-    def setFileNames(cls, fileNames):
-        cls.fileNames = fileNames
-
-    @classmethod
-    def setFileName(cls, fileName):
-        cls.fileName = fileName
+        if DT.img.all() != None:
+            DT.setRoiPoint()
+        DT.setMoveSliderScale()
 
     @classmethod
     def setDetector(cls, tag):
@@ -220,12 +243,12 @@ class DT:
         cls.detector_dict[tag] = _model_dict
 
     @classmethod
-    def getValue(cls, tag, arg):
+    def getValue(cls, tag, key):
         '''
         str: 'tag', '모자이크'
         key: '민감도'
         '''
-        return cls.sliderDict[tag][arg]
+        return cls.sliderDict[tag][key]
 
 
     @classmethod

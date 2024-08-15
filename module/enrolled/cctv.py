@@ -1,8 +1,7 @@
 import cv2
 from ultralytics import YOLO
-import os
+import os, time
 from module.sharedData import DT
-import settings
 import pandas as pd
 from control import tools
 from PySide6.QtCore import Signal
@@ -17,13 +16,12 @@ class DetectorCCTV(QObject):
     slider_dict = {
         '움직임_픽셀차이': 50,
         '감지_민감도': 1,
-        '띄엄띄엄_보기':1,
-        '밝기':0
+        '지연':0,
         }
     models = {
-        'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')),
-        'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
-        'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
+        'model': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt')),
+        'model_nbp':  YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
+        'model_face': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
     btn_names = ['btn_1', 'btn_2', 'btn_3', 'btn_4', 'btn_5']
 
@@ -32,6 +30,7 @@ class DetectorCCTV(QObject):
     signal_start = Signal(int)
     signal_end = Signal(int)
     signal_df_to_tableview_df = Signal()
+
 
     def setup():
         # 슬라이더 설정
@@ -55,7 +54,6 @@ class DetectorCCTV(QObject):
         img: cv2 이미지(바운딩 박스 처리된 이미지)
         track_id: 추적된 객체의 id값
         ''' 
-
         if realsize_bool:
             roi_x = DT.roi_point[0][0]
             roi_y = DT.roi_point[0][1]
@@ -66,10 +64,10 @@ class DetectorCCTV(QObject):
             shape = DT.resized_shape
         text = ''
         try:
-            detections = DetectorCCTV.models['model'].track(frame, persist=True)[0]
+            detections = DetectorCCTV.models['model'].track(frame, persist=True, device=DT.device)[0]
         except Exception as e:
-            DetectorCCTV.models['model'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')).to('cpu')
-            detections = DetectorCCTV.models['model'].track(frame, persist=True)[0]
+            DetectorCCTV.models['model'] = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt'))
+            detections = DetectorCCTV.models['model'].track(frame, persist=True, device=DT.device)[0]
     
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
@@ -108,15 +106,12 @@ class DetectorCCTV(QObject):
 
     def detect_move(roi_img):
         '''
-        DetectorCCTV.detect_move()
         이미지 3개를 받아서 흑백으로 변환(빠른 연산을 위해서)
         1,2프레임과 2,3프레임의 차이를 구하고,
         두 차이 이미지를 비교하여 움직임이 있는 부분을 찾아내는 함수
         return plot_img, region_status
         '''
         # bright = self.Slider_bright.value()
-        bright = DT.getValue(DetectorCCTV.tag, '밝기')
-        roi_img = cv2.add(roi_img, bright)   
         # 밝기 처리한 이미지를 리턴하므로 원본 이미지를 복사하여 사용
         plot_img = roi_img.copy()
         gray_img = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
@@ -129,13 +124,18 @@ class DetectorCCTV(QObject):
         # 움직임 감지
         diff_cnt, diff_img = DetectorCCTV.get_diff_img()
         # 움직임이 임계값 이하인 경우 원본 출력
-        mean_brightness = np.mean(roi_img)
+        mean_brightness = np.mean(gray_img)
         brightness = 1
-        if mean_brightness > 80:
-            brightness= 2
-        thr = DT.getValue(DetectorCCTV.tag, '움직임_픽셀차이')
-        thr = thr * DT.move_slider_scale * brightness
+        # if mean_brightness > 60:
+        #     brightness = mean_brightness/40-1
+        
+        thr = DT.scale_move_thr * brightness * DetectorCCTV.slider_dict['움직임_픽셀차이']
+        print(f'움직임 민감도: {thr}')
+        print(f'gray_img mean_brightness: {mean_brightness}')
+        print(f'diff_cnt: {diff_cnt}')
+        
         if diff_cnt < thr:
+            print('diff_cnt < thr')
             return plot_img, False
         DT.setRoiColor((0, 255, 0))      
         # 영상에서 1인 부분이 thr 이상이면 움직임이 있다고 판단 영상출력을 하는데 움직임이 있는 부분은 빨간색으로 테두리를 표시
@@ -151,7 +151,12 @@ class DetectorCCTV(QObject):
         연속된 3개의 프레임에서 1,2프레임과 2,3프레임의 차이를 구하고,
         두 차이 이미지를 비교하여 움직임이 있는 부분을 찾아내는 함수
         ''' 
-        roi_frame_1, roi_frame_2, roi_frame_3 = DT.getRoiFrame()
+        try:
+            roi_frame_1, roi_frame_2, roi_frame_3 = DT.getRoiFrame()
+        except Exception as e:
+            print(f"Error getting ROI frames: {e}")
+            return 0, None
+        
         # 1,2 프레임, 2,3 프레임 영상들의 차를 구함
         if roi_frame_1.shape == roi_frame_2.shape and roi_frame_2.shape == roi_frame_3.shape:
             diff_ab = cv2.absdiff(roi_frame_1, roi_frame_2)

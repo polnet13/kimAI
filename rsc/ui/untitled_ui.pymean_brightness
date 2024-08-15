@@ -85,10 +85,11 @@ class Ui_MainWindow(object):
         self.btn_dongzip = QPushButton(self.tab_multi)
         self.btn_dongzip.setObjectName(u"btn_dongzip")
         self.btn_dongzip.setGeometry(QRect(21, 17, 92, 26))
-        self.horizontalSlider = QSlider(self.tab_multi)
-        self.horizontalSlider.setObjectName(u"horizontalSlider")
-        self.horizontalSlider.setGeometry(QRect(120, 50, 191, 22))
-        self.horizontalSlider.setOrientation(Qt.Horizontal)
+        self.slider_multi_thr = QSlider(self.tab_multi)
+        self.slider_multi_thr.setObjectName(u"slider_multi_thr")
+        self.slider_multi_thr.setGeometry(QRect(120, 50, 191, 22))
+        self.slider_multi_thr.setValue(50)
+        self.slider_multi_thr.setOrientation(Qt.Horizontal)
         self.label_2 = QLabel(self.tab_multi)
         self.label_2.setObjectName(u"label_2")
         self.label_2.setGeometry(QRect(20, 50, 81, 16))
@@ -150,6 +151,7 @@ class Ui_MainWindow(object):
         self.btn_dongzip.clicked.connect(MainWindow.slot_btn_multi_open)
         self.btn_init_detection.clicked.connect(MainWindow.slot_btn_df_reset)
         self.btn_page_print.clicked.connect(MainWindow.slot_btn_print)
+        self.slider_multi_thr.sliderMoved.connect(MainWindow.thr_slider_move_moved)
 
         self.tabWidget.setCurrentIndex(0)
 

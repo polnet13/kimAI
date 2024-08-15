@@ -5,7 +5,6 @@ import os
 from control import tools
 from module.modelLoader import ModelClass
 from module.sharedData import DT
-import settings
 import numpy as np
 
 
@@ -20,10 +19,10 @@ class MultiCCTV:
         '밝기':0
         }
     models = {
-        'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt')),
-        'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
-        'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
-    } # 어디서 읽어서 DT.models 로 전달함
+        'model': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt')),
+        'model_nbp':  YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
+        'model_face': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/model_face.pt')),
+    } # 어디서 읽어서 self.models 로 전달함
     columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
 
     # MultiCCTV.arg
@@ -41,6 +40,7 @@ class MultiCCTV:
         self.track = False
         self.queue = None
         # 경로 설정
+        self.filePath = fileName
         self.base = os.path.dirname(fileName)
         self.fileName = os.path.basename(fileName)
         self.output_path = os.path.dirname(os.path.dirname(__file__))
@@ -64,8 +64,8 @@ class MultiCCTV:
 
     def multi_process(self):
         '''동집 실질적인 작업 함수'''
-        file = os.path.join(self.base, self.fileName)
-        self.cap = cv2.VideoCapture(file)
+        # 비디오 파일 열기
+        self.cap = cv2.VideoCapture(self.filePath)
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         # 전체 프레임 가져오기
@@ -97,9 +97,7 @@ class MultiCCTV:
                 false=0
                 roi_img = self.img[self.y1:self.y2, self.x1:self.x2]
                 # ROI 부분만 움직임 감지
-                thr = 20
-                roi_img, detect_move_bool, contours = self.detect_move(
-                    roi_img, thr)
+                roi_img, detect_move_bool, contours = self.detect_move(roi_img)     
                 # 움직임이 없는 경우 루프 건너뜀
                 if detect_move_bool == False:
                     continue
@@ -115,13 +113,13 @@ class MultiCCTV:
             if false > 2:
                 break
         # total_frames/fps
-        message = ['done', total_frames, frame_cnt, self.fps, file]
+        message = ['done', total_frames, frame_cnt, self.fps, self.fileName]
         self.queue.put(message)
         self.cap.release()
         self.video.release()
 
 
-    def detect_move(self, roi_img, thr=30):
+    def detect_move(self, roi_img):
         '''
         WorkerCCTV.detect_move()
         이미지 3개를 받아서 흑백으로 변환(빠른 연산을 위해서)
@@ -130,26 +128,27 @@ class MultiCCTV:
         return plot_img, 움직임 Bool, contours
         '''
         # 밝기 처리한 이미지를 리턴하므로 원본 이미지를 복사하여 사용
+        contours = 0
         plot_img = roi_img.copy()
         gray_img = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
         # ROI를 설정합니다.
-        DT.setRoiFrame(gray_img)
+        self.setRoiFrame(gray_img)
         # frame1, frame2, frame3이 하나라도 None이면 원본+밝기 이미지 출력
-        if DT.roi_frame_1 is None or DT.roi_frame_2 is None or DT.roi_frame_3 is None:
-            DT.setRoiColor((0, 0, 255))
-            return plot_img, False
+        if self.roi_frame_1 is None or self.roi_frame_2 is None or self.roi_frame_3 is None:
+            self.roiColor = (0, 0, 255)
+            return plot_img, False, contours
         # 움직임 감지
         diff_cnt, diff_img = self.get_diff_img()
         # 움직임이 임계값 이하인 경우 원본 출력
         mean_brightness = np.mean(roi_img)
         brightness = 1
-        if mean_brightness > 80:
-            brightness= 2
-        thr = 50
-        thr = thr * DT.move_slider_scale * brightness
+        # if mean_brightness > 60:
+        #     brightness = mean_brightness/40-1
+
+        thr = DT.scale_multi_move_thr * brightness 
         if diff_cnt < thr:
-            return plot_img, False
-        DT.setRoiColor((0, 255, 0))      
+            return plot_img, False, contours
+        self.roiColor = (0, 255, 0)
         # 영상에서 1인 부분이 thr 이상이면 움직임이 있다고 판단 영상출력을 하는데 움직임이 있는 부분은 빨간색으로 테두리를 표시
         contours, _ = cv2.findContours(diff_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         return plot_img, True, contours
@@ -186,4 +185,14 @@ class MultiCCTV:
     
     def set_roi(self, x1, y1, x2, y2):
         self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
+
+    def setRoiFrame(cls, gray_img):
+        '''
+        cls.roi_frame_1 = cls.roi_frame_2 
+        cls.roi_frame_2 = cls.roi_frame_3 
+        cls.roi_frame_3 = gray_img
+        '''
+        cls.roi_frame_1 = cls.roi_frame_2 
+        cls.roi_frame_2 = cls.roi_frame_3 
+        cls.roi_frame_3 = gray_img
         

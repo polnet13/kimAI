@@ -1,7 +1,7 @@
 import subprocess
 import sys
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox
-from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QLabel
+from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout, QSlider
 from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
 
 
@@ -21,7 +21,6 @@ from control import tools
 from module import enrolled, generic
 from rsc.ui.untitled_ui import Ui_MainWindow
 from PySide6.QtUiTools import QUiLoader   
-import settings
 from module.sharedData import DT
 from module.modelLoader import ModelClass
 from module import cctv_multi
@@ -67,7 +66,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # self.img = cv2.imread(DT.fileName)
         # 멀티프로세싱
         self.workers = None
-        self.flag_start_btn = False
+        self.btn_flag_multi_start = False
         self.flag_dongzip_btn = False
         # 플레이어 객체 생성
         self.player = generic.PlayerClass()
@@ -144,7 +143,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 현재 df.img 를 main.py의 부모 폴더에 저장
         if DT.img is None:
             return
-        _fileName = os.path.join(settings.BASE_DIR, 'output', f'{DT.fileName}({DT.cap_num}).png')
+        _fileName = os.path.join(DT.BASE_DIR, 'output', f'{DT.fileName}({DT.cap_num}).png')
         cv2.imwrite(_fileName, DT.img)
         # 저장 경로 열기
         if sys.platform.startswith('win'):
@@ -157,7 +156,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         _fileName, _ = QFileDialog.getOpenFileName(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
         if _fileName == '':
             return
-        DT.setFileName(_fileName)
+        DT.fileName = _fileName
         self.slot_btn_df_reset()
         self.player_fileopen()
         tools.plot_df_to_obj_img(DT.img, 0)
@@ -174,7 +173,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
 
     def slot_btn_open_complete(self):
-        path = os.path.join(settings.BASE_DIR, 'output')
+        path = os.path.join(DT.BASE_DIR, 'output')
         if sys.platform.startswith('win'):
             os.startfile(path)
         elif sys.platform.startswith('linux'):
@@ -185,15 +184,17 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         qimage 객체로 변경해서 출력하는 것의 속도 측정
         '''
+        delay = DT.time_delay
         _play_status = not DT.play_status
         DT.setPlayStatus(_play_status)
+        DT.setMoveSliderScale()
         self.playSlider.setEnabled(not _play_status)
         if DT.play_status:
             # 타임이벤트 생성
             self.timer = QTimer()
             # self.timer.timeout.connect(self.play)
             self.timer.timeout.connect(self.play)
-            self.timer.start(1)
+            self.timer.start(delay)
         if DT.play_status == False:
             self.timer.stop()
             DT.detection_list_to_df()
@@ -203,11 +204,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def df_to_tableview(self):
         
         if not DT.df.empty:
-            print('not DT.df.empty')
-            print(len(DT.df))
             DT.detector.make_plot_df()
         if not DT.df_plot.empty:
-            print('not DT.df_plot.empty')
             self.modelclass.df_to_tableview_df()
 
 
@@ -305,7 +303,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             return
         self.flag_dongzip_btn = True
         fileNames, _ = QFileDialog.getOpenFileNames(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
-        DT.setFileNames(fileNames)
+        DT.fileNames = fileNames
         if len(DT.fileNames) == 0:
             self.flag_dongzip_btn = False
             self.textBrowser.append('동영상 파일이 선택되지 않았습니다.')
@@ -313,9 +311,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # fileNames의 파일들의 용량을 확인하고 용량이 큰 순서대로 정렬
         DT.fileNames = tools.sort_files_by_size(DT.fileNames)
         _fileName = DT.fileNames[0]
-        DT.setFileName(_fileName)
-        self.player_fileopen()
-        self.make_queue_and_progress_bars(DT.fileNames)
+        DT.fileName = _fileName
+        self.player_fileopen()   # 첫 파일 플레이어에 불러오기
+        self.make_queue_and_progress_bars(DT.fileNames)  # 모든 파일 큐와 프로그래스바 생성
 
 
     def player_fileopen(self):
@@ -344,13 +342,13 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         백그라운드 워커을 실행하고,
         프로그레스바를 업데이트하는 타이머를 실행
         '''
-        if self.flag_start_btn is True:
+        if self.btn_flag_multi_start is True:
             return
         # 메뉴 넘버 따오는 함수 추가예정
         self.objects = [cctv_multi.MultiCCTV(file) for file in DT.fileNames]
         self.object_queue_to_worker()
         self.run_workers()
-        self.flag_start_btn= True
+        self.btn_flag_multi_start= True
         self.startBtn.setText('동영상 압축 중...')
         self.completed_count = 0
         # 백그라운드 워커(실질적인 영상 압축 코드)
@@ -497,8 +495,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.label_frame_gap.setText(str(value)) # label7 = self.jump_frameSlider 값
         
     def thr_slider_move_moved(self, value):
-        self.move_thr = value
-        self.label_thr_move.setText(str(value)) # label4 = self.thrSlider 값
+        '''멀티 슬라이더값 변경시 실행되는 함수'''
+        DT.setMultiMoveThr(value)
+        self.label_3.setText(str(DT.scale_multi_move_thr))  # 멀티 움직임 민감도 슬라이더
 
 
     def Slider_bright_moved(self, value):
@@ -536,6 +535,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         실제 좌표(a,b)를 받아서 디스플레이 이미지의 좌표로 변환
         '''
+
         if DT.play_status:
             return
         if DT.img is None:
@@ -547,6 +547,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         x, y = tools.shape_to_adjust(x, y)  # gui 오차 보정
         if event.button() == Qt.LeftButton:
             DT.setRoi((x, y, DT.roi[2], DT.roi[3]))
+        
 
         
     def mouseMoveEvent(self, event):
@@ -568,7 +569,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         x1, y1, x2, y2 = DT.roi[0], DT.roi[1], DT.roi[2], DT.roi[3]
         x1, y1, x2, y2 = tools.sort_roi(x1, y1, x2, y2)
         DT.setRoi((x1, y1, x2, y2))
-        DT.setRoiPoint()
+        
         # 영상비율 자동 조절되도록 수정 필요
         self.display_img(img)
         self.label_roi_update()
@@ -601,6 +602,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         x1, y1, x2, y2 = tools.sort_roi(x1, y1, x2, y2)
         DT.setRoi((x1, y1, x2, y2))
         DT.setRoiPoint()
+        DT.setMoveSliderScale()
+        print(DT.move_slider_scale)
         self.slot_btn_df_reset()
         self.display_img(img)
         self.label_roi_update()
@@ -664,7 +667,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def slot_btn_multi_reset(self):
         DT.fileNames = []
         self.flag_dongzip_btn = False
-        self.flag_start_btn = False
+        self.btn_flag_multi_start = False
         self.clear_status_bars()
         self.terminate_workers()
         self.update()
@@ -677,8 +680,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     # 멀티프로세싱 함수 #
     ####################
     def make_queue_and_progress_bars(self, fileNames):
-        print('make_queue_and_progress_bars')
-        '''큐(통신)와 프로그레스 바, 워커 생성 '''
         # 상태바 제거
         self.clear_status_bars()
         # 스크롤 가능한 프로그레스 바 위젯 생성
@@ -688,7 +689,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         scroll_area.setWidgetResizable(True)
         scroll_area.setWidget(scroll_widget)
         self.vLayout_dongzip_statusbar.addWidget(scroll_area)
-        self.len_filenames = len(fileNames)
         self.startBtn = QPushButton(f'작업 시작')
         scroll_layout.addWidget(self.startBtn)
 
@@ -699,6 +699,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.progress_bars = []
         self.queues = []
         self.workers = []
+        self.len_filenames = len(fileNames)
         for i in range(self.len_filenames):
             # 큐 생성
             queue = Queue()
@@ -741,10 +742,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''워커 시작: 멀티프로세스 열일 시작'''
         self.active_workers = 0
         for _ in range(min(int(self.num_cores) - 1, len(DT.fileNames))):  # 코어 수 - 2개의 작업을 시작
-            self.workers[self.active_workers].x1 = DT.roi[0]
-            self.workers[self.active_workers].x2 = DT.roi[2]
-            self.workers[self.active_workers].y1 = DT.roi[1]
-            self.workers[self.active_workers].y2 = DT.roi[3]
+            roi = DT.roi
+            roi = tools.rel_to_abs(self.img_shape, roi[0], roi[1], roi[2], roi[3])
+            self.workers[self.active_workers].x1 = roi[0]
+            self.workers[self.active_workers].x2 = roi[2]
+            self.workers[self.active_workers].y1 = roi[1]
+            self.workers[self.active_workers].y2 = roi[3]
             self.workers[self.active_workers].start()
             self.active_workers += 1
 
@@ -780,6 +783,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             msg.exec_()
             self.message_box_shown = True  # 메시지 박스 표시 플래그 업데이트        self.update()
             self.slot_btn_multi_reset()
+            self.btn_flag_multi_start= False
 
             
     def button_clicked(self):

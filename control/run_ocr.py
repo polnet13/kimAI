@@ -3,7 +3,7 @@ import cv2
 from easyocr.easyocr import *
 from fuzzywuzzy import fuzz
 from collections import Counter
-import settings
+from module.sharedData import DT
 # GPU 설정
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 
@@ -37,9 +37,9 @@ allowlist_num = '0123456789'
 
 class OcrReader:
    
-    def __init__(self, model_name = settings.model_name):
+    def __init__(self, model_name = DT.model_name):
         # 경로설정 14라인
-        path = settings.OCR_MODEL
+        path = DT.OCR_MODEL
         self.reader1 = Reader(['ko'],
                 model_storage_directory= path,
                 user_network_directory= path,

@@ -137,7 +137,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_control">
      <attribute name="title">
@@ -173,9 +173,9 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>60</y>
+        <y>90</y>
         <width>291</width>
-        <height>411</height>
+        <height>381</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="vLayout_dongzip_statusbar"/>
@@ -217,6 +217,48 @@
       </property>
       <property name="text">
        <string>멀티 open</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="slider_multi_thr">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>50</y>
+        <width>191</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>50</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>81</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>민감도</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>50</y>
+        <width>64</width>
+        <height>15</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>50</string>
       </property>
      </widget>
     </widget>
@@ -501,6 +543,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>slider_multi_thr</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>thr_slider_move_moved()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1062</x>
+     <y>127</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1084</x>
+     <y>12</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slot_btn_pageprint()</slot>
@@ -514,5 +572,6 @@
   <slot>slot_btn_multi_reset()</slot>
   <slot>slot_btn_df_reset()</slot>
   <slot>slot_btn_print()</slot>
+  <slot>thr_slider_move_moved()</slot>
  </slots>
 </ui>

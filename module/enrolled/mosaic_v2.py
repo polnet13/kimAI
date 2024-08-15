@@ -5,11 +5,11 @@ from control import tools
 from control.run_ocr import OcrReader
 import numpy as np
 import pandas as pd
-import settings
 from module.modelLoader import ModelClass
 from module.sharedData import DT
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal   
 from PySide6.QtCore import QObject
+import time
 
 
 # ToDo
@@ -29,9 +29,9 @@ class DetectorMosaic_v2(QObject):
         '가림정도':10,
         }
     models = {
-        'model': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')),
-        'model_nbp':  YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
-        'model_face': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/model_face.pt')),
+        'model': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt')),
+        'model_nbp':  YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
+        'model_face': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
     # 커스텀 버튼 설정
     btn_names = ['시작', '끝', '분석', '추가(프레임)', '추가(전체)', '작업시작']
@@ -100,7 +100,7 @@ class DetectorMosaic_v2(QObject):
         실패: None
         ''' 
         mosaic_img = None
-        detection = DetectorMosaic_v2.models['model_nbp'](bike_img)[0]
+        detection = DetectorMosaic_v2.models['model_nbp'](bike_img, device=DT.device)[0]
         ratio = DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600
         # 번호판 검출
         for data_nbp in detection.boxes.data.tolist():
@@ -122,7 +122,7 @@ class DetectorMosaic_v2(QObject):
         실패: None
         ''' 
         mosaic_img = None
-        detection = DetectorMosaic_v2.models['model_face'](face_img)[0]
+        detection = DetectorMosaic_v2.models['model_face'](face_img, device=DT.device)[0]
         ratio = DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600
         # 번호판 검출
         for data_face in detection.boxes.data.tolist():
@@ -162,12 +162,12 @@ class DetectorMosaic_v2(QObject):
             print(cap_num)
             # cap_num = cap.get(프레임) 
             try:
-                detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
+                detections = DetectorMosaic_v2.models['model'].track(frame, persist=True, device=DT.device)[0]
             except Exception as e:
                 print(e)
                 # 욜로 트래커 초기화
-                DetectorMosaic_v2.models['model'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8x.pt'))
-                detections = DetectorMosaic_v2.models['model'].track(frame, persist=True)[0]
+                DetectorMosaic_v2.models['model'] = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt'))
+                detections = DetectorMosaic_v2.models['model'].track(frame, persist=True, device=DT.device)[0]
             # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
             for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
                 if len(data) < 7:  # data 리스트의 길이가 7보다 작은 경우 해당 데이터를 건너뛰도록 합니다. 이를 통해 인덱스 오류를 방지
@@ -218,7 +218,10 @@ class DetectorMosaic_v2(QObject):
         #     process_frame = range(DT.total_frame+1)
         # else:
         #     process_frame = DT.df_plot['frame']
+        start_time = time.time()
         self.analyze(start, end)
+        end_time = time.time()
+        print((end-start)/(end_time-start_time))
         print('''
 분석 버튼을 눌렀을 때
 DT.start_point와 DT.end_point 값이 존재 => 해당 구간을 df에 저장

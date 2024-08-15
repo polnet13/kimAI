@@ -9,7 +9,6 @@ from module.modelLoader import ModelClass
 from module import generic 
 # from module.generic import CustomBaseClass
 from module.sharedData import DT
-import settings
 from PySide6.QtCore import Signal
 from PySide6.QtCore import QObject
 
@@ -22,8 +21,8 @@ class DetectorBike(QObject):
         '감지_민감도':1,
         }
     models = {
-        'base': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt')),
-        'model_nbp': YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
+        'base': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt')),
+        'model_nbp': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'reader': OcrReader(),
     }
     btn_names = ['btn_1', 'btn_2', 'btn_3', 'btn_4', 'btn_5', 'btn_6']
@@ -35,7 +34,7 @@ class DetectorBike(QObject):
     signal_df_to_tableview_df = Signal()
 
     # 변수
-    img_path = os.path.join(settings.BASE_DIR, 'rsc/init.jpg')
+    img_path = os.path.join(DT.BASE_DIR, 'rsc/init.jpg')
     df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
     track_ids = {}
     df = pd.DataFrame(columns=DT.columns)
@@ -57,10 +56,10 @@ class DetectorBike(QObject):
         ''' 
         text = ''
         try:
-            detections = DetectorBike.models['base'].track(frame, persist=True, device='cpu')[0]
+            detections = DetectorBike.models['base'].track(frame, persist=True, device=DT.device)[0]
         except:
-            DetectorBike.models['base'] = YOLO(os.path.join(settings.BASE_DIR, 'rsc/models/yolov8n.pt'))
-            detections = DetectorBike.models['base'].track(frame, persist=True, device='cpu')[0]
+            DetectorBike.models['base'] = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt'))
+            detections = DetectorBike.models['base'].track(frame, persist=True, device=DT.device)[0]
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
             xmin, ymin, xmax, ymax  = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
@@ -125,7 +124,7 @@ class DetectorBike(QObject):
             print(bike_img.shape)
             return
         roi_img = None
-        detection = DetectorBike.models['model_nbp'](bike_img, device='cpu')[0]
+        detection = DetectorBike.models['model_nbp'](bike_img, device=DT.device)[0]
         # 번호판 검출
         for data_nbp in detection.boxes.data.tolist():
             xmin, ymin, xmax, ymax = int(data_nbp[0]), int(data_nbp[1]), int(data_nbp[2]), int(data_nbp[3])

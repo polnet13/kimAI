@@ -99,11 +99,15 @@ class ModelClass(QObject):
         self.detector.signal_end.connect(self.receive_end)
         self.detector.signal_df_to_tableview_df.connect(self.df_to_tableview_df)
         self.reset.emit()
+        # 리셋할 것
+        DT.time_delay = 0
 
     def update_label(self, value, selected_menu_text, label1, label2, arg):
-        label1.setText(str(value))  # 슬라이더 값
-        label2.setText(str(value))  # 버튼명
+        label1.setText(str(value))  # 버튼명
         DT.sliderDict[selected_menu_text][arg] = value
+        if arg == '지연':
+            DT.time_delay = value
+        print(value)
 
     def receive_start(self, value):
         # 시작 버튼명을 f'시작({value})'로 변경
@@ -140,8 +144,7 @@ class ModelClass(QObject):
             value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df_plot.iloc[row]]
             self.qmodel.appendRow(value_objs)
         self.tableview_df.setModel(self.qmodel)
-        print('df_to_tableview_df 실행')
-        print(DT.df_plot)
+
 
  
         
