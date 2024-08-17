@@ -9,7 +9,7 @@ class DT:
 
     DT.sliderDict: {'태그':{'민감도':3}, ...} 찾을 때: DT.sliderDict['태그']['민감도']
     ''' 
-    device = 'cuda'   # 'cuda' or 'cpu'
+    device = 'cpu'   # 'cuda' or 'cpu'
     # BASE_DIR
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     OUT_DIR = os.path.join(BASE_DIR, 'output')
