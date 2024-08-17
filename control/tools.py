@@ -1,8 +1,10 @@
 import cv2
-import os, time
+import os, time, sys
 import inspect
 from module.sharedData import DT
 from control import tools   
+import subprocess
+
 
 def sort_roi(x1, y1, x2, y2):
     '''
@@ -181,3 +183,10 @@ def get_classes(module):
             classes.append(obj)
 
     return classes
+
+def openpath(path):
+    '''경로를 열어주는 함수'''
+    if sys.platform.startswith('win'):
+        os.startfile(path)
+    elif sys.platform.startswith('linux'):
+        subprocess.run(['xdg-open', path])

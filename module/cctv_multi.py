@@ -30,7 +30,7 @@ class MultiCCTV:
 
 
 
-    def __init__(self, fileName):
+    def __init__(self, fileName, scale_move_thr=1, thr_move_slider_multi=50):
         # x1, y1, x2, y2 는 상대적 좌표임
 
         # 슬라이더 설정
@@ -41,10 +41,10 @@ class MultiCCTV:
         self.queue = None
         # 경로 설정
         self.filePath = fileName
+        self.output_path = os.path.dirname(fileName)
+        self.output_path = os.path.join(self.output_path, 'output')
         self.base = os.path.dirname(fileName)
         self.fileName = os.path.basename(fileName)
-        self.output_path = os.path.dirname(os.path.dirname(__file__))
-        self.output_path = os.path.join(self.output_path, 'output')
         # 아웃풋 경로 생성
         if not os.path.exists(self.output_path):
             os.makedirs(self.output_path)
@@ -56,10 +56,13 @@ class MultiCCTV:
         self.roi_frame_2 = None
         self.roi_frame_3 = None
         self.difframe = None
-        self.move_thr = 30
+        self.move_thr = 50
+        self.thr = 50
         self.roi_color = (0, 0, 255)
-        self.thr = 20
         self.diff_max = 20
+        # 움직임 감지
+        self.scale_move_thr = scale_move_thr
+        self.thr_move_slider_multi = thr_move_slider_multi
 
 
     def multi_process(self):
@@ -132,20 +135,14 @@ class MultiCCTV:
         plot_img = roi_img.copy()
         gray_img = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
         # ROI를 설정합니다.
-        self.setRoiFrame(gray_img)
+        self.setRoiFrame123(gray_img)
         # frame1, frame2, frame3이 하나라도 None이면 원본+밝기 이미지 출력
         if self.roi_frame_1 is None or self.roi_frame_2 is None or self.roi_frame_3 is None:
             self.roiColor = (0, 0, 255)
             return plot_img, False, contours
         # 움직임 감지
         diff_cnt, diff_img = self.get_diff_img()
-        # 움직임이 임계값 이하인 경우 원본 출력
-        mean_brightness = np.mean(roi_img)
-        brightness = 1
-        # if mean_brightness > 60:
-        #     brightness = mean_brightness/40-1
-
-        thr = DT.scale_multi_move_thr * brightness 
+        thr = self.scale_move_thr * self.thr_move_slider_multi # * brightness
         if diff_cnt < thr:
             return plot_img, False, contours
         self.roiColor = (0, 255, 0)
@@ -171,8 +168,8 @@ class MultiCCTV:
 
         # 영상들의 차가 threshold 이상이면 값을 255(백색)으로 만들어줌
         # 수정필요: self.thr 슬라이더로 받기
-        _, diff_ab_t = cv2.threshold(diff_ab, self.thr, 255, cv2.THRESH_BINARY)
-        _, diff_bc_t = cv2.threshold(diff_bc, self.thr, 255, cv2.THRESH_BINARY)
+        _, diff_ab_t = cv2.threshold(diff_ab, 1, 255, cv2.THRESH_BINARY)
+        _, diff_bc_t = cv2.threshold(diff_bc, 1, 255, cv2.THRESH_BINARY)
 
         # 두 영상 차의 공통된 부분을 1로 만들어줌
         diff = cv2.bitwise_and(diff_ab_t, diff_bc_t)
@@ -186,13 +183,15 @@ class MultiCCTV:
     def set_roi(self, x1, y1, x2, y2):
         self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
 
-    def setRoiFrame(cls, gray_img):
+    def setRoiFrame123(self, gray_img):
         '''
         cls.roi_frame_1 = cls.roi_frame_2 
         cls.roi_frame_2 = cls.roi_frame_3 
         cls.roi_frame_3 = gray_img
         '''
-        cls.roi_frame_1 = cls.roi_frame_2 
-        cls.roi_frame_2 = cls.roi_frame_3 
-        cls.roi_frame_3 = gray_img
+        self.roi_frame_1 = self.roi_frame_2 
+        self.roi_frame_2 = self.roi_frame_3 
+        self.roi_frame_3 = gray_img
+
+
         

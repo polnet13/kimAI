@@ -29,18 +29,21 @@ class DetectorMosaic_v2(QObject):
         '가림정도':10,
         }
     models = {
-        'model': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt')),
+        'model': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8m.pt')),
         'model_nbp':  YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         'model_face': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 DT.models 로 전달함
     # 커스텀 버튼 설정
-    btn_names = ['시작', '끝', '분석', '추가(프레임)', '추가(전체)', '작업시작']
+    btn_names = ['시작', '끝', '분석', '프레임 추가', '전체 추가', '모자이크']
 
     # 시그널
     reset = Signal()
-    signal_start = Signal(int)
-    signal_end = Signal(int)
-    signal_df_to_tableview_df = Signal()
+    signal_1 = Signal(int)
+    signal_2 = Signal(int)
+    signal_3 = Signal()
+    signal_4 = Signal()
+    signal_5 = Signal()
+    signal_6 = Signal()
 
  
     def __init__(self):
@@ -90,6 +93,17 @@ class DetectorMosaic_v2(QObject):
             xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)  # roi에서 전체 이미지로 좌표 변환
             img = tools.mosaic(img, xmin, ymin, xmax, ymax, ratio=DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600)
             img = cv2.putText(img, f'{row["ID"]}', (xmin, ymin-5), cv2.FONT_ITALIC, 1, (255,255,255), 2)
+        return img
+    
+    def plot_df_to_mosaic(img, cap_num):
+        img = img.copy()
+        df = DT.df
+        cap_num = int(cap_num)
+        df = df[df['frame']== cap_num]
+        for index, row in df.iterrows():
+            xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']  # roi에서의 상대적 좌표
+            xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)  # roi에서 전체 이미지로 좌표 변환
+            img = tools.mosaic(img, xmin, ymin, xmax, ymax, ratio=DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600)
         return img
 
 
@@ -156,6 +170,7 @@ class DetectorMosaic_v2(QObject):
         cap_num = start
         self.cap = cv2.VideoCapture(DT.fileName)
         self.cap.set(cv2.CAP_PROP_POS_FRAMES, cap_num)
+        DT.detection_list.clear()
         while cap_num < end+1:
             ret, frame = self.cap.read()
             cap_num = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
@@ -169,6 +184,7 @@ class DetectorMosaic_v2(QObject):
                 DetectorMosaic_v2.models['model'] = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt'))
                 detections = DetectorMosaic_v2.models['model'].track(frame, persist=True, device=DT.device)[0]
             # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
+            
             for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
                 if len(data) < 7:  # data 리스트의 길이가 7보다 작은 경우 해당 데이터를 건너뛰도록 합니다. 이를 통해 인덱스 오류를 방지
                     continue
@@ -195,29 +211,38 @@ class DetectorMosaic_v2(QObject):
         r = range(DT.start_point, DT.end_point+1)
         df = pd.DataFrame({'frame': r})
         DT.df_plot = pd.concat([DT.df_plot, df], axis=0).drop_duplicates()
-        self.signal_df_to_tableview_df.emit()
+        self.signal_3.emit()
+
+    def getCustomeID(self):
+        '''
+        DT.df 에서 label이 custom인 것 중 id max값 +1 을 id값으로 리턴하는 함수
+        '''
+        return 1
+    
+    def getTotalID(self):
+        '''
+        DT.df 에서 label이 total인 것 중 id max값 +1 을 id값으로 리턴하는 함수
+        '''
+        return 3
     #####################
     ## 커스텀 버튼 함수 ##
     #####################
 
     def btn1(self):
         DT.start_point = DT.cap_num
-        self.signal_start.emit(DT.start_point)
+        self.signal_1.emit(DT.start_point)
         print('시작: ', DT.start_point)
 
 
     def btn2(self):
         DT.end_point = DT.cap_num
-        self.signal_end.emit(DT.end_point)
+        self.signal_2.emit(DT.end_point)
         print('끝: ', DT.end_point)
 
     def btn3(self):
+        '''분석'''
         start = DT.start_point if DT.start_point else 0
-        end = DT.end_point if DT.end_point else DT.total_frame
-        # if DT.df_plot.empty:
-        #     process_frame = range(DT.total_frame+1)
-        # else:
-        #     process_frame = DT.df_plot['frame']
+        end = DT.end_point if DT.end_point else DT.total_frames
         start_time = time.time()
         self.analyze(start, end)
         end_time = time.time()
@@ -229,15 +254,95 @@ DT.start_point와 DT.end_point 값이 존재 => 해당 구간을 df에 저장
               ''')
 
     def btn4(self):
-        print('btn4: 프레임 모자이크 추가 => df에 저장')
+        print('btn4: roi값 프레임에 추가 => df에 저장')
+        ID = self.getCustomeID()
+        x1, y1, x2, y2 = DT.roi
+        df = pd.DataFrame({'frame': DT.cap_num, 'ID': ID, 'label': 'custom', 'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2, 'thr': 1}, index=[0])
+        DT.df = pd.concat([DT.df, df], ignore_index=True)
+        print(DT.df)
+        
 
     def btn5(self):
         print('btn5: 전체 프레임에 roi값 모자이크 추가 => df에 저장')
+        start = DT.start_point if DT.start_point else 0
+        end = DT.end_point if DT.end_point else DT.total_frames
+        ID = self.getTotalID()
+        x1, y1, x2, y2 = DT.roi
+        for frame in range(start, end+1):
+            df = pd.DataFrame({'frame': frame, 'ID': ID, 'label': 'total', 'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2, 'thr': 1}, index=[0])
+            DT.df = pd.concat([DT.df, df], ignore_index=True)
+        print(DT.df)
 
     def btn6(self):
-        print('df에 저장된 값으로 모자이크 처리 후 영상 저장 => 폴더 열기')
+        '''
+        모자이크 처리
+        '''
+        self.flag_btn6 = True
+        worker = WorkerMosaic(DT.fileName, 
+                        DT.df,
+                        DT.start_point, 
+                        DT.end_point, 
+                        DT.total_frames, 
+                        DT.fps, 
+                        DT.width, 
+                        DT.height,
+                        DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600)
+        worker.start()
+        worker.join()
+        result = worker.queue.get()
+        print(result)
 
     # 버튼 리스트
     def make_btn_list(self):
         self.btns = [self.btn1, self.btn2, self.btn3, self.btn4, self.btn5, self.btn6]
-    
+
+
+
+
+from multiprocessing import Process, Queue
+
+class WorkerMosaic(Process):
+    def __init__(self, fileName, df, start_point, end_point, total_frames, fps, width, height, ratio):
+        super().__init__()
+        self.queue = Queue()
+        self.fileName = fileName
+        self.df = df
+        self.start_point = start_point
+        self.end_point = end_point
+        self.total_frames = total_frames
+        self.fps = fps
+        self.width = width
+        self.height = height
+        self.ratio = ratio
+
+    def run(self):
+        start = self.start_point if self.start_point else 0
+        end = self.end_point if self.end_point else self.total_frames
+        cap = cv2.VideoCapture(self.fileName)
+        fileName = os.path.basename(self.fileName)
+        outdir  = os.path.dirname(self.fileName)
+        output_path = os.path.join(outdir, 'output')
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+        outfile = os.path.join(output_path, f'{fileName}')
+        self.video = cv2.VideoWriter(outfile, cv2.VideoWriter_fourcc(*'mp4v'), self.fps, (self.width, self.height))
+        for frame in range(start, end+1):
+            text = f'{frame}'
+            self.queue.put(text)
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+            ret, img = cap.read()
+            img = self.plot_df_to_mosaic(img, frame)
+            self.video.write(img)             
+        self.video.release()
+        tools.openpath(output_path)
+
+    def plot_df_to_mosaic(self, img, cap_num):
+        img = img.copy()
+        df = self.df
+        cap_num = int(cap_num)
+        df = df[df['frame']== cap_num]
+        for index, row in df.iterrows():
+            xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']  # roi에서의 상대적 좌표
+            xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)  # roi에서 전체 이미지로 좌표 변환
+            img = tools.mosaic(img, xmin, ymin, xmax, ymax, ratio=self.ratio)
+        return img

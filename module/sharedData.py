@@ -9,7 +9,7 @@ class DT:
 
     DT.sliderDict: {'태그':{'민감도':3}, ...} 찾을 때: DT.sliderDict['태그']['민감도']
     ''' 
-    device = 'cpu'   # 'cuda' or 'cpu'
+    device = 'cuda'   # 'cuda' or 'cpu'
     # BASE_DIR
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     OUT_DIR = os.path.join(BASE_DIR, 'output')
@@ -32,8 +32,8 @@ class DT:
     roi_frame_2 = None
     roi_frame_3 = None
     # 움직임
-    scale_multi_move_thr = 50   
-    scale_move_thr = 50
+    thr_move_slider_multi = 50
+    scale_move_thr = 1
     roi_color = (0, 0, 255)   # 움직임 감지 ROI 색상
     # 트래킹
     track_ids = {}  # 추적된 객체의 id값
@@ -65,33 +65,17 @@ class DT:
     flag_multiCCTV = False
     
 
-    
-
-    @classmethod
-    def setMultiMoveThr(cls, slider_value):
-        '''멀티 CCTV 분석시 움직임 감지 슬라이더 설정'''
-        slider_value = int(slider_value)
-        if DT.check_realsize:
-            point = DT.roi_point[0]
-        else:
-            point = DT.roi_point[1]
-        x1, x2, y1, y2 = point
-        w = x2-x1
-        h = y2-y1
-        m = min(w, h)
-        pic_count = m**2
-        magic_num = 10000  
-        cls.scale_multi_move_thr = pic_count/magic_num
-        print(f'슬라이더 스케일: {DT.scale_multi_move_thr}')
-
 
     @classmethod
     def setMoveSliderScale(cls):
         '''
+        roi 변화에 따른 슬라이더 스케일 조정
+
         영상이 바뀌거나 => player_fileopen
         디텍터가 바뀌거나 => cls.setDetector
         checkbox_realsize가 바뀔때 => mainwindwo.slot_btn_df_reset
         roi가 바뀔때 => mainwindow.mouseReleaseEvent
+        멀티 open 했을 때 => mainwindow.slot_btn_multi_open
         '''
         if cls.check_realsize:
             resolution = DT.roi_point[0]
@@ -171,7 +155,7 @@ class DT:
         xmin, ymin, xmax, ymax = cls.roi
         cls.roi_point[0] = (tools.rel_to_abs(DT.img.shape, xmin, ymin, xmax, ymax))
         cls.roi_point[1] = (tools.rel_to_abs(DT.resized_shape, xmin, ymin, xmax, ymax))
-        cls.setMoveSliderScale
+        cls.setMoveSliderScale()
 
 
     @classmethod

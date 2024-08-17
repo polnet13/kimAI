@@ -14,6 +14,7 @@ class ModelClass(QObject):
     '''
     # 시그널
     reset = Signal()
+    statusbar_say = Signal(str)
 
 
 
@@ -95,12 +96,15 @@ class ModelClass(QObject):
             button.clicked.connect(self.detector.btns[i])
         # 모델 생성은 변수들 초기화 후 마지막으로 진행
         # 시그널 연결
-        self.detector.signal_start.connect(self.receive_start)
-        self.detector.signal_end.connect(self.receive_end)
-        self.detector.signal_df_to_tableview_df.connect(self.df_to_tableview_df)
+        self.detector.signal_1.connect(self.signal_1)
+        self.detector.signal_2.connect(self.signal_2)
+        self.detector.signal_3.connect(self.df_to_tableview)
+        self.detector.signal_6.connect(self.signal_6)
         self.reset.emit()
         # 리셋할 것
         DT.time_delay = 0
+    
+
 
     def update_label(self, value, selected_menu_text, label1, label2, arg):
         label1.setText(str(value))  # 버튼명
@@ -109,16 +113,19 @@ class ModelClass(QObject):
             DT.time_delay = value
         print(value)
 
-    def receive_start(self, value):
+    def signal_1(self, value):
         # 시작 버튼명을 f'시작({value})'로 변경
         self.btn_container.itemAt(0).widget().setText(f'시작({value})')
 
-    def receive_end(self, value):
+    def signal_2(self, value):
         # 종료 버튼명을 f'시작({value})'로 변경
         if value+1 < DT.start_point:
             return
         self.btn_container.itemAt(1).widget().setText(f'끝({value})')
 
+    def signal_6(self):
+        self.df_to_tableview()
+        
     
     #########################
     # 테이블뷰 선택된 행 삭제 #
@@ -128,12 +135,12 @@ class ModelClass(QObject):
         # 디텍터 마다 테이블 삭제시 작동하는 함수를 다르게 하기 위해서 detector에 위임함
         DT.df.drop(index).reset_index(drop=True)
         # 테이블뷰 다시 출력
-        self.df_to_tableview_df()
+        self.df_to_tableview()
         self.tableview_df.update()
         
  
     # df => 리스트뷰
-    def df_to_tableview_df(self):
+    def df_to_tableview(self):
         '''detector.df를 테이블에 출력'''
         # 모델 초기화를 데터 추가 전에 수행
         self.qmodel = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음

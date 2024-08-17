@@ -51,8 +51,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         # 멀티 프로세싱 관련 변수
-        self.num_cores = os.cpu_count()
-        self.statusBar().showMessage(f'코어 수: {self.num_cores}')
+        self.thread = os.cpu_count()
+        self.statusBar().showMessage(f'스레드: {self.thread}')
         # 메시지 박스 표시 플래그
         self.message_box_shown = False  
         self.checkbox_yolo.setChecked(True)
@@ -87,6 +87,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.modelclass.tableview_df.clicked.connect(self.on_item_clicked)
         self.check_realsize.stateChanged.connect(self.slot_btn_df_reset)
         self.modelclass.reset.connect(self.slot_btn_df_reset)
+        self.modelclass.statusbar_say.connect(self.say)
         
 
 
@@ -124,20 +125,74 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # delete키 눌렀을 때 설정
         self.delete_key = QShortcut(QKeySequence(Qt.Key_Delete), self)
         self.delete_key.activated.connect(self.delete_listview_row) 
+        # 디텍터 버튼 숫자 단축키 456|123
+        self.key_4 = QShortcut(QKeySequence(Qt.Key_4), self)
+        self.key_4.activated.connect(self.btn1)
+        self.key_5 = QShortcut(QKeySequence(Qt.Key_5), self)
+        self.key_5.activated.connect(self.btn2)
+        self.key_6 = QShortcut(QKeySequence(Qt.Key_6), self)
+        self.key_6.activated.connect(self.btn3)
+        self.key_1 = QShortcut(QKeySequence(Qt.Key_1), self)
+        self.key_1.activated.connect(self.btn4)
+        self.key_2 = QShortcut(QKeySequence(Qt.Key_2), self)
+        self.key_2.activated.connect(self.btn5)
+        self.key_3 = QShortcut(QKeySequence(Qt.Key_3), self)
+        self.key_3.activated.connect(self.btn6)
+
+    def btn1(self):
+        print('btn1')
+        self.modelclass.detector.btn1()
+
+    def btn2(self):
+        print('btn2')
+        self.modelclass.detector.btn2()
+    
+    def btn3(self):
+        print('btn3')
+        self.modelclass.detector.btn3()
+    
+    def btn4(self):
+        print('btn4')
+        self.modelclass.detector.btn4()
+
+    def btn5(self):
+        print('btn5')
+        self.modelclass.detector.btn5()
+
+    def btn6(self):
+        print('btn6')
+        self.modelclass.detector.btn6()
 
 
     ##############
     ## 슬롯함수 ##
     ##############
+        
+
+    def say(self, value):
+        QTimer.singleShot(0, lambda: self.statusBar().showMessage(str(value)))
+        print(f'self.statusBar().showMessage({value})')
+
+
+
+    def slot_slider_move(self, value):
+        '''멀티 분석에서 슬라이더값 변경시 실행되는 함수'''
+        self.label_3.setText(str(value)) 
+        DT.thr_move_slider_multi = value  
+        print(f'DT.thr_move_slider_multi: {DT.thr_move_slider_multi}')
+        print(f'DT.scale_move_thr: {DT.scale_move_thr}')
+
+
     def slot_btn_df_reset(self):
         '''탐지내역 초기화'''
         print('slot_btn_df_reset')
         DT.reset()
-        self.modelclass.df_to_tableview_df()
+        self.modelclass.df_to_tableview()
         self.textBrowser.clear()
         DT.setRealsize(self.check_realsize.isChecked())
         DT.setMoveSliderScale()
         print(DT.check_realsize)
+
 
     def slot_btn_print(self):
         # 현재 df.img 를 main.py의 부모 폴더에 저장
@@ -173,7 +228,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
 
     def slot_btn_open_complete(self):
-        path = os.path.join(DT.BASE_DIR, 'output')
+        path = DT.OUT_DIR
         if sys.platform.startswith('win'):
             os.startfile(path)
         elif sys.platform.startswith('linux'):
@@ -200,6 +255,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             DT.detection_list_to_df()
             self.df_to_tableview()
             self.update()
+
 
     def df_to_tableview(self):
         
@@ -260,7 +316,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             # 이후 추가 디텍션은 원본이미지로 수행함
             realsize_bool = self.check_realsize.isChecked()
             roi_img, text  = DT.detector.detect_yolo_track(roi_img, DT.cap_num, realsize_bool)
-            # roi_img 사용 : cctv, multicctv
             # roi 무시: bike, 모자이크함
             if text:
                 self.textBrowser.append(text)
@@ -312,6 +367,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         DT.fileNames = tools.sort_files_by_size(DT.fileNames)
         _fileName = DT.fileNames[0]
         DT.fileName = _fileName
+        DT.OUT_DIR = os.path.join(os.path.dirname(_fileName), 'output')
         self.player_fileopen()   # 첫 파일 플레이어에 불러오기
         self.make_queue_and_progress_bars(DT.fileNames)  # 모든 파일 큐와 프로그래스바 생성
 
@@ -345,7 +401,13 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if self.btn_flag_multi_start is True:
             return
         # 메뉴 넘버 따오는 함수 추가예정
-        self.objects = [cctv_multi.MultiCCTV(file) for file in DT.fileNames]
+        self.objects = [
+            cctv_multi.MultiCCTV(
+                file, 
+                scale_move_thr = DT.scale_move_thr,
+                thr_move_slider_multi = DT.thr_move_slider_multi
+                ) for file in DT.fileNames
+                ]
         self.object_queue_to_worker()
         self.run_workers()
         self.btn_flag_multi_start= True
@@ -488,17 +550,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.player.cap_read()
             self.display_img()
         
-
-        
             
     def jump_frameSlider_moved(self, value):
         self.label_frame_gap.setText(str(value)) # label7 = self.jump_frameSlider 값
         
-    def thr_slider_move_moved(self, value):
-        '''멀티 슬라이더값 변경시 실행되는 함수'''
-        DT.setMultiMoveThr(value)
-        self.label_3.setText(str(DT.scale_multi_move_thr))  # 멀티 움직임 민감도 슬라이더
-
 
     def Slider_bright_moved(self, value):
         self.label_bright.setText(str(value))
@@ -668,8 +723,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         DT.fileNames = []
         self.flag_dongzip_btn = False
         self.btn_flag_multi_start = False
-        self.clear_status_bars()
         self.terminate_workers()
+        self.clear_status_bars()
         self.update()
 
 
@@ -741,7 +796,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def run_workers(self):
         '''워커 시작: 멀티프로세스 열일 시작'''
         self.active_workers = 0
-        for _ in range(min(int(self.num_cores) - 1, len(DT.fileNames))):  # 코어 수 - 2개의 작업을 시작
+        for _ in range(min(int(self.thread) - 1, len(DT.fileNames))):  # 코어 수 - 2개의 작업을 시작
             roi = DT.roi
             roi = tools.rel_to_abs(self.img_shape, roi[0], roi[1], roi[2], roi[3])
             self.workers[self.active_workers].x1 = roi[0]
@@ -770,7 +825,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                         self.workers[self.active_workers].start()  # 새 작업 시작
                         self.active_workers += 1
                 else:
-                    self.progress_bars[i].setValue(msg[0])
+                    try:
+                        self.progress_bars[i].setValue(msg[0])
+                    except:
+                        return
         # 모든 작업이 완료되었는지 확인하고 메시지 박스가 아직 표시되지 않았다면 표시
         if self.completed_count == self.len_filenames and not self.message_box_shown:
             if self.completed_count == 0:

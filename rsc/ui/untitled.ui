@@ -10,6 +10,12 @@
     <height>650</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <weight>50</weight>
+    <bold>false</bold>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -137,7 +143,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_control">
      <attribute name="title">
@@ -227,6 +233,16 @@
         <width>191</width>
         <height>22</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="minimum">
+       <number>1</number>
       </property>
       <property name="value">
        <number>50</number>
@@ -547,7 +563,7 @@
    <sender>slider_multi_thr</sender>
    <signal>sliderMoved(int)</signal>
    <receiver>MainWindow</receiver>
-   <slot>thr_slider_move_moved()</slot>
+   <slot>slot_slider_move()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1062</x>
@@ -573,5 +589,6 @@
   <slot>slot_btn_df_reset()</slot>
   <slot>slot_btn_print()</slot>
   <slot>thr_slider_move_moved()</slot>
+  <slot>slot_slider_move()</slot>
  </slots>
 </ui>

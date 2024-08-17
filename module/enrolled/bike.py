@@ -29,9 +29,12 @@ class DetectorBike(QObject):
     
     # 시그널
     reset = Signal()
-    signal_start = Signal(int)
-    signal_end = Signal(int)
-    signal_df_to_tableview_df = Signal()
+    signal_1 = Signal(int)
+    signal_2 = Signal(int)
+    signal_3 = Signal()
+    signal_4 = Signal()
+    signal_5 = Signal()
+    signal_6 = Signal()
 
     # 변수
     img_path = os.path.join(DT.BASE_DIR, 'rsc/init.jpg')

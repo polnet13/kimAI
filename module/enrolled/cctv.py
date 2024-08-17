@@ -14,8 +14,7 @@ class DetectorCCTV(QObject):
 
     tag = 'CCTV_플레이어'
     slider_dict = {
-        '움직임_픽셀차이': 50,
-        '감지_민감도': 1,
+        '민감도': 50,
         '지연':0,
         }
     models = {
@@ -27,9 +26,12 @@ class DetectorCCTV(QObject):
 
     # 시그널
     reset = Signal()
-    signal_start = Signal(int)
-    signal_end = Signal(int)
-    signal_df_to_tableview_df = Signal()
+    signal_1 = Signal(int)
+    signal_2 = Signal(int)
+    signal_3 = Signal()
+    signal_4 = Signal()
+    signal_5 = Signal()
+    signal_6 = Signal()
 
 
     def setup():
@@ -80,10 +82,6 @@ class DetectorCCTV(QObject):
             # (0, 'person'), (2, 'car'), (3, 'motorcycle'), (5, 'bus'), (7, 'truck'), (9, 'traffic light')
             if int(data[6]) != 0:
                 continue
-            # 임계값 이하는 생략 하라는 코드
-            thr = DT.getValue(DetectorCCTV.tag, '감지_민감도')
-            if confidence < thr/100:
-                continue
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 1)
             cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
             # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
@@ -124,14 +122,13 @@ class DetectorCCTV(QObject):
         # 움직임 감지
         diff_cnt, diff_img = DetectorCCTV.get_diff_img()
         # 움직임이 임계값 이하인 경우 원본 출력
-        mean_brightness = np.mean(gray_img)
-        brightness = 1
+        # mean_brightness = np.mean(gray_img)
+        # brightness = 1
         # if mean_brightness > 60:
         #     brightness = mean_brightness/40-1
         
-        thr = DT.scale_move_thr * brightness * DetectorCCTV.slider_dict['움직임_픽셀차이']
+        thr = DT.scale_move_thr * DetectorCCTV.slider_dict['민감도'] # * brightness
         print(f'움직임 민감도: {thr}')
-        print(f'gray_img mean_brightness: {mean_brightness}')
         print(f'diff_cnt: {diff_cnt}')
         
         if diff_cnt < thr:
@@ -165,9 +162,8 @@ class DetectorCCTV(QObject):
             return 0, None
 
         # 영상들의 차가 threshold 이상이면 값을 255(백색)으로 만들어줌
-        thr = DT.getValue(DetectorCCTV.tag, '감지_민감도')
-        _, diff_ab_t = cv2.threshold(diff_ab, thr, 255, cv2.THRESH_BINARY)
-        _, diff_bc_t = cv2.threshold(diff_bc, thr, 255, cv2.THRESH_BINARY)
+        _, diff_ab_t = cv2.threshold(diff_ab, 1, 255, cv2.THRESH_BINARY)
+        _, diff_bc_t = cv2.threshold(diff_bc, 1, 255, cv2.THRESH_BINARY)
 
         # 두 영상 차의 공통된 부분을 1로 만들어줌
         diff = cv2.bitwise_and(diff_ab_t, diff_bc_t)
