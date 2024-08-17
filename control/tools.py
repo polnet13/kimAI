@@ -1,7 +1,7 @@
 import cv2
 import os, time, sys
 import inspect
-from module.sharedData import DT
+from views.sharedData import DT
 from control import tools   
 import subprocess
 

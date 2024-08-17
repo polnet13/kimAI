@@ -1,10 +1,11 @@
 import subprocess
 import sys
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QLabel
-from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout, QSlider
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QLabel, QGridLayout, QHBoxLayout, QComboBox
+from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout, QSlider, QTableView, QHeaderView
 from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
 
-
+from PySide6.QtCore import Signal
+from PySide6.QtCore import QObject
 # 웹 바로가기
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QKeySequence, QShortcut
@@ -18,13 +19,14 @@ import cv2
 from multiprocessing import Process, Queue
 # 사용자
 from control import tools
-from module import enrolled, generic
+from views import enrolled, generic
 from rsc.ui.untitled_ui import Ui_MainWindow
 from PySide6.QtUiTools import QUiLoader   
-from module.sharedData import DT
-from module.modelLoader import ModelClass
-from module import cctv_multi
+from views.sharedData import DT
+from views import cctv_multi
 import pandas as pd
+
+
 
 
 
@@ -43,6 +45,8 @@ class Worker(Process):
 
 
 class mainWindow(QMainWindow, Ui_MainWindow):  
+
+
     '''
     UI 컨트롤 관련 클래스
     영상부 해상도 680*480
@@ -61,9 +65,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 플레이창
         self.label.setStyleSheet("background-color: black")
         # 리스트뷰 
-        
-        # # CCTV 분석기 초기화
-        # self.img = cv2.imread(DT.fileName)
         # 멀티프로세싱
         self.workers = None
         self.btn_flag_multi_start = False
@@ -79,19 +80,15 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.frame_option.addLayout(self.modelclass.layout, 11)
         self.check_realsize.setChecked(DT.check_realsize)
 
-
         #################
         ## 시그널 연결 ##
         ################
         self.tableView.clicked.connect(self.on_item_clicked)
-        self.modelclass.tableview_df.clicked.connect(self.on_item_clicked)
         self.check_realsize.stateChanged.connect(self.slot_btn_df_reset)
+        self.modelclass.tableview_df.clicked.connect(self.on_item_clicked)
         self.modelclass.reset.connect(self.slot_btn_df_reset)
-        self.modelclass.statusbar_say.connect(self.say)
-        
+        self.modelclass.progressChanged.connect(self.update_progressBar)
 
-
- 
         #################
         ## 단축키 함수 ##
         ################
@@ -167,13 +164,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     ##############
     ## 슬롯함수 ##
     ##############
-        
-
     def say(self, value):
         QTimer.singleShot(0, lambda: self.statusBar().showMessage(str(value)))
         print(f'self.statusBar().showMessage({value})')
-
-
 
     def slot_slider_move(self, value):
         '''멀티 분석에서 슬라이더값 변경시 실행되는 함수'''
@@ -181,7 +174,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         DT.thr_move_slider_multi = value  
         print(f'DT.thr_move_slider_multi: {DT.thr_move_slider_multi}')
         print(f'DT.scale_move_thr: {DT.scale_move_thr}')
-
 
     def slot_btn_df_reset(self):
         '''탐지내역 초기화'''
@@ -846,3 +838,153 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             
     def button_clicked(self):
         print("Button clicked")
+
+
+    def update_progressBar(self, value):
+        self.progressBar.setValue(value)
+
+
+class ModelClass(QObject):
+    '''
+    슬라이더와 모델의 상호작용을 위한 클래스
+    '''
+    # 시그널
+    reset = Signal()
+    progressChanged  = Signal(int)
+
+
+
+    def __init__(self):
+        super().__init__()
+        self.layout = None
+        self.detector = None
+        # UI 구성 요소 생성
+        self.layout = QVBoxLayout()
+        self.combo_box = QComboBox()
+        sub_layout = QHBoxLayout()
+        self.slider_container = QVBoxLayout()
+        self.label1_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
+        self.label2_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
+        self.btn_container = QGridLayout()
+        self.combo_box.addItems(DT.sliderDict.keys())
+        self.combo_box.currentIndexChanged.connect(self.change_sliders)
+        self.progress_bar = QVBoxLayout()
+        # 레이아웃 설정
+        sub_layout.addLayout(self.label2_container)
+        sub_layout.addLayout(self.label1_container)
+        sub_layout.addLayout(self.slider_container)
+        self.layout.addWidget(self.combo_box)
+        # 테이블 생성
+        self.tableview_df = QTableView()
+        header = self.tableview_df.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.layout.addWidget(self.tableview_df)
+        # 레이아웃 설정
+        self.layout.addSpacing(5)  # 일정 간격 추가
+        self.layout.addLayout(sub_layout)
+        self.layout.addSpacing(5)  # 일정 간격 추가
+        self.layout.addLayout(self.btn_container)
+        self.layout.setAlignment(Qt.AlignTop)
+        self.layout.addSpacing(5)  # 일정 간격 추가
+        self.layout.addLayout(self.progress_bar)
+        # 슬라이더, 버튼 생성
+        self.change_sliders(0)
+  
+
+    def change_sliders(self, index):
+        '''
+        드롭다운 메뉴(콤보박스)의 선택에 따라 슬라이더를 변경하고,
+        디텍터를 활성화 하는 함수
+        '''
+        
+        # 기존 슬라이더, 레이블, 버튼 삭제
+        for i in reversed(range(self.slider_container.count())):
+            self.slider_container.itemAt(i).widget().deleteLater()
+        for i in reversed(range(self.label1_container.count())):
+            self.label1_container.itemAt(i).widget().deleteLater()
+        for i in reversed(range(self.label2_container.count())):
+            self.label2_container.itemAt(i).widget().deleteLater()
+        # 기존 버튼 제거
+        for i in reversed(range(self.btn_container.count())):
+            self.btn_container.itemAt(i).widget().deleteLater()
+        # 선택된 메뉴에 대한 슬라이더 생성
+        select_mode = self.combo_box.itemText(index)
+        DT.setSelectedMode(select_mode)
+        self.detector = DT.detector()
+        # 슬라이더 생성
+        slider_values_dict = DT.sliderDict[select_mode]
+        for arg, value in slider_values_dict.items():
+            slider = QSlider(Qt.Horizontal)
+            slider.setMinimum(1)
+            slider.setMaximum(99)
+            slider.setValue(value)
+            label1 = QLabel(str(value))  # 슬라이더 값을 표시할 QLabel 생성
+            label2 = QLabel(arg)  # 버튼명을 표시할 QLabel 생성
+            slider.valueChanged.connect(lambda value, label1=label1, label2=label2, arg=arg: self.update_label(value, select_mode, label1, label2, arg))  # 슬라이더 값 변경 시 호출될 슬롯 연결
+            self.slider_container.addWidget(slider)
+            self.label1_container.addWidget(label1)
+            self.label2_container.addWidget(label2)
+        # 버튼 생성
+        for i in range(len(DT.detector.btn_names)):
+            button = QPushButton(DT.detector.btn_names[i])
+            self.btn_container.addWidget(button, i // 3, i % 3)
+            # 버튼 이벤트 연결
+            button.clicked.connect(self.detector.btns[i])
+        # 모델 생성은 변수들 초기화 후 마지막으로 진행
+        # 시그널 연결
+        self.detector.signal_1.connect(self.signal_1)
+        self.detector.signal_2.connect(self.signal_2)
+        self.detector.signal_3.connect(self.df_to_tableview)
+        self.detector.signal_6.connect(self.signal_6)
+        self.reset.emit()
+        # 리셋할 것
+        DT.time_delay = 0
+    
+
+
+    def update_label(self, value, selected_menu_text, label1, label2, arg):
+        label1.setText(str(value))  # 버튼명
+        DT.sliderDict[selected_menu_text][arg] = value
+        if arg == '지연':
+            DT.time_delay = value
+        print(value)
+
+    def signal_1(self, value):
+        # 시작 버튼명을 f'시작({value})'로 변경
+        self.btn_container.itemAt(0).widget().setText(f'시작({value})')
+
+    def signal_2(self, value):
+        # 종료 버튼명을 f'시작({value})'로 변경
+        if value+1 < DT.start_point:
+            return
+        self.btn_container.itemAt(1).widget().setText(f'끝({value})')
+
+    def signal_6(self, value):
+        self.progressChanged(int(value))
+        
+    
+    #########################
+    # 테이블뷰 선택된 행 삭제 #
+    #########################
+    def delete_listview_row(self):
+        index = self.tableview_df.currentIndex().row()
+        # 디텍터 마다 테이블 삭제시 작동하는 함수를 다르게 하기 위해서 detector에 위임함
+        DT.df.drop(index).reset_index(drop=True)
+        # 테이블뷰 다시 출력
+        self.df_to_tableview()
+        self.tableview_df.update()
+        
+ 
+    # df => 리스트뷰
+    def df_to_tableview(self):
+        '''detector.df를 테이블에 출력'''
+        # 모델 초기화를 데터 추가 전에 수행
+        self.qmodel = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
+        columns = DT.df_plot.columns
+        self.qmodel.setColumnCount(len(columns))
+        self.qmodel.setHorizontalHeaderLabels(columns)
+        for row in range(len(DT.df_plot)):
+            value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df_plot.iloc[row]]
+            self.qmodel.appendRow(value_objs)
+        self.tableview_df.setModel(self.qmodel)
+

@@ -2,7 +2,7 @@
 import sys 
 import multiprocessing
 from PySide6.QtWidgets import *
-from module.mainWindowManager import mainWindow
+from views.mainWindowManager import mainWindow
 
 
 class csswindow(mainWindow):

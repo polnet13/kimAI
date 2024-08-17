@@ -1,7 +1,7 @@
 import cv2
 from ultralytics import YOLO
 import os, time
-from module.sharedData import DT
+from views.sharedData import DT
 import pandas as pd
 from control import tools
 from PySide6.QtCore import Signal

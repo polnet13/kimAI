@@ -7,7 +7,7 @@ from ultralytics import YOLO
 
 
 from control import tools
-from module.sharedData import DT
+from views.sharedData import DT
 
 
 

@@ -1,4 +1,0 @@
-from module.enrolled.cctv import DetectorCCTV
-from module.enrolled.bike import DetectorBike
-from module.enrolled.mosaic_v2 import DetectorMosaic_v2
-

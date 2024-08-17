@@ -5,20 +5,12 @@ from control import tools
 from control.run_ocr import OcrReader
 import numpy as np
 import pandas as pd
-from module.modelLoader import ModelClass
-from module.sharedData import DT
-from PySide6.QtCore import Signal   
-from PySide6.QtCore import QObject
+from views.sharedData import DT
+from PySide6.QtCore import Signal, QObject, QTimer 
 import time
 
 
-# ToDo
-# 1. 분석 시작점, 끝점 버튼과 라벨 추가
-#   - 시작점 cap.get(cv2.CAP_PROP_POS_FRAMES) 으로 프레임 설정후 레코딩 시작
-#   - 끝점 반복 조건문(if cap_num == 끝점)으로 레코딩 종료
-# 2. 프레임별 모자이크 추가 버튼 및 기능
-#   - 모자이크 추가 버튼 클릭시, 프레임별로 모자이크 추가 df = {'cap_num': cap_num, 'a': a, 'b': b}
-# 3. 판다스로 데이터 저장
+
 
 
 class DetectorMosaic_v2(QObject):
@@ -278,7 +270,7 @@ DT.start_point와 DT.end_point 값이 존재 => 해당 구간을 df에 저장
         모자이크 처리
         '''
         self.flag_btn6 = True
-        worker = WorkerMosaic(DT.fileName, 
+        self.worker_mosaic_print = WorkerMosaic(DT.fileName, 
                         DT.df,
                         DT.start_point, 
                         DT.end_point, 
@@ -287,10 +279,17 @@ DT.start_point와 DT.end_point 값이 존재 => 해당 구간을 df에 저장
                         DT.width, 
                         DT.height,
                         DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600)
-        worker.start()
-        worker.join()
-        result = worker.queue.get()
+        self.worker_mosaic_print.start()
+        timer = QTimer()
+        timer.timeout.connect(self.progressChanged)
+        timer.start(3)
+        self.worker_mosaic_print.join()
+
+
+    def progressChanged(self):
+        result = self.worker_mosaic_print.queue.get()
         print(result)
+        self.signal_6.emit(int(result))
 
     # 버튼 리스트
     def make_btn_list(self):
@@ -298,13 +297,12 @@ DT.start_point와 DT.end_point 값이 존재 => 해당 구간을 df에 저장
 
 
 
-
 from multiprocessing import Process, Queue
 
 class WorkerMosaic(Process):
+    
     def __init__(self, fileName, df, start_point, end_point, total_frames, fps, width, height, ratio):
-        super().__init__()
-        self.queue = Queue()
+        super().__init__()  # Process 클래스의 __init__ 호출
         self.fileName = fileName
         self.df = df
         self.start_point = start_point
@@ -314,6 +312,8 @@ class WorkerMosaic(Process):
         self.width = width
         self.height = height
         self.ratio = ratio
+        self.queue = Queue()
+        
 
     def run(self):
         start = self.start_point if self.start_point else 0
@@ -327,7 +327,10 @@ class WorkerMosaic(Process):
         outfile = os.path.join(output_path, f'{fileName}')
         self.video = cv2.VideoWriter(outfile, cv2.VideoWriter_fourcc(*'mp4v'), self.fps, (self.width, self.height))
         for frame in range(start, end+1):
-            text = f'{frame}'
+            processed_frame = frame - start
+            progress = int((processed_frame / end+1) * 100)
+            print(progress)
+            text = f'{progress}'
             self.queue.put(text)
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
             ret, img = cap.read()

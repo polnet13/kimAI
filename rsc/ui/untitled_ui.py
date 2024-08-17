@@ -16,10 +16,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QHeaderView,
-    QLabel, QLineEdit, QMainWindow, QPushButton,
-    QSizePolicy, QSlider, QStatusBar, QTabWidget,
-    QTableView, QTextBrowser, QToolButton, QVBoxLayout,
-    QWidget)
+    QLabel, QLineEdit, QMainWindow, QProgressBar,
+    QPushButton, QSizePolicy, QSlider, QStatusBar,
+    QTabWidget, QTableView, QTextBrowser, QToolButton,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -38,13 +38,13 @@ class Ui_MainWindow(object):
         self.playSlider.setOrientation(Qt.Horizontal)
         self.btn_region_reset = QPushButton(self.centralwidget)
         self.btn_region_reset.setObjectName(u"btn_region_reset")
-        self.btn_region_reset.setGeometry(QRect(90, 580, 111, 31))
+        self.btn_region_reset.setGeometry(QRect(90, 590, 111, 31))
         self.btn_fileopen = QPushButton(self.centralwidget)
         self.btn_fileopen.setObjectName(u"btn_fileopen")
-        self.btn_fileopen.setGeometry(QRect(680, 580, 81, 31))
+        self.btn_fileopen.setGeometry(QRect(680, 590, 81, 31))
         self.btn_play = QToolButton(self.centralwidget)
         self.btn_play.setObjectName(u"btn_play")
-        self.btn_play.setGeometry(QRect(40, 580, 41, 31))
+        self.btn_play.setGeometry(QRect(40, 590, 41, 31))
         self.label = QLabel(self.centralwidget)
         self.label.setObjectName(u"label")
         self.label.setGeometry(QRect(40, 40, 720, 480))
@@ -55,10 +55,10 @@ class Ui_MainWindow(object):
         self.playTimer.setGeometry(QRect(710, 560, 64, 15))
         self.btn_init_detection = QPushButton(self.centralwidget)
         self.btn_init_detection.setObjectName(u"btn_init_detection")
-        self.btn_init_detection.setGeometry(QRect(210, 580, 131, 31))
+        self.btn_init_detection.setGeometry(QRect(210, 590, 131, 31))
         self.btn_page_print = QPushButton(self.centralwidget)
         self.btn_page_print.setObjectName(u"btn_page_print")
-        self.btn_page_print.setGeometry(QRect(560, 580, 111, 31))
+        self.btn_page_print.setGeometry(QRect(560, 590, 111, 31))
         self.tabWidget = QTabWidget(self.centralwidget)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tabWidget.setGeometry(QRect(780, 40, 331, 511))
@@ -134,16 +134,20 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.tab_info, "")
         self.label_cap_num = QLabel(self.centralwidget)
         self.label_cap_num.setObjectName(u"label_cap_num")
-        self.label_cap_num.setGeometry(QRect(790, 600, 311, 18))
+        self.label_cap_num.setGeometry(QRect(40, 560, 211, 18))
         self.check_realsize = QCheckBox(self.centralwidget)
         self.check_realsize.setObjectName(u"check_realsize")
         self.check_realsize.setEnabled(True)
-        self.check_realsize.setGeometry(QRect(790, 560, 161, 19))
+        self.check_realsize.setGeometry(QRect(780, 560, 161, 19))
         self.check_realsize.setChecked(False)
         self.checkbox_yolo = QCheckBox(self.centralwidget)
         self.checkbox_yolo.setObjectName(u"checkbox_yolo")
-        self.checkbox_yolo.setGeometry(QRect(790, 580, 161, 19))
+        self.checkbox_yolo.setGeometry(QRect(780, 580, 161, 19))
         self.checkbox_yolo.setChecked(False)
+        self.progressBar = QProgressBar(self.centralwidget)
+        self.progressBar.setObjectName(u"progressBar")
+        self.progressBar.setGeometry(QRect(780, 600, 321, 20))
+        self.progressBar.setValue(0)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")

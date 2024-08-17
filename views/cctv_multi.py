@@ -3,8 +3,7 @@ import cv2
 from ultralytics import YOLO
 import os
 from control import tools
-from module.modelLoader import ModelClass
-from module.sharedData import DT
+from views.sharedData import DT
 import numpy as np
 
 

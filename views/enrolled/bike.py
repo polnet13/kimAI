@@ -5,10 +5,9 @@ import pandas as pd
 from ultralytics import YOLO
 from control import tools
 from control.run_ocr import OcrReader
-from module.modelLoader import ModelClass
-from module import generic 
+from views import generic 
 # from module.generic import CustomBaseClass
-from module.sharedData import DT
+from views.sharedData import DT
 from PySide6.QtCore import Signal
 from PySide6.QtCore import QObject
 

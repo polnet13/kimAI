@@ -3,7 +3,7 @@ import cv2
 from easyocr.easyocr import *
 from fuzzywuzzy import fuzz
 from collections import Counter
-from module.sharedData import DT
+from views.sharedData import DT
 # GPU 설정
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 
