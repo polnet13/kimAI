@@ -63,11 +63,11 @@ def sort_files_by_size(filesPath):
 
 def shape_to_adjust(x, y):
     '''
-    gui 좌표값 오차 보정 함수
+    gui 좌표값 오차 보정 함수  
     gui(720, 480)의 좌표 값을 입력된 이미지의 해상도에 맞춰 비디오의 좌표로 변환
     '''
-    x = max(0, min(x-40, 720)) / 720  
-    y = max(0, min(y-40, 720)) / 480  
+    x = max(0, min(x-70, 720)) / 720  
+    y = max(0, min(y-10, 720)) / 480  
     return x, y
 
 def rel_to_abs(img_shape, xmin, ymin, xmax, ymax):

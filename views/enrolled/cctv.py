@@ -12,7 +12,7 @@ import numpy as np
 
 class DetectorCCTV(QObject):
 
-    tag = 'CCTV_플레이어'
+    tag = 'cctv'
     slider_dict = {
         '민감도': 50,
         '지연':0,

@@ -10,7 +10,6 @@ from PySide6.QtCore import QObject
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6 import QtGui
-# 단축키
 from PySide6.QtGui import QKeySequence, QShortcut  
 from PySide6.QtCore import Qt
 # 외부 모듈
@@ -76,18 +75,36 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         for detector in detectors:
             DT.setSliderValue(detector.tag, detector.slider_dict)
             DT.enrollDetectors(detector.tag, detector)
-        self.modelclass = ModelClass()
-        self.frame_option.addLayout(self.modelclass.layout, 11)
         self.check_realsize.setChecked(DT.check_realsize)
+        DT.setDetector('cctv')
+        self.detector = None
 
         #################
         ## 시그널 연결 ##
         ################
-        self.tableView.clicked.connect(self.on_item_clicked)
         self.check_realsize.stateChanged.connect(self.slot_btn_df_reset)
-        self.modelclass.tableview_df.clicked.connect(self.on_item_clicked)
-        self.modelclass.reset.connect(self.slot_btn_df_reset)
-        self.modelclass.progressChanged.connect(self.update_progressBar)
+        # 버튼 좌 메뉴 
+        self.btn_home.clicked.connect(self.buttonClick)
+        self.btn_cctv.clicked.connect(self.buttonClick)
+        self.btn_bike.clicked.connect(self.buttonClick)
+        self.btn_mosaic.clicked.connect(self.buttonClick)
+        self.btn_temp1.clicked.connect(self.buttonClick)
+        self.btn_settings.clicked.connect(self.buttonClick)
+        # CCTV
+        self.btn_multi_open.clicked.connect(self.slot_btn_multi_open)
+        self.btn_multi_reset.clicked.connect(self.slot_btn_multi_reset)
+        self.btn_multi_complete_open.clicked.connect(self.slot_btn_open_complete)
+        # 모자이크  
+        self.btn_mosaic_start.clicked.connect(self.btn1)
+        self.btn_mosaic_end.clicked.connect(self.btn2)
+        self.btn_mosaic_analyze.clicked.connect(self.btn3)
+        self.btn_mosaic_add_frame.clicked.connect(self.btn4)
+        self.btn_mosaic_add_frams.clicked.connect(self.btn5)
+        self.btn_mosaic_video_out.clicked.connect(self.btn6)
+        # 바이크
+
+
+
 
         #################
         ## 단축키 함수 ##
@@ -121,7 +138,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.esc_key.activated.connect(self.program_exit)   
         # delete키 눌렀을 때 설정
         self.delete_key = QShortcut(QKeySequence(Qt.Key_Delete), self)
-        self.delete_key.activated.connect(self.delete_listview_row) 
+        self.delete_key.activated.connect(self.delete_tableview_row) 
         # 디텍터 버튼 숫자 단축키 456|123
         self.key_4 = QShortcut(QKeySequence(Qt.Key_4), self)
         self.key_4.activated.connect(self.btn1)
@@ -137,29 +154,94 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.key_3.activated.connect(self.btn6)
 
     def btn1(self):
-        print('btn1')
-        self.modelclass.detector.btn1()
-
+        DT.detector.btn1()
+        if DT.selected_mode == 'cctv':
+            pass
+        if DT.selected_mode == 'mosaic':
+            self.btn_mosaic_start.setText(f'시작({DT.start_point})')
+        if DT.selected_mode == 'bike':
+            pass
+ 
     def btn2(self):
-        print('btn2')
-        self.modelclass.detector.btn2()
+        DT.detector.btn2()
+        if DT.selected_mode == 'cctv':
+            pass
+        if DT.selected_mode == 'mosaic':
+            self.btn_mosaic_end.setText(f'시작({DT.end_point})')
+        if DT.selected_mode == 'bike':
+            pass
+ 
     
     def btn3(self):
-        print('btn3')
-        self.modelclass.detector.btn3()
-    
+        if DT.selected_mode == 'cctv':
+            print('cctv')
+            pass
+        if DT.selected_mode == 'mosaic':
+            DT.detector.btn3()
+            self.df_to_tableView_mosaic_frame()
+            self.df_to_tableView_mosaic_ID()
+        if DT.selected_mode == 'bike':
+            print('bike')
+            pass
+
+
     def btn4(self):
-        print('btn4')
-        self.modelclass.detector.btn4()
+        if type(DT.detector) == type(DT.detector_dict['cctv']):
+            pass
+        if type(DT.detector) == type(DT.detector_dict['mosaic']):
+            DT.detector.btn4()
+            self.df_to_tableView_mosaic_frame()
+            self.df_to_tableView_mosaic_ID()
+        if type(DT.detector) == type(DT.detector_dict['bike']):
+            pass
 
     def btn5(self):
-        print('btn5')
-        self.modelclass.detector.btn5()
+        if type(DT.detector) == type(DT.detector_dict['cctv']):
+            pass
+        if type(DT.detector) == type(DT.detector_dict['mosaic']):
+            DT.detector.btn5()
+            self.df_to_tableView_mosaic_frame()
+            self.df_to_tableView_mosaic_ID()
+        if type(DT.detector) == type(DT.detector_dict['bike']):
+            pass
 
     def btn6(self):
-        print('btn6')
-        self.modelclass.detector.btn6()
+        if type(DT.detector) == type(DT.detector_dict['cctv']):
+            pass
+        if type(DT.detector) == type(DT.detector_dict['mosaic']):
 
+            DT.detector.btn6()
+            self.df_to_tableView_mosaic_frame()
+            self.df_to_tableView_mosaic_ID()
+            
+        if type(DT.detector) == type(DT.detector_dict['bike']):
+            pass
+
+    
+
+    def buttonClick(self):
+        # GET BUTTON CLICKED
+        btn = self.sender()
+        btnName = btn.objectName()
+        
+        # SHOW HOME PAGE
+        if btnName == "btn_home":
+            self.stackedWidget.setCurrentWidget(self.stack_home)
+        if btnName == "btn_cctv":
+            self.stackedWidget.setCurrentWidget(self.stack_cctv)
+            DT.setSelectedMode('cctv')
+        if btnName == "btn_mosaic":
+            self.stackedWidget.setCurrentWidget(self.stack_mosaic) 
+            DT.setSelectedMode('mosaic')
+        if btnName == "btn_bike":
+            self.stackedWidget.setCurrentWidget(self.stack_bike)  
+            DT.setSelectedMode('bike')
+        if btnName == "btn_temp1":
+            self.stackedWidget.setCurrentWidget(self.stack_temp)
+        if btnName == "btn_settings":
+            self.stackedWidget.setCurrentWidget(self.stack_settings)
+
+ 
 
     ##############
     ## 슬롯함수 ##
@@ -204,7 +286,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if _fileName == '':
             return
         DT.fileName = _fileName
-        self.slot_btn_df_reset()
         self.player_fileopen()
         tools.plot_df_to_obj_img(DT.img, 0)
         
@@ -245,16 +326,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.play_status == False:
             self.timer.stop()
             DT.detection_list_to_df()
-            self.df_to_tableview()
             self.update()
 
 
-    def df_to_tableview(self):
-        
-        if not DT.df.empty:
-            DT.detector.make_plot_df()
-        if not DT.df_plot.empty:
-            self.modelclass.df_to_tableview_df()
+
 
 
     # 이벤트 감지       
@@ -310,8 +385,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             roi_img, text  = DT.detector.detect_yolo_track(roi_img, DT.cap_num, realsize_bool)
             # roi 무시: bike, 모자이크함
             if text:
-                self.textBrowser.append(text)
-                self.textBrowser.setFocus()
+                self.text_si.setPlainText(text)
         #################################################################################
         # self.img에 roi_img를 붙여서 출력
         img[y1:y2, x1:x2] = roi_img
@@ -321,6 +395,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
         #
         self.display_img(img, (0,255,0))
+        if DT.selected_mode == 'bike':
+            # 초기화
+            self.text_si.clear()
+            self.text_giho.clear()
+            self.text_num.clear()
+            self.text_si.setText(DT.bike_si)
+            self.text_giho.setText(DT.bike_giho)
+            self.text_num.setText(str(DT.bike_num))
         self.process_time_print()
 
 
@@ -342,10 +424,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         동집 버튼을 누르면
         큐(실질적인 동영상 압축 작업)와 프로그래스바를 생성하고,
         '''
-        # 탭 위젯 2번째 탭으로 이동
-        self.tabWidget.setCurrentIndex(1)
-        self.textBrowser.clear()
-        
         if self.flag_dongzip_btn is True:
             return
         self.flag_dongzip_btn = True
@@ -353,7 +431,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         DT.fileNames = fileNames
         if len(DT.fileNames) == 0:
             self.flag_dongzip_btn = False
-            self.textBrowser.append('동영상 파일이 선택되지 않았습니다.')
+            self.statusBar().showMessage('동영상 파일이 선택되지 않았습니다.')
             return
         # fileNames의 파일들의 용량을 확인하고 용량이 큰 순서대로 정렬
         DT.fileNames = tools.sort_files_by_size(DT.fileNames)
@@ -375,9 +453,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.reset_roi()
         self.statusBar().showMessage(f'파일 경로: {DT.fileName}')
         # 영상의 전체 프레임수를 가지고 옴
-        self.label_xy.setText(f'해상도: {DT.width}*{DT.height}')
+        self.label_xy_.setText(f'해상도: {DT.width}*{DT.height}')
         self.playSlider.setMaximum(DT.total_frames -1)
-        self.label_fps.setText(f'fps : {DT.fps}')
+        self.label_fps_.setText(f'fps : {DT.fps}')
         DT.setRoiPoint()
         self.update()
         self.display_img()
@@ -450,12 +528,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def minus_gap(self):
         self.jump_frameSlider.setValue(self.jump_frameSlider.value() - 3)
     # 테이블뷰 선택된 행 삭제
-    def delete_listview_row(self):
-        index = self.modelclass.tableview_df.currentIndex().row()
+    def delete_tableview_row(self):
+        index = self.tableView_mosaic_frame.currentIndex().row()
         # 디텍터 마다 테이블 삭제시 작동하는 함수를 다르게 하기 위해서 detector에 위임함
         DT.detector.drop(index, inplace=True)
         # 테이블뷰 다시 출력
-        self.modelclass.df_to_tableview_df()
+        self.tableView_mosaic_frame()
         self.update()
         
     # 리스트뷰 항목 클릭시 해당 프레임으로 이동
@@ -463,7 +541,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 해당 위치의 항목을 가져옴
         row = index.row()
         # 항목의 텍스트를 가져옴
-        n = self.modelclass.qmodel.item(row, 0).text()
+        n = self.qmodel_mosaic_frame.item(row, 0).text()
         n = float(n)
         # slider 위치를 n 값으로 이동
         self.playSlider.setValue(n) 
@@ -481,14 +559,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
     def tableview_df_down(self):
         # 테이블뷰에서 아래행으로 이동
-        if self.modelclass.tableview_df.hasFocus():
-            row = self.modelclass.tableview_df.currentIndex().row()
+        if self.tableView_mosaic_frame.hasFocus():
+            row = self.tableView_mosaic_frame.currentIndex().row()
             row += 1
-            self.modelclass.tableview_df.selectRow(row)
+            self.tableView_mosaic_frame.selectRow(row)
         # 항목의 텍스트를 가져옴
-        if self.modelclass.qmodel.item(row, 0) is None:
+        if self.qmodel_mosaic_frame.item(row, 0) is None:
             return
-        n = self.modelclass.qmodel.item(row, 0).text()
+        n = self.qmodel_mosaic_frame.item(row, 0).text()
         n = float(n)
         # slider 위치를 n 값으로 이동
         self.playSlider.setValue(n) 
@@ -505,14 +583,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.display_img(img)
 
     def tableview_df_up(self):
-        if self.modelclass.tableview_df.hasFocus():
-            row = self.modelclass.tableview_df.currentIndex().row()
+        if self.tableView_mosaic_frame.hasFocus():
+            row = self.tableView_mosaic_frame.currentIndex().row()
             row -= 1
-            self.modelclass.tableview_df.selectRow(row)
-        if self.modelclass.qmodel.item(row, 0) is None:
+            self.tableView_mosaic_frame.selectRow(row)
+        if self.qmodel_mosaic_frame.item(row, 0) is None:
             return
         # 항목의 텍스트를 가져옴
-        n = self.modelclass.qmodel.item(row, 0).text()
+        n = self.qmodel_mosaic_frame.item(row, 0).text()
         n = float(n)
         # slider 위치를 n 값으로 이동
         self.playSlider.setValue(n) 
@@ -549,20 +627,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
     def Slider_bright_moved(self, value):
         self.label_bright.setText(str(value))
-    
-
-    # # df => 리스트뷰
-    # def df_to_tableview(self):
-    #     # 모델 초기화를 데터 추가 전에 수행
-    #     self.qmodel = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
-    #     columns = DT.df.columns
-    #     self.qmodel.setColumnCount(len(columns))
-    #     self.qmodel.setHorizontalHeaderLabels(columns)
-    #     for row in range(len(DT.df)):
-    #         value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df.iloc[row]]
-    #         self.qmodel.appendRow(value_objs)
-    #     self.tableView.setModel(self.qmodel)
-
 
 
     def program_exit(self):
@@ -588,8 +652,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.img is None:
             return
         x, y = event.pos().x(), event.pos().y()
-        # a, b값이 play창 밖이면 무시하도록
-        if x < 40 or x > 760 or y < 40 or y > 520:
+        print(x, y)
+        # a, b값이 play창 밖이면 무시하도록(720*480 기준)
+        if x < 70 or x > 790 or y < 10 or y > 490:
             return
         x, y = tools.shape_to_adjust(x, y)  # gui 오차 보정
         if event.button() == Qt.LeftButton:
@@ -602,8 +667,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.play_status:
             return
         x, y = event.pos().x(), event.pos().y()
+        print(x, y)
+
         # a, b값이 play창 밖이면 무시하도록
-        if x < 40 or x > 760 or y < 40 or y > 520 or DT.img is None:
+        if x < 70 or x > 790 or y < 10 or y > 490 or DT.img is None:
             return
         if DT.img is None:
             return
@@ -625,11 +692,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     # 마우스 왼쪽 버튼이 떼졌을 때의 동작
     def mouseReleaseEvent(self, event):
         x, y = event.pos().x(), event.pos().y()
+        print(x, y)
+        
         x, y = tools.shape_to_adjust(x, y)
+
         if DT.img is None:
             return
         # a, b값이 play창 밖이면 무시하도록
-        if x < 40 or x > 760 or y < 40 or y > 520:
+        if x < 70 or x > 790 or y < 10 or y > 490:
             return
         if DT.play_status:
             return
@@ -665,7 +735,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         roi 갱신으로 욜로모델도 갱신함(트래킹시 이미지 사이즈 변경되면 욜로 오류발생 방지)
         '''
         x1, y1, x2, y2 = DT.roi
-        self.label_roi.setText(f'관심영역: {x1:.2f} {y1:.2f} {x2:.2f} {y2:.2f}')
         self.statusBar().showMessage(
             f'{DT.width}*{DT.height}     roi: {DT.roi[0]:.2f} {DT.roi[1]:.2f} {DT.roi[2]:.2f} {DT.roi[3]:.2f}'
             )
@@ -808,7 +877,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
                     # 워커 종료시
                     file = os.path.basename(msg[4])
                     one_page_summary = (f'{file}\n{round(msg[1]/msg[3],1)}초 => {round(msg[2]/msg[3],1)}초\n관심영역에 움직임이 감지된 {round(msg[2]/msg[1]*100,1)}% 만 남김\n')
-                    self.textBrowser.append(one_page_summary)
+                    self.textBrowser_multi.append(one_page_summary)
                     self.flag_dongzip_btn = False
                     self.progress_bars[i].setValue(100)
                     self.completed_count += 1
@@ -844,102 +913,31 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.progressBar.setValue(value)
 
 
-class ModelClass(QObject):
-    '''
-    슬라이더와 모델의 상호작용을 위한 클래스
-    '''
-    # 시그널
-    reset = Signal()
-    progressChanged  = Signal(int)
+
+    ############
+    # 모자이크 #
+    ############
+    def signal_start_point(self, value):
+        # 시작 버튼명을 f'시작({value})'로 변경
+        self.btn_mosaic_start.setText(f'시작({value})')
+
+    def signal_end_point(self, value):
+        # 종료 버튼명을 f'시작({value})'로 변경
+        if value+1 < DT.start_point:
+            return
+        self.btn_mosaic_end.setText(f'종료({value})')
+
+    def frame_list_to_listview(self):
+        '''frame_list를 리스트뷰에 출력'''
+        frame_list = DT.df_plot
+        self.listView_mosaic.clear()
+        for frame in frame_list:
+            self.listView_mosaic.addItem(str(frame))
+        self.update()
 
 
 
-    def __init__(self):
-        super().__init__()
-        self.layout = None
-        self.detector = None
-        # UI 구성 요소 생성
-        self.layout = QVBoxLayout()
-        self.combo_box = QComboBox()
-        sub_layout = QHBoxLayout()
-        self.slider_container = QVBoxLayout()
-        self.label1_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
-        self.label2_container = QVBoxLayout()  # 슬라이더 값을 출력할 레이블을 위한 레이아웃
-        self.btn_container = QGridLayout()
-        self.combo_box.addItems(DT.sliderDict.keys())
-        self.combo_box.currentIndexChanged.connect(self.change_sliders)
-        self.progress_bar = QVBoxLayout()
-        # 레이아웃 설정
-        sub_layout.addLayout(self.label2_container)
-        sub_layout.addLayout(self.label1_container)
-        sub_layout.addLayout(self.slider_container)
-        self.layout.addWidget(self.combo_box)
-        # 테이블 생성
-        self.tableview_df = QTableView()
-        header = self.tableview_df.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.layout.addWidget(self.tableview_df)
-        # 레이아웃 설정
-        self.layout.addSpacing(5)  # 일정 간격 추가
-        self.layout.addLayout(sub_layout)
-        self.layout.addSpacing(5)  # 일정 간격 추가
-        self.layout.addLayout(self.btn_container)
-        self.layout.setAlignment(Qt.AlignTop)
-        self.layout.addSpacing(5)  # 일정 간격 추가
-        self.layout.addLayout(self.progress_bar)
-        # 슬라이더, 버튼 생성
-        self.change_sliders(0)
-  
 
-    def change_sliders(self, index):
-        '''
-        드롭다운 메뉴(콤보박스)의 선택에 따라 슬라이더를 변경하고,
-        디텍터를 활성화 하는 함수
-        '''
-        
-        # 기존 슬라이더, 레이블, 버튼 삭제
-        for i in reversed(range(self.slider_container.count())):
-            self.slider_container.itemAt(i).widget().deleteLater()
-        for i in reversed(range(self.label1_container.count())):
-            self.label1_container.itemAt(i).widget().deleteLater()
-        for i in reversed(range(self.label2_container.count())):
-            self.label2_container.itemAt(i).widget().deleteLater()
-        # 기존 버튼 제거
-        for i in reversed(range(self.btn_container.count())):
-            self.btn_container.itemAt(i).widget().deleteLater()
-        # 선택된 메뉴에 대한 슬라이더 생성
-        select_mode = self.combo_box.itemText(index)
-        DT.setSelectedMode(select_mode)
-        self.detector = DT.detector()
-        # 슬라이더 생성
-        slider_values_dict = DT.sliderDict[select_mode]
-        for arg, value in slider_values_dict.items():
-            slider = QSlider(Qt.Horizontal)
-            slider.setMinimum(1)
-            slider.setMaximum(99)
-            slider.setValue(value)
-            label1 = QLabel(str(value))  # 슬라이더 값을 표시할 QLabel 생성
-            label2 = QLabel(arg)  # 버튼명을 표시할 QLabel 생성
-            slider.valueChanged.connect(lambda value, label1=label1, label2=label2, arg=arg: self.update_label(value, select_mode, label1, label2, arg))  # 슬라이더 값 변경 시 호출될 슬롯 연결
-            self.slider_container.addWidget(slider)
-            self.label1_container.addWidget(label1)
-            self.label2_container.addWidget(label2)
-        # 버튼 생성
-        for i in range(len(DT.detector.btn_names)):
-            button = QPushButton(DT.detector.btn_names[i])
-            self.btn_container.addWidget(button, i // 3, i % 3)
-            # 버튼 이벤트 연결
-            button.clicked.connect(self.detector.btns[i])
-        # 모델 생성은 변수들 초기화 후 마지막으로 진행
-        # 시그널 연결
-        self.detector.signal_1.connect(self.signal_1)
-        self.detector.signal_2.connect(self.signal_2)
-        self.detector.signal_3.connect(self.df_to_tableview)
-        self.detector.signal_6.connect(self.signal_6)
-        self.reset.emit()
-        # 리셋할 것
-        DT.time_delay = 0
-    
 
 
     def update_label(self, value, selected_menu_text, label1, label2, arg):
@@ -949,15 +947,9 @@ class ModelClass(QObject):
             DT.time_delay = value
         print(value)
 
-    def signal_1(self, value):
-        # 시작 버튼명을 f'시작({value})'로 변경
-        self.btn_container.itemAt(0).widget().setText(f'시작({value})')
+    
 
-    def signal_2(self, value):
-        # 종료 버튼명을 f'시작({value})'로 변경
-        if value+1 < DT.start_point:
-            return
-        self.btn_container.itemAt(1).widget().setText(f'끝({value})')
+
 
     def signal_6(self, value):
         self.progressChanged(int(value))
@@ -966,7 +958,7 @@ class ModelClass(QObject):
     #########################
     # 테이블뷰 선택된 행 삭제 #
     #########################
-    def delete_listview_row(self):
+    def delete_tableview_row(self):
         index = self.tableview_df.currentIndex().row()
         # 디텍터 마다 테이블 삭제시 작동하는 함수를 다르게 하기 위해서 detector에 위임함
         DT.df.drop(index).reset_index(drop=True)
@@ -976,15 +968,51 @@ class ModelClass(QObject):
         
  
     # df => 리스트뷰
-    def df_to_tableview(self):
+    def df_to_tableView_mosaic_frame(self):
         '''detector.df를 테이블에 출력'''
         # 모델 초기화를 데터 추가 전에 수행
-        self.qmodel = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
+        self.qmodel_mosaic_frame = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
         columns = DT.df_plot.columns
-        self.qmodel.setColumnCount(len(columns))
-        self.qmodel.setHorizontalHeaderLabels(columns)
+        self.qmodel_mosaic_frame.setColumnCount(len(columns))
+        self.qmodel_mosaic_frame.setHorizontalHeaderLabels(columns)
         for row in range(len(DT.df_plot)):
             value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df_plot.iloc[row]]
-            self.qmodel.appendRow(value_objs)
-        self.tableview_df.setModel(self.qmodel)
+            self.qmodel_mosaic_frame.appendRow(value_objs)
+        self.tableView_mosaic_frame.setModel(self.qmodel_mosaic_frame)
+
+    def df_to_tableView_mosaic_ID(self):
+        '''detector.df를 테이블에 출력'''
+        df = DT.df[['ID','label']].copy()
+        df = df.drop_duplicates()
+        print(df)
+
+        # 모델 초기화를 데터 추가 전에 수행
+        self.qmodel_mosaic_ID = QtGui.QStandardItemModel()
+        columns = df.columns
+        self.qmodel_mosaic_ID.setColumnCount(len(columns))
+        self.qmodel_mosaic_ID.setHorizontalHeaderLabels(columns)
+        for row in range(len(df)):
+            value_objs = [QtGui.QStandardItem(str(value)) for value in df.iloc[row]]
+            self.qmodel_mosaic_ID.appendRow(value_objs)
+        self.tableView_mosaic_ID.setModel(self.qmodel_mosaic_ID)
+        self.update()
+
+ 
+
+
+
+    def mosaic_analyze_percent(self):
+        start = DT.start_point
+        end = DT.end_point
+        curent_frame = DT.mosaic_current_frame
+        if start <= curent_frame <= end:
+            percent = (curent_frame - start) / (end - start) * 100
+            self.progressBar_mosaic.setValue(percent)
+        else:
+            self.progressBar_mosaic.setValue(100)
+        self.update()
+    
+
+
+
 

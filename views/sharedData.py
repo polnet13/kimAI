@@ -9,7 +9,7 @@ class DT:
 
     DT.sliderDict: {'태그':{'민감도':3}, ...} 찾을 때: DT.sliderDict['태그']['민감도']
     ''' 
-    device = 'cpu'   # 'cuda' or 'cpu'
+    device = 'cuda'   # 'cuda' or 'cpu'
     # BASE_DIR
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     OUT_DIR = os.path.join(BASE_DIR, 'output')
@@ -57,12 +57,17 @@ class DT:
     # 시작, 종료점
     start_point = None
     end_point = None
+    mosaic_current_frame = None
     # 메인 윈도우 관련
     fileNames = None
     fileName = None
     # 멀티 관련
     queue = None
     flag_multiCCTV = False
+    # 오토바이
+    bike_si = None
+    bike_giho = None
+    bike_num = None
     
 
 

@@ -44,16 +44,8 @@ root
 
 # ui파일 => 파이썬 파일로 변환
 untitled.ui 파일 위치에서 명령어 실행
-pyside6-uic untitled.ui -o untitled_ui.py 
+pyside6-uic untitled.ui -o untitled_ui.py  
 
-# 0. 모델 작성
-Path: root/apps/model_setting/models.py
-
-# 1. 모델 마이그레이션 준비 
-python manage.py makemigrations model_setting
-
-# 2. 모델 마이그레이트
-python manage.py migrate
 
 #### Using Pyinstaller
 python manage.py deploy

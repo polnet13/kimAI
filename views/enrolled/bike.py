@@ -15,7 +15,7 @@ from PySide6.QtCore import QObject
 
 class DetectorBike(QObject):
 
-    tag = '이륜차_번호판_감지'
+    tag = 'bike'
     slider_dict = {
         '감지_민감도':1,
         }
@@ -39,7 +39,6 @@ class DetectorBike(QObject):
     img_path = os.path.join(DT.BASE_DIR, 'rsc/init.jpg')
     df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
     track_ids = {}
-    df = pd.DataFrame(columns=DT.columns)
  
     ##############
     ## 슬롯함수 ##
@@ -106,13 +105,13 @@ class DetectorBike(QObject):
                     DetectorBike.df = pd.concat([DetectorBike.df, _df], ignore_index=True)
                     frame[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img
         try:
-            s = DetectorBike.df['si'].value_counts().idxmax()
-            g = DetectorBike.df['giho'].value_counts().idxmax()
-            n = DetectorBike.df['num'].value_counts().idxmax()
-            text = f'{s} {g} {n}'  # 누적 인식
+            DT.bike_si = DetectorBike.df['si'].value_counts().idxmax()
+            DT.bike_giho = DetectorBike.df['giho'].value_counts().idxmax()
+            DT.bike_num = int(DetectorBike.df['num'].value_counts().idxmax())
+
         except:
             pass
-        return frame, text
+        return frame, ''
         
 
 

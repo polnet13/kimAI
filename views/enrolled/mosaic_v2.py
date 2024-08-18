@@ -8,6 +8,7 @@ import pandas as pd
 from views.sharedData import DT
 from PySide6.QtCore import Signal, QObject, QTimer 
 import time
+from multiprocessing import Process, Queue
 
 
 
@@ -15,7 +16,7 @@ import time
 
 class DetectorMosaic_v2(QObject):
 
-    tag = '모자이크'
+    tag = 'mosaic'
     slider_dict = {
         '민감도':1,
         '가림정도':10,
@@ -30,9 +31,9 @@ class DetectorMosaic_v2(QObject):
 
     # 시그널
     reset = Signal()
-    signal_1 = Signal(int)
-    signal_2 = Signal(int)
-    signal_3 = Signal()
+    signal_start_point = Signal()
+    signal_end_point = Signal()
+    signal_mosaic_analyze_result_plot = Signal()
     signal_4 = Signal()
     signal_5 = Signal()
     signal_6 = Signal()
@@ -40,7 +41,6 @@ class DetectorMosaic_v2(QObject):
  
     def __init__(self):
         super().__init__()
-        self.make_btn_list()
 
 
     def setup():
@@ -48,7 +48,6 @@ class DetectorMosaic_v2(QObject):
         모델이 초기화 될 때 실행되는 함수
         '''
         # 슬라이더 설정
-        DT.clear()
         DT.setSliderValue(DetectorMosaic_v2.tag, DetectorMosaic_v2.slider_dict)
         DT.dfReset()
     #######################
@@ -101,8 +100,6 @@ class DetectorMosaic_v2(QObject):
 
     def detect_nbp_mosaic(bike_img):
         '''
-        return 
-        성공: 번호판 이미지
         실패: None
         ''' 
         mosaic_img = None
@@ -156,17 +153,17 @@ class DetectorMosaic_v2(QObject):
     def detlete_tableview_row():
         pass
 
-    def analyze(self, start, end):
+    def analyze(start, end):
         '''프레임 리스트를 넣어주면 모자이크 처리하는 함수'''
         # 캡셋을 해서 시작점 설정
         cap_num = start
-        self.cap = cv2.VideoCapture(DT.fileName)
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, cap_num)
+        DT.cap = cv2.VideoCapture(DT.fileName)
+        DT.cap.set(cv2.CAP_PROP_POS_FRAMES, cap_num)
         DT.detection_list.clear()
         while cap_num < end+1:
-            ret, frame = self.cap.read()
-            cap_num = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
-            print(cap_num)
+            ret, frame = DT.cap.read()
+            cap_num = DT.cap.get(cv2.CAP_PROP_POS_FRAMES)
+            DT.mosaic_current_frame = cap_num
             # cap_num = cap.get(프레임) 
             try:
                 detections = DetectorMosaic_v2.models['model'].track(frame, persist=True, device=DT.device)[0]
@@ -203,105 +200,87 @@ class DetectorMosaic_v2(QObject):
         r = range(DT.start_point, DT.end_point+1)
         df = pd.DataFrame({'frame': r})
         DT.df_plot = pd.concat([DT.df_plot, df], axis=0).drop_duplicates()
-        self.signal_3.emit()
 
-    def getCustomeID(self):
+    def getCustomeID():
         '''
         DT.df 에서 label이 custom인 것 중 id max값 +1 을 id값으로 리턴하는 함수
         '''
         return 1
     
-    def getTotalID(self):
+    def getTotalID():
         '''
         DT.df 에서 label이 total인 것 중 id max값 +1 을 id값으로 리턴하는 함수
         '''
         return 3
-    #####################
+    
+
+ 
+#####################
     ## 커스텀 버튼 함수 ##
     #####################
 
-    def btn1(self):
+    def btn1():
         DT.start_point = DT.cap_num
-        self.signal_1.emit(DT.start_point)
-        print('시작: ', DT.start_point)
 
 
-    def btn2(self):
+    def btn2():
         DT.end_point = DT.cap_num
-        self.signal_2.emit(DT.end_point)
-        print('끝: ', DT.end_point)
 
-    def btn3(self):
+    def btn3():
         '''분석'''
         start = DT.start_point if DT.start_point else 0
         end = DT.end_point if DT.end_point else DT.total_frames
-        start_time = time.time()
-        self.analyze(start, end)
-        end_time = time.time()
-        print((end-start)/(end_time-start_time))
-        print('''
-분석 버튼을 눌렀을 때
-DT.start_point와 DT.end_point 값이 존재 => 해당 구간을 df에 저장
-값이 없으면 0 부터 total_frame 까지 df에 저장
-              ''')
+        DetectorMosaic_v2.analyze(start, end)
 
-    def btn4(self):
+    def btn4():
         print('btn4: roi값 프레임에 추가 => df에 저장')
-        ID = self.getCustomeID()
+        ID = DetectorMosaic_v2.getCustomeID()
         x1, y1, x2, y2 = DT.roi
-        df = pd.DataFrame({'frame': DT.cap_num, 'ID': ID, 'label': 'custom', 'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2, 'thr': 1}, index=[0])
+        df = pd.DataFrame({'frame': DT.cap_num, 'ID': ID, 'label': '부분', 'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2, 'thr': 1}, index=[0])
         DT.df = pd.concat([DT.df, df], ignore_index=True)
         print(DT.df)
         
 
-    def btn5(self):
+    def btn5():
         print('btn5: 전체 프레임에 roi값 모자이크 추가 => df에 저장')
         start = DT.start_point if DT.start_point else 0
         end = DT.end_point if DT.end_point else DT.total_frames
-        ID = self.getTotalID()
+        ID = DetectorMosaic_v2.getTotalID()
         x1, y1, x2, y2 = DT.roi
         for frame in range(start, end+1):
-            df = pd.DataFrame({'frame': frame, 'ID': ID, 'label': 'total', 'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2, 'thr': 1}, index=[0])
+            df = pd.DataFrame({'frame': frame, 'ID': ID, 'label': '전체', 'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2, 'thr': 1}, index=[0])
             DT.df = pd.concat([DT.df, df], ignore_index=True)
         print(DT.df)
 
-    def btn6(self):
+    def btn6():
         '''
         모자이크 처리
         '''
-        self.flag_btn6 = True
-        self.worker_mosaic_print = WorkerMosaic(DT.fileName, 
-                        DT.df,
-                        DT.start_point, 
-                        DT.end_point, 
-                        DT.total_frames, 
-                        DT.fps, 
-                        DT.width, 
-                        DT.height,
-                        DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600)
-        self.worker_mosaic_print.start()
-        timer = QTimer()
-        timer.timeout.connect(self.progressChanged)
-        timer.start(3)
-        self.worker_mosaic_print.join()
-
-
-    def progressChanged(self):
-        result = self.worker_mosaic_print.queue.get()
-        print(result)
-        self.signal_6.emit(int(result))
-
-    # 버튼 리스트
-    def make_btn_list(self):
-        self.btns = [self.btn1, self.btn2, self.btn3, self.btn4, self.btn5, self.btn6]
+        if DT.df is None:
+            print('df가 없습니다.')
+            return
+        queue = Queue()
+        DetectorMosaic_v2.worker_mosaic_print = WorkerMosaic(
+            queue,
+            DT.fileName, 
+            DT.df,
+            DT.start_point, 
+            DT.end_point, 
+            DT.total_frames, 
+            DT.fps, 
+            DT.width, 
+            DT.height,
+            DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600)
+        DetectorMosaic_v2.worker_mosaic_print.start()
+        DetectorMosaic_v2.worker_mosaic_print.join()
+        DT.df = None
 
 
 
-from multiprocessing import Process, Queue
 
 class WorkerMosaic(Process):
     
-    def __init__(self, fileName, df, start_point, end_point, total_frames, fps, width, height, ratio):
+    def __init__(self, queue, fileName, df, start_point, end_point, total_frames, fps, width, height, ratio):
         super().__init__()  # Process 클래스의 __init__ 호출
         self.fileName = fileName
         self.df = df
@@ -312,7 +291,8 @@ class WorkerMosaic(Process):
         self.width = width
         self.height = height
         self.ratio = ratio
-        self.queue = Queue()
+        self.queue = queue
+        
         
 
     def run(self):
