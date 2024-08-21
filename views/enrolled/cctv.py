@@ -6,6 +6,7 @@ import pandas as pd
 from control import tools
 from PySide6.QtCore import Signal
 from PySide6.QtCore import QObject
+from PySide6.QtWidgets import QWidget
 import numpy as np
 
 

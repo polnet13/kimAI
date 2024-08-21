@@ -10,8 +10,46 @@ from views import generic
 from views.sharedData import DT
 from PySide6.QtCore import Signal
 from PySide6.QtCore import QObject
+from PySide6.QtWidgets import QWidget
 
- 
+from rsc.ui.bike_ui import Ui_Bike
+
+
+
+class Bike(Ui_Bike, QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        # 시그널 슬롯 연결
+        self.pushButton_4.clicked.connect(self.slot_pushButton_4)
+        self.pushButton_5.clicked.connect(self.slot_pushButton_5)
+        self.pushButton_6.clicked.connect(self.slot_pushButton_6)
+        self.pushButton_1.clicked.connect(self.slot_pushButton_1)
+        self.pushButton_2.clicked.connect(self.slot_pushButton_2)
+        self.pushButton_3.clicked.connect(self.slot_pushButton_3)
+        
+    def slot_pushButton_4(self):
+        print('slot_pushButton_4')
+
+    def slot_pushButton_5(self):
+        print('slot_pushButton_5')
+
+    def slot_pushButton_6(self):
+        print('slot_pushButton_6')
+
+    def slot_pushButton_1(self):
+        print('slot_pushButton_1')
+
+    def slot_pushButton_2(self):
+        print('slot_pushButton_2')
+        
+    def slot_pushButton_3(self):
+        print('slot_pushButton_3')
+
+    def program_exit(self):
+        print('Ui_Bike 프로그램 종료')
+
+
 
 class DetectorBike(QObject):
 

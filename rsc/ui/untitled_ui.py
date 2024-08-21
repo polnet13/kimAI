@@ -27,531 +27,14 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.setWindowModality(Qt.ApplicationModal)
-        MainWindow.resize(1159, 613)
+        MainWindow.resize(1179, 613)
         font = QFont()
         font.setBold(False)
         MainWindow.setFont(font)
         MainWindow.setStyleSheet(u"background-color: rgb(40, 44, 52);")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.centralwidget.setStyleSheet(u"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"\n"
-"SET APP STYLESHEET - FULL STYLES HERE\n"
-"DARK THEME - DRACULA COLOR BASED\n"
-"\n"
-"///////////////////////////////////////////////////////////////////////////////////////////////// */\n"
-"\n"
-"QWidget{\n"
-"	color: rgb(221, 221, 221);\n"
-"	font: 10pt \"Segoe UI\";\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"Tooltip */\n"
-"QToolTip {\n"
-"	color: #ffffff;\n"
-"	background-color: rgba(33, 37, 43, 180);\n"
-"	border: 1px solid rgb(44, 49, 58);\n"
-"	background-image: none;\n"
-"	background-position: left center;\n"
-"    background-repeat: no-repeat;\n"
-"	border: none;\n"
-"	border-left: 2px solid rgb(255, 121, 198);\n"
-"	text-align: left;\n"
-"	padding-left: 8px;\n"
-"	margin: 0px;\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"Bg App */\n"
-"#widget_center {	\n"
-"	ba"
-                        "ckground-color: rgb(40, 44, 52);\n"
-"	border: 1px solid rgb(44, 49, 58);\n"
-"}\n"
-"/*\n"
-"\n"
-"\ud0ed\uc704\uc82f */\n"
-"#tabWidget {	\n"
-"	background-color: rgb(40, 44, 52);\n"
-"	border: 1px solid rgb(44, 49, 58);\n"
-"}\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"Left Menu */\n"
-"#leftMenuBg {	\n"
-"	background-color: rgb(33, 37, 43);\n"
-"}\n"
-"#topLogo {\n"
-"	background-color: rgb(33, 37, 43);\n"
-"	background-image: url(:/images/images/images/PyDracula.png);\n"
-"	background-position: centered;\n"
-"	background-repeat: no-repeat;\n"
-"}\n"
-"#titleLeftApp { font: 63 12pt \"Segoe UI Semibold\"; }\n"
-"#titleLeftDescription { font: 8pt \"Segoe UI\"; color: rgb(189, 147, 249); }\n"
-"\n"
-"/* MENUS */\n"
-"QPushButton {	\n"
-"	background-color: rgb(112, 112, 112);\n"
-"	color: rgb(220, 220, 220)\n"
-"	padding: 5px 5px;         /* \ubc84\ud2bc \ub0b4\ubd80 \uc5ec\ubc31 */\n"
-"    font-size: 15px;\n"
-"}\n"
-"#topMenu .QPushButton:hover {\n"
-"	background-color: r"
-                        "gb(40, 44, 52);\n"
-"}\n"
-"#topMenu .QPushButton:pressed {	\n"
-"	background-color: rgb(189, 147, 249);\n"
-"	color: rgb(255, 255, 255);\n"
-"}\n"
-"#bottomMenu .QPushButton {	\n"
-"	background-position: left center;\n"
-"    background-repeat: no-repeat;\n"
-"	border: none;\n"
-"	border-left: 20px solid transparent;\n"
-"	background-color:transparent;\n"
-"	text-align: left;\n"
-"	padding-left: 44px;\n"
-"}\n"
-"#bottomMenu .QPushButton:hover {\n"
-"	background-color: rgb(40, 44, 52);\n"
-"}\n"
-"#bottomMenu .QPushButton:pressed {	\n"
-"	background-color: rgb(189, 147, 249);\n"
-"	color: rgb(255, 255, 255);\n"
-"}\n"
-"#leftMenuFrame{\n"
-"	border-top: 3px solid rgb(44, 49, 58);\n"
-"}\n"
-"\n"
-"/* Toggle Button */\n"
-"#toggleButton {\n"
-"	background-position: left center;\n"
-"    background-repeat: no-repeat;\n"
-"	border: none;\n"
-"	border-left: 20px solid transparent;\n"
-"	background-color: rgb(37, 41, 48);\n"
-"	text-align: left;\n"
-"	padding-left: 44px;\n"
-"	color: rgb(113, 126, 149);\n"
-"}\n"
-"#toggleButton:hover {\n"
-"	backgrou"
-                        "nd-color: rgb(40, 44, 52);\n"
-"}\n"
-"#toggleButton:pressed {\n"
-"	background-color: rgb(189, 147, 249);\n"
-"}\n"
-"\n"
-"/* Title Menu */\n"
-"#titleRightInfo { padding-left: 10px; }\n"
-"\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"Extra Tab */\n"
-"#extraLeftBox {	\n"
-"	background-color: rgb(44, 49, 58);\n"
-"}\n"
-"#extraTopBg{	\n"
-"	background-color: rgb(189, 147, 249)\n"
-"}\n"
-"\n"
-"/* Icon */\n"
-"#extraIcon {\n"
-"	background-position: center;\n"
-"	background-repeat: no-repeat;\n"
-"	background-image: url(:/icons/images/icons/icon_settings.png);\n"
-"}\n"
-"\n"
-"/* Label */\n"
-"#extraLabel { color: rgb(255, 255, 255); }\n"
-"\n"
-"/* Btn Close */\n"
-"#extraCloseColumnBtn { background-color: rgba(255, 255, 255, 0); border: none;  border-radius: 5px; }\n"
-"#extraCloseColumnBtn:hover { background-color: rgb(196, 161, 249); border-style: solid; border-radius: 4px; }\n"
-"#extraCloseColumnBtn:pressed { background-color: rgb(180, 141, 238); border-style: "
-                        "solid; border-radius: 4px; }\n"
-"\n"
-"/* Extra Content */\n"
-"#extraContent{\n"
-"	border-top: 3px solid rgb(40, 44, 52);\n"
-"}\n"
-"\n"
-"/* Extra Top Menus */\n"
-"#extraTopMenu .QPushButton {\n"
-"background-position: left center;\n"
-"    background-repeat: no-repeat;\n"
-"	border: none;\n"
-"	border-left: 22px solid transparent;\n"
-"	background-color:transparent;\n"
-"	text-align: left;\n"
-"	padding-left: 44px;\n"
-"}\n"
-"#extraTopMenu .QPushButton:hover {\n"
-"	background-color: rgb(40, 44, 52);\n"
-"}\n"
-"#extraTopMenu .QPushButton:pressed {	\n"
-"	background-color: rgb(189, 147, 249);\n"
-"	color: rgb(255, 255, 255);\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"Content App */\n"
-"#contentTopBg{	\n"
-"	background-color: rgb(33, 37, 43);\n"
-"}\n"
-"#contentBottom{\n"
-"	border-top: 3px solid rgb(44, 49, 58);\n"
-"}\n"
-"\n"
-"/* Top Buttons */\n"
-"#rightButtons .QPushButton { background-color: rgba(255, 255, 255, 0); border: none;  border-radius: 5px"
-                        "; }\n"
-"#rightButtons .QPushButton:hover { background-color: rgb(44, 49, 57); border-style: solid; border-radius: 4px; }\n"
-"#rightButtons .QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
-"\n"
-"/* Theme Settings */\n"
-"#extraRightBox { background-color: rgb(44, 49, 58); }\n"
-"#themeSettingsTopDetail { background-color: rgb(189, 147, 249); }\n"
-"\n"
-"/* Bottom Bar */\n"
-"#bottomBar { background-color: rgb(44, 49, 58); }\n"
-"#bottomBar QLabel { font-size: 11px; color: rgb(113, 126, 149); padding-left: 10px; padding-right: 10px; padding-bottom: 2px; }\n"
-"\n"
-"/* CONTENT SETTINGS */\n"
-"/* MENUS */\n"
-"#contentSettings .QPushButton {	\n"
-"	background-position: left center;\n"
-"    background-repeat: no-repeat;\n"
-"	border: none;\n"
-"	border-left: 22px solid transparent;\n"
-"	background-color:transparent;\n"
-"	text-align: left;\n"
-"	padding-left: 44px;\n"
-"}\n"
-"#contentSettings .QPushButton:hover {\n"
-"	background-color: rgb(40, 44, 52);\n"
-"}\n"
-"#contentSet"
-                        "tings .QPushButton:pressed {	\n"
-"	background-color: rgb(189, 147, 249);\n"
-"	color: rgb(255, 255, 255);\n"
-"}\n"
-"\n"
-"/////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"QTableView {\n"
-"    background-color: #F0F0F0;\n"
-"    border: 1px solid #CCCCCC;\n"
-"    gridline-color: #CCCCCC;\n"
-"    selection-background-color: #E1F5FE;\n"
-"    selection-color: #0366d6;\n"
-"    font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n"
-"}\n"
-"\n"
-"QTableView::item {\n"
-"    padding: 5px;\n"
-"}\n"
-"\n"
-"QTableView::item:selected {\n"
-"    border: 1px solid #0366d6;\n"
-"}\n"
-"\n"
-"QHeaderView::section {\n"
-"    background-color: #F0F0F0;\n"
-"    border: 1px solid #CCCCCC;\n"
-"    padding: 4px;\n"
-"    font-weight: bold;\n"
-"    text-align: center;\n"
-"}\n"
-"\n"
-"QTableView::horizontalHeader {\n"
-"    background-color: #f0f0f0;  /* \ud5e4\ub354 \ubc30\uacbd\uc0c9 */\n"
-"    color: #333;                /* \ud5e4\ub354 \uae00\uc790\uc0c9 */\n"
-"}\n"
-"\n"
-"QTableVie"
-                        "w::verticalHeader {\n"
-"    background-color: #e0e0e0;  /* \uc778\ub371\uc2a4 \ubc30\uacbd\uc0c9 */\n"
-"    color: #555;                /* \uc778\ub371\uc2a4 \uae00\uc790\uc0c9 */\n"
-"}\n"
-"\n"
-"\n"
-" ////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"LineEdit */\n"
-"QLineEdit {\n"
-"	background-color: rgb(33, 37, 43);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(33, 37, 43);\n"
-"	padding-left: 10px;\n"
-"	selection-color: rgb(255, 255, 255);\n"
-"	selection-background-color: rgb(255, 121, 198);\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"PlainTextEdit */\n"
-"QPlainTextEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	padding: 10px;\n"
-"	selection-color: rgb(255, 255, 255);\n"
-"	selection-background-color: rgb(255, 121, "
-                        "198);\n"
-"}\n"
-"QPlainTextEdit  QScrollBar:vertical {\n"
-"    width: 8px;\n"
-" }\n"
-"QPlainTextEdit  QScrollBar:horizontal {\n"
-"    height: 8px;\n"
-" }\n"
-"QPlainTextEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QPlainTextEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"ScrollBars */\n"
-"QScrollBar:horizontal {\n"
-"    border: none;\n"
-"    background: rgb(52, 59, 72);\n"
-"    height: 8px;\n"
-"    margin: 0px 21px 0 21px;\n"
-"	border-radius: 0px;\n"
-"}\n"
-"QScrollBar::handle:horizontal {\n"
-"    background: rgb(189, 147, 249);\n"
-"    min-width: 25px;\n"
-"	border-radius: 4px\n"
-"}\n"
-"QScrollBar::add-line:horizontal {\n"
-"    border: none;\n"
-"    background: rgb(55, 63, 77);\n"
-"    width: 20px;\n"
-"	border-top-right-radius: 4px;\n"
-"    border-bottom-right-radius: 4px;\n"
-"    subcontrol-position: right;\n"
-"    subcontrol-origin: margin;\n"
-"}\n"
-"QScrollBar::sub-li"
-                        "ne:horizontal {\n"
-"    border: none;\n"
-"    background: rgb(55, 63, 77);\n"
-"    width: 20px;\n"
-"	border-top-left-radius: 4px;\n"
-"    border-bottom-left-radius: 4px;\n"
-"    subcontrol-position: left;\n"
-"    subcontrol-origin: margin;\n"
-"}\n"
-"QScrollBar::up-arrow:horizontal, QScrollBar::down-arrow:horizontal\n"
-"{\n"
-"     background: none;\n"
-"}\n"
-"QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal\n"
-"{\n"
-"     background: none;\n"
-"}\n"
-" QScrollBar:vertical {\n"
-"	border: none;\n"
-"    background: rgb(52, 59, 72);\n"
-"    width: 8px;\n"
-"    margin: 21px 0 21px 0;\n"
-"	border-radius: 0px;\n"
-" }\n"
-" QScrollBar::handle:vertical {	\n"
-"	background: rgb(189, 147, 249);\n"
-"    min-height: 25px;\n"
-"	border-radius: 4px\n"
-" }\n"
-" QScrollBar::add-line:vertical {\n"
-"     border: none;\n"
-"    background: rgb(55, 63, 77);\n"
-"     height: 20px;\n"
-"	border-bottom-left-radius: 4px;\n"
-"    border-bottom-right-radius: 4px;\n"
-"     subcontrol-position: bottom;\n"
-"     subcontrol-origin: m"
-                        "argin;\n"
-" }\n"
-" QScrollBar::sub-line:vertical {\n"
-"	border: none;\n"
-"    background: rgb(55, 63, 77);\n"
-"     height: 20px;\n"
-"	border-top-left-radius: 4px;\n"
-"    border-top-right-radius: 4px;\n"
-"     subcontrol-position: top;\n"
-"     subcontrol-origin: margin;\n"
-" }\n"
-" QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {\n"
-"     background: none;\n"
-" }\n"
-"\n"
-" QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\n"
-"     background: none;\n"
-" }\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"CheckBox */\n"
-"QCheckBox::indicator {\n"
-"    border: 3px solid rgb(52, 59, 72);\n"
-"	width: 15px;\n"
-"	height: 15px;\n"
-"	border-radius: 10px;\n"
-"    background: rgb(44, 49, 60);\n"
-"}\n"
-"QCheckBox::indicator:hover {\n"
-"    border: 3px solid rgb(58, 66, 81);\n"
-"}\n"
-"QCheckBox::indicator:checked {\n"
-"    background: 3px solid rgb(52, 59, 72);\n"
-"	border: 3px solid rgb(52, 59, 72);	\n"
-"	background-image: url("
-                        ":/icons/images/icons/cil-check-alt.png);\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"RadioButton */\n"
-"QRadioButton::indicator {\n"
-"    border: 3px solid rgb(52, 59, 72);\n"
-"	width: 15px;\n"
-"	height: 15px;\n"
-"	border-radius: 10px;\n"
-"    background: rgb(44, 49, 60);\n"
-"}\n"
-"QRadioButton::indicator:hover {\n"
-"    border: 3px solid rgb(58, 66, 81);\n"
-"}\n"
-"QRadioButton::indicator:checked {\n"
-"    background: 3px solid rgb(94, 106, 130);\n"
-"	border: 3px solid rgb(52, 59, 72);	\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"ComboBox */\n"
-"QComboBox{\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(33, 37, 43);\n"
-"	padding: 5px;\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QComboBox:hover{\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QComboBox::drop-down {\n"
-"	subcontrol-origin: padding;\n"
-"	subcontrol-position: to"
-                        "p right;\n"
-"	width: 25px; \n"
-"	border-left-width: 3px;\n"
-"	border-left-color: rgba(39, 44, 54, 150);\n"
-"	border-left-style: solid;\n"
-"	border-top-right-radius: 3px;\n"
-"	border-bottom-right-radius: 3px;	\n"
-"	background-image: url(:/icons/images/icons/cil-arrow-bottom.png);\n"
-"	background-position: center;\n"
-"	background-repeat: no-reperat;\n"
-" }\n"
-"QComboBox QAbstractItemView {\n"
-"	color: rgb(255, 121, 198);	\n"
-"	background-color: rgb(33, 37, 43);\n"
-"	padding: 10px;\n"
-"	selection-background-color: rgb(39, 44, 54);\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"Sliders */\n"
-"QSlider::groove:horizontal {\n"
-"    border-radius: 5px;\n"
-"    height: 10px;\n"
-"	margin: 0px;\n"
-"	background-color: rgb(52, 59, 72);\n"
-"}\n"
-"QSlider::groove:horizontal:hover {\n"
-"	background-color: rgb(55, 62, 76);\n"
-"}\n"
-"QSlider::handle:horizontal {\n"
-"    background-color: rgb(189, 147, 249);\n"
-"    border: none;\n"
-"    height: 10px;\n"
-" "
-                        "   width: 10px;\n"
-"    margin: 0px;\n"
-"	border-radius: 5px;\n"
-"}\n"
-"QSlider::handle:horizontal:hover {\n"
-"    background-color: rgb(195, 155, 255);\n"
-"}\n"
-"QSlider::handle:horizontal:pressed {\n"
-"    background-color: rgb(255, 121, 198);\n"
-"}\n"
-"\n"
-"QSlider::groove:vertical {\n"
-"    border-radius: 5px;\n"
-"    width: 10px;\n"
-"    margin: 0px;\n"
-"	background-color: rgb(52, 59, 72);\n"
-"}\n"
-"QSlider::groove:vertical:hover {\n"
-"	background-color: rgb(55, 62, 76);\n"
-"}\n"
-"QSlider::handle:vertical {\n"
-"    background-color: rgb(189, 147, 249);\n"
-"	border: none;\n"
-"    height: 10px;\n"
-"    width: 10px;\n"
-"    margin: 0px;\n"
-"	border-radius: 5px;\n"
-"}\n"
-"QSlider::handle:vertical:hover {\n"
-"    background-color: rgb(195, 155, 255);\n"
-"}\n"
-"QSlider::handle:vertical:pressed {\n"
-"    background-color: rgb(255, 121, 198);\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"CommandLinkButton */\n"
-"QCommandLinkButton {	\n"
-"	c"
-                        "olor: rgb(255, 121, 198);\n"
-"	border-radius: 5px;\n"
-"	padding: 5px;\n"
-"	color: rgb(255, 170, 255);\n"
-"}\n"
-"QCommandLinkButton:hover {	\n"
-"	color: rgb(255, 170, 255);\n"
-"	background-color: rgb(44, 49, 60);\n"
-"}\n"
-"QCommandLinkButton:pressed {	\n"
-"	color: rgb(189, 147, 249);\n"
-"	background-color: rgb(52, 58, 71);\n"
-"}\n"
-"\n"
-"/* /////////////////////////////////////////////////////////////////////////////////////////////////\n"
-"Button */\n"
-"#pagesContainer QPushButton {\n"
-"	border: 2px solid rgb(52, 59, 72);\n"
-"	border-radius: 5px;	\n"
-"	background-color: rgb(52, 59, 72);\n"
-"}\n"
-"#pagesContainer QPushButton:hover {\n"
-"	background-color: rgb(57, 65, 80);\n"
-"	border: 2px solid rgb(61, 70, 86);\n"
-"}\n"
-"#pagesContainer QPushButton:pressed {	\n"
-"	background-color: rgb(35, 40, 49);\n"
-"	border: 2px solid rgb(43, 50, 61);\n"
-"}\n"
-"\n"
-"")
+        self.centralwidget.setStyleSheet(u"color: rgb(211, 211, 211);")
         self.leftMenuBg = QFrame(self.centralwidget)
         self.leftMenuBg.setObjectName(u"leftMenuBg")
         self.leftMenuBg.setGeometry(QRect(0, 0, 60, 581))
@@ -748,10 +231,10 @@ class Ui_MainWindow(object):
 
         self.widget_center = QWidget(self.centralwidget)
         self.widget_center.setObjectName(u"widget_center")
-        self.widget_center.setGeometry(QRect(60, -10, 1091, 591))
+        self.widget_center.setGeometry(QRect(60, -10, 1111, 591))
         self.stackedWidget = QStackedWidget(self.widget_center)
         self.stackedWidget.setObjectName(u"stackedWidget")
-        self.stackedWidget.setGeometry(QRect(740, 20, 371, 571))
+        self.stackedWidget.setGeometry(QRect(740, 20, 370, 570))
         self.stack_settings = QWidget()
         self.stack_settings.setObjectName(u"stack_settings")
         self.horizontalScrollBar = QScrollBar(self.stack_settings)
@@ -903,7 +386,7 @@ class Ui_MainWindow(object):
         self.stack_bike.setObjectName(u"stack_bike")
         self.gridLayoutWidget = QWidget(self.stack_bike)
         self.gridLayoutWidget.setObjectName(u"gridLayoutWidget")
-        self.gridLayoutWidget.setGeometry(QRect(9, 440, 331, 121))
+        self.gridLayoutWidget.setGeometry(QRect(9, 440, 331, 145))
         self.gridLayout = QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
@@ -918,22 +401,6 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.text_num, 0, 6, 1, 1)
 
-        self.pushButton = QPushButton(self.gridLayoutWidget)
-        self.pushButton.setObjectName(u"pushButton")
-
-        self.gridLayout.addWidget(self.pushButton, 1, 1, 1, 1)
-
-        self.pushButton_5 = QPushButton(self.gridLayoutWidget)
-        self.pushButton_5.setObjectName(u"pushButton_5")
-
-        self.gridLayout.addWidget(self.pushButton_5, 3, 5, 1, 1)
-
-        self.text_si = QLineEdit(self.gridLayoutWidget)
-        self.text_si.setObjectName(u"text_si")
-        self.text_si.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout.addWidget(self.text_si, 0, 1, 1, 1)
-
         self.pushButton_3 = QPushButton(self.gridLayoutWidget)
         self.pushButton_3.setObjectName(u"pushButton_3")
 
@@ -945,10 +412,26 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.text_giho, 0, 5, 1, 1)
 
+        self.text_si = QLineEdit(self.gridLayoutWidget)
+        self.text_si.setObjectName(u"text_si")
+        self.text_si.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout.addWidget(self.text_si, 0, 1, 1, 1)
+
+        self.pushButton = QPushButton(self.gridLayoutWidget)
+        self.pushButton.setObjectName(u"pushButton")
+
+        self.gridLayout.addWidget(self.pushButton, 1, 1, 1, 1)
+
         self.pushButton_4 = QPushButton(self.gridLayoutWidget)
         self.pushButton_4.setObjectName(u"pushButton_4")
 
         self.gridLayout.addWidget(self.pushButton_4, 3, 1, 1, 1)
+
+        self.pushButton_5 = QPushButton(self.gridLayoutWidget)
+        self.pushButton_5.setObjectName(u"pushButton_5")
+
+        self.gridLayout.addWidget(self.pushButton_5, 3, 5, 1, 1)
 
         self.pushButton_6 = QPushButton(self.gridLayoutWidget)
         self.pushButton_6.setObjectName(u"pushButton_6")
@@ -961,39 +444,69 @@ class Ui_MainWindow(object):
         self.stackedWidget.addWidget(self.stack_bike)
         self.stack_cctv = QWidget()
         self.stack_cctv.setObjectName(u"stack_cctv")
-        self.btn_multi_open = QPushButton(self.stack_cctv)
+        self.verticalLayoutWidget = QWidget(self.stack_cctv)
+        self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
+        self.verticalLayoutWidget.setGeometry(QRect(0, 20, 361, 471))
+        self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.btn_multi_reset = QPushButton(self.verticalLayoutWidget)
+        self.btn_multi_reset.setObjectName(u"btn_multi_reset")
+
+        self.horizontalLayout.addWidget(self.btn_multi_reset)
+
+        self.btn_multi_open = QPushButton(self.verticalLayoutWidget)
         self.btn_multi_open.setObjectName(u"btn_multi_open")
-        self.btn_multi_open.setGeometry(QRect(20, 20, 92, 26))
-        self.verticalLayoutWidget_3 = QWidget(self.stack_cctv)
-        self.verticalLayoutWidget_3.setObjectName(u"verticalLayoutWidget_3")
-        self.verticalLayoutWidget_3.setGeometry(QRect(19, 223, 311, 321))
-        self.vLayout_dongzip_statusbar = QVBoxLayout(self.verticalLayoutWidget_3)
-        self.vLayout_dongzip_statusbar.setObjectName(u"vLayout_dongzip_statusbar")
-        self.vLayout_dongzip_statusbar.setContentsMargins(0, 0, 0, 0)
-        self.label_2 = QLabel(self.stack_cctv)
-        self.label_2.setObjectName(u"label_2")
-        self.label_2.setGeometry(QRect(19, 53, 81, 16))
-        self.btn_multi_complete_open = QPushButton(self.stack_cctv)
+
+        self.horizontalLayout.addWidget(self.btn_multi_open)
+
+        self.btn_multi_complete_open = QPushButton(self.verticalLayoutWidget)
         self.btn_multi_complete_open.setObjectName(u"btn_multi_complete_open")
-        self.btn_multi_complete_open.setGeometry(QRect(217, 20, 92, 26))
-        self.slider_multi_thr = QSlider(self.stack_cctv)
+
+        self.horizontalLayout.addWidget(self.btn_multi_complete_open)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
+
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.label_2 = QLabel(self.verticalLayoutWidget)
+        self.label_2.setObjectName(u"label_2")
+
+        self.horizontalLayout_4.addWidget(self.label_2)
+
+        self.slider_multi_thr = QSlider(self.verticalLayoutWidget)
         self.slider_multi_thr.setObjectName(u"slider_multi_thr")
-        self.slider_multi_thr.setGeometry(QRect(119, 53, 191, 22))
         self.slider_multi_thr.setFont(font1)
         self.slider_multi_thr.setMinimum(1)
         self.slider_multi_thr.setValue(50)
         self.slider_multi_thr.setOrientation(Qt.Horizontal)
-        self.btn_multi_reset = QPushButton(self.stack_cctv)
-        self.btn_multi_reset.setObjectName(u"btn_multi_reset")
-        self.btn_multi_reset.setGeometry(QRect(118, 20, 93, 26))
-        self.textBrowser_multi = QTextBrowser(self.stack_cctv)
+
+        self.horizontalLayout_4.addWidget(self.slider_multi_thr)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
+
+        self.textBrowser_multi = QTextBrowser(self.verticalLayoutWidget)
         self.textBrowser_multi.setObjectName(u"textBrowser_multi")
-        self.textBrowser_multi.setGeometry(QRect(20, 80, 311, 131))
+
+        self.verticalLayout.addWidget(self.textBrowser_multi)
+
+        self.vLayout_dongzip_statusbar = QVBoxLayout()
+        self.vLayout_dongzip_statusbar.setObjectName(u"vLayout_dongzip_statusbar")
+        self.vLayout_dongzip_statusbar.setSizeConstraint(QLayout.SetMinimumSize)
+        self.vLayout_dongzip_statusbar.setContentsMargins(3, 3, 3, 3)
+
+        self.verticalLayout.addLayout(self.vLayout_dongzip_statusbar)
+
         self.stackedWidget.addWidget(self.stack_cctv)
         self.label = QLabel(self.widget_center)
         self.label.setObjectName(u"label")
         self.label.setGeometry(QRect(10, 20, 720, 480))
         self.label.setAutoFillBackground(False)
+        self.label.setStyleSheet(u"")
         self.label.setFrameShape(QFrame.WinPanel)
         self.label_cap_num = QLabel(self.widget_center)
         self.label_cap_num.setObjectName(u"label_cap_num")
@@ -1036,12 +549,8 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.btn_page_print.clicked.connect(MainWindow.slot_btn_print)
-        self.btn_play.clicked.connect(MainWindow.slot_btn_play)
-        self.btn_fileopen.clicked.connect(MainWindow.slot_btn_fileopen)
-        self.btn_region_reset.clicked.connect(MainWindow.slot_btn_region_reset)
 
-        self.stackedWidget.setCurrentIndex(4)
+        self.stackedWidget.setCurrentIndex(5)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -1090,15 +599,15 @@ class Ui_MainWindow(object):
         self.btn_mosaic_video_out.setText(QCoreApplication.translate("MainWindow", u"\uc0dd\uc131", None))
         self.label_11.setText(QCoreApplication.translate("MainWindow", u"\ubaa8\uc790\uc774\ud06c \uc815\ub3c4", None))
         self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"5", None))
-        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"4", None))
-        self.pushButton_5.setText(QCoreApplication.translate("MainWindow", u"2", None))
         self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"6", None))
+        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"4", None))
         self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"1", None))
+        self.pushButton_5.setText(QCoreApplication.translate("MainWindow", u"2", None))
         self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"3", None))
-        self.btn_multi_open.setText(QCoreApplication.translate("MainWindow", u"\ud30c\uc77c \uc5f4\uae30", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"\ubbfc\uac10\ub3c4", None))
-        self.btn_multi_complete_open.setText(QCoreApplication.translate("MainWindow", u"\uc644\ub8cc \uc5f4\uae30", None))
         self.btn_multi_reset.setText(QCoreApplication.translate("MainWindow", u"reset", None))
+        self.btn_multi_open.setText(QCoreApplication.translate("MainWindow", u"\ud30c\uc77c \uc5f4\uae30", None))
+        self.btn_multi_complete_open.setText(QCoreApplication.translate("MainWindow", u"\uc644\ub8cc \uc5f4\uae30", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"\ubbfc\uac10\ub3c4", None))
         self.label.setText("")
         self.label_cap_num.setText(QCoreApplication.translate("MainWindow", u"\ud504\ub808\uc784 \ubc88\ud638", None))
         self.btn_region_reset.setText(QCoreApplication.translate("MainWindow", u"\uad00\uc2ec\uc601\uc5ed \ub9ac\uc14b", None))

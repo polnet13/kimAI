@@ -3,15 +3,12 @@ import sys
 from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QLabel, QGridLayout, QHBoxLayout, QComboBox
 from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout, QSlider, QTableView, QHeaderView
 from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
-
-from PySide6.QtCore import Signal
-from PySide6.QtCore import QObject
-# 웹 바로가기
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6 import QtGui
 from PySide6.QtGui import QKeySequence, QShortcut  
 from PySide6.QtCore import Qt
+from rsc.ui.untitled_ui import Ui_MainWindow
 # 외부 모듈
 import os, time
 import cv2
@@ -19,42 +16,39 @@ from multiprocessing import Process, Queue
 # 사용자
 from control import tools
 from views import enrolled, generic
-from rsc.ui.untitled_ui import Ui_MainWindow
-from PySide6.QtUiTools import QUiLoader   
 from views.sharedData import DT
-from views import cctv_multi
+from views.enrolled.cctv_multi import CCTV, MultiCCTV
+from views.enrolled.bike import Bike, DetectorBike
+from views.enrolled.mosaic_v2 import Mosaic, DetectorMosaic_v2  
 import pandas as pd
 
 
 
 
 
-class Worker(Process):
-    '''
-    멀티 작업 클래스
-    '''
-    def __init__(self):
-        super().__init__()
-        self.queue = None
-        self.obj = None
-
-    def run(self):
-        self.obj.queue = self.queue
-        self.obj.multi_process()
-
-
 class mainWindow(QMainWindow, Ui_MainWindow):  
 
-
-    '''
-    UI 컨트롤 관련 클래스
-    영상부 해상도 680*480
-    '''
     def __init__(self):
         super().__init__()
+
         self.setupUi(self)
+
+        # 로드 탭
+        self.selected_tab = None
+        self.tab_mosaic = Mosaic() 
+        self.stackedWidget.addWidget(self.tab_mosaic)   
+        self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_mosaic))
+        self.tab_bike = Bike() 
+        self.stackedWidget.addWidget(self.tab_bike)
+        self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_bike))
+        self.tab_cctv = CCTV() 
+        self.stackedWidget.addWidget(self.tab_cctv)
+        self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_cctv))
+        self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
+
+
         # 멀티 프로세싱 관련 변수
-        self.thread = os.cpu_count()
+        
         self.statusBar().showMessage(f'스레드: {self.thread}')
         # 메시지 박스 표시 플래그
         self.message_box_shown = False  
@@ -83,6 +77,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         ## 시그널 연결 ##
         ################
         self.check_realsize.stateChanged.connect(self.slot_btn_df_reset)
+        self.btn_page_print.clicked.connect(self.slot_btn_print)
+        self.btn_fileopen.clicked.connect(self.slot_btn_fileopen)
         # 버튼 좌 메뉴 
         self.btn_home.clicked.connect(self.buttonClick)
         self.btn_cctv.clicked.connect(self.buttonClick)
@@ -90,21 +86,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.btn_mosaic.clicked.connect(self.buttonClick)
         self.btn_temp1.clicked.connect(self.buttonClick)
         self.btn_settings.clicked.connect(self.buttonClick)
-        # CCTV
-        self.btn_multi_open.clicked.connect(self.slot_btn_multi_open)
-        self.btn_multi_reset.clicked.connect(self.slot_btn_multi_reset)
-        self.btn_multi_complete_open.clicked.connect(self.slot_btn_open_complete)
-        # 모자이크  
-        self.btn_mosaic_start.clicked.connect(self.btn1)
-        self.btn_mosaic_end.clicked.connect(self.btn2)
-        self.btn_mosaic_analyze.clicked.connect(self.btn3)
-        self.btn_mosaic_add_frame.clicked.connect(self.btn4)
-        self.btn_mosaic_add_frams.clicked.connect(self.btn5)
-        self.btn_mosaic_video_out.clicked.connect(self.btn6)
-        # 바이크
-
-
-
+ 
 
         #################
         ## 단축키 함수 ##
@@ -170,8 +152,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.btn_mosaic_end.setText(f'시작({DT.end_point})')
         if DT.selected_mode == 'bike':
             pass
- 
-    
+   
     def btn3(self):
         if DT.selected_mode == 'cctv':
             print('cctv')
@@ -183,7 +164,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.selected_mode == 'bike':
             print('bike')
             pass
-
 
     def btn4(self):
         if type(DT.detector) == type(DT.detector_dict['cctv']):
@@ -217,9 +197,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if type(DT.detector) == type(DT.detector_dict['bike']):
             pass
 
-    
-
     def buttonClick(self):
+        '''좌 메뉴 버튼 클릭시 실행되는 함수 정의'''
         # GET BUTTON CLICKED
         btn = self.sender()
         btnName = btn.objectName()
@@ -227,46 +206,37 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # SHOW HOME PAGE
         if btnName == "btn_home":
             self.stackedWidget.setCurrentWidget(self.stack_home)
+            self.selected_tab = None
         if btnName == "btn_cctv":
-            self.stackedWidget.setCurrentWidget(self.stack_cctv)
+            self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_cctv))
             DT.setSelectedMode('cctv')
+            self.selected_tab = self.tab_cctv
         if btnName == "btn_mosaic":
-            self.stackedWidget.setCurrentWidget(self.stack_mosaic) 
+            self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_mosaic))
             DT.setSelectedMode('mosaic')
+            self.selected_tab = self.tab_mosaic
         if btnName == "btn_bike":
-            self.stackedWidget.setCurrentWidget(self.stack_bike)  
+            self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_bike))
             DT.setSelectedMode('bike')
+            self.selected_tab = self.tab_bike
         if btnName == "btn_temp1":
             self.stackedWidget.setCurrentWidget(self.stack_temp)
+            self.selected_tab = None
         if btnName == "btn_settings":
             self.stackedWidget.setCurrentWidget(self.stack_settings)
-
- 
+            self.selected_tab = None    
 
     ##############
     ## 슬롯함수 ##
     ##############
-    def say(self, value):
-        QTimer.singleShot(0, lambda: self.statusBar().showMessage(str(value)))
-        print(f'self.statusBar().showMessage({value})')
-
-    def slot_slider_move(self, value):
-        '''멀티 분석에서 슬라이더값 변경시 실행되는 함수'''
-        self.label_3.setText(str(value)) 
-        DT.thr_move_slider_multi = value  
-        print(f'DT.thr_move_slider_multi: {DT.thr_move_slider_multi}')
-        print(f'DT.scale_move_thr: {DT.scale_move_thr}')
-
     def slot_btn_df_reset(self):
         '''탐지내역 초기화'''
-        print('slot_btn_df_reset')
         DT.reset()
         self.modelclass.df_to_tableview()
         self.textBrowser.clear()
         DT.setRealsize(self.check_realsize.isChecked())
         DT.setMoveSliderScale()
         print(DT.check_realsize)
-
 
     def slot_btn_print(self):
         # 현재 df.img 를 main.py의 부모 폴더에 저장
@@ -280,7 +250,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         elif sys.platform.startswith('linux'):
             subprocess.run(['xdg-open', _fileName])
 
-
     def slot_btn_fileopen(self):
         _fileName, _ = QFileDialog.getOpenFileName(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
         if _fileName == '':
@@ -289,23 +258,13 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.player_fileopen()
         tools.plot_df_to_obj_img(DT.img, 0)
         
-
     def slot_btn_minusOneFrame(self):
         _curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)-2
         self.playSlider.setValue(_curent_frame)
         
-
     def slot_btn_plusOneFrame(self):
         _curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)
         self.playSlider.setValue(_curent_frame)
-
-
-    def slot_btn_open_complete(self):
-        path = DT.OUT_DIR
-        if sys.platform.startswith('win'):
-            os.startfile(path)
-        elif sys.platform.startswith('linux'):
-            subprocess.run(['xdg-open', path])
 
 
     def slot_btn_play(self):
@@ -327,9 +286,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.timer.stop()
             DT.detection_list_to_df()
             self.update()
-
-
-
 
 
     # 이벤트 감지       
@@ -405,7 +361,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.text_num.setText(str(DT.bike_num))
         self.process_time_print()
 
-
     def process_time_print(self):
         end_time = time.time()  
         time_diff = end_time - self.start_time
@@ -416,32 +371,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.statusBar().showMessage(
             f'{DT.width}*{DT.height}     roi: {DT.roi[0]:.2f} {DT.roi[1]:.2f} {DT.roi[2]:.2f} {DT.roi[3]:.2f}     fps: {int(fps)}'
             )
-        
-
-
-    def slot_btn_multi_open(self):
-        '''
-        동집 버튼을 누르면
-        큐(실질적인 동영상 압축 작업)와 프로그래스바를 생성하고,
-        '''
-        if self.flag_dongzip_btn is True:
-            return
-        self.flag_dongzip_btn = True
-        fileNames, _ = QFileDialog.getOpenFileNames(self, '파일 선택', '~/', 'Video Files (*.mp4 *.avi *.mkv *.mov *.*)')
-        DT.fileNames = fileNames
-        if len(DT.fileNames) == 0:
-            self.flag_dongzip_btn = False
-            self.statusBar().showMessage('동영상 파일이 선택되지 않았습니다.')
-            return
-        # fileNames의 파일들의 용량을 확인하고 용량이 큰 순서대로 정렬
-        DT.fileNames = tools.sort_files_by_size(DT.fileNames)
-        _fileName = DT.fileNames[0]
-        DT.fileName = _fileName
-        DT.OUT_DIR = os.path.join(os.path.dirname(_fileName), 'output')
-        self.player_fileopen()   # 첫 파일 플레이어에 불러오기
-        self.make_queue_and_progress_bars(DT.fileNames)  # 모든 파일 큐와 프로그래스바 생성
-
-
+ 
     def player_fileopen(self):
         '''
         DT의 현재 파일을 불러와서 GUI에 반영하고
@@ -461,37 +391,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.display_img()
         
 
-
-        
-    def start_multi(self):
-        '''
-        백그라운드 워커을 실행하고,
-        프로그레스바를 업데이트하는 타이머를 실행
-        '''
-        if self.btn_flag_multi_start is True:
-            return
-        # 메뉴 넘버 따오는 함수 추가예정
-        self.objects = [
-            cctv_multi.MultiCCTV(
-                file, 
-                scale_move_thr = DT.scale_move_thr,
-                thr_move_slider_multi = DT.thr_move_slider_multi
-                ) for file in DT.fileNames
-                ]
-        self.object_queue_to_worker()
-        self.run_workers()
-        self.btn_flag_multi_start= True
-        self.startBtn.setText('동영상 압축 중...')
-        self.completed_count = 0
-        # 백그라운드 워커(실질적인 영상 압축 코드)
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_progress)
-        self.timer.start(100)  
-
-
-
-
- 
     def slot_btn_reset(self):
         '''관심영역 초기화'''
         print(DT.roi_point)
@@ -502,7 +401,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.reset_roi()
             self.display_img()
         print(DT.roi_point)
-
 
     def reset_roi(self):
         '''
@@ -534,8 +432,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         DT.detector.drop(index, inplace=True)
         # 테이블뷰 다시 출력
         self.tableView_mosaic_frame()
-        self.update()
-        
+        self.update()    
     # 리스트뷰 항목 클릭시 해당 프레임으로 이동
     def on_item_clicked(self, index):
         # 해당 위치의 항목을 가져옴
@@ -620,27 +517,22 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.player.cap_read()
             self.display_img()
         
-            
     def jump_frameSlider_moved(self, value):
         self.label_frame_gap.setText(str(value)) # label7 = self.jump_frameSlider 값
-        
-
+    
     def Slider_bright_moved(self, value):
         self.label_bright.setText(str(value))
 
-
     def program_exit(self):
         '''워커와 GUI 종료'''
-        self.terminate_workers()
+        if self.selected_tab is not None:
+            self.selected_tab.program_exit()
         self.close()        
-
-
 
 
     ############
     ## 마우스 ##
     ############
-
     # 마우스 왼쪽 버튼이 눌렸을 때의 동작
     def mousePressEvent(self, event):
         '''
@@ -659,9 +551,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         x, y = tools.shape_to_adjust(x, y)  # gui 오차 보정
         if event.button() == Qt.LeftButton:
             DT.setRoi((x, y, DT.roi[2], DT.roi[3]))
-        
-
-        
+          
     def mouseMoveEvent(self, event):
         img = None
         if DT.play_status:
@@ -687,8 +577,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 영상비율 자동 조절되도록 수정 필요
         self.display_img(img)
         self.label_roi_update()
-
-        
+  
     # 마우스 왼쪽 버튼이 떼졌을 때의 동작
     def mouseReleaseEvent(self, event):
         x, y = event.pos().x(), event.pos().y()
@@ -728,7 +617,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     ##################
     ## GUI 업데이트 ##
     ##################
-
     def label_roi_update(self):
         '''
         디스플레이창에 roi 좌표를 출력하고
@@ -770,8 +658,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     ##########
     ## 기타 ##
     ##########            
-
-        
     def slot_btn_region_reset(self):
         if DT.img is None:
             self.label_roi.setText(f'관심영역: {DT.region_status}') 
@@ -779,141 +665,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.reset_roi()
             self.display_img()
-
-    def slot_btn_multi_reset(self):
-        DT.fileNames = []
-        self.flag_dongzip_btn = False
-        self.btn_flag_multi_start = False
-        self.terminate_workers()
-        self.clear_status_bars()
-        self.update()
-
+ 
 
     def slot_btn_pageprint(self):
         pass
         
-    ####################     
-    # 멀티프로세싱 함수 #
-    ####################
-    def make_queue_and_progress_bars(self, fileNames):
-        # 상태바 제거
-        self.clear_status_bars()
-        # 스크롤 가능한 프로그레스 바 위젯 생성
-        scroll_area = QScrollArea()
-        scroll_widget = QWidget()
-        scroll_layout = QVBoxLayout(scroll_widget)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setWidget(scroll_widget)
-        self.vLayout_dongzip_statusbar.addWidget(scroll_area)
-        self.startBtn = QPushButton(f'작업 시작')
-        scroll_layout.addWidget(self.startBtn)
-
-        cap = cv2.VideoCapture(fileNames[0])
-        self.img_shape = cap.read()[1].shape
-        self.startBtn.clicked.connect(self.start_multi)
-        # 큐, 프로그래스 바, 워커 생성
-        self.progress_bars = []
-        self.queues = []
-        self.workers = []
-        self.len_filenames = len(fileNames)
-        for i in range(self.len_filenames):
-            # 큐 생성
-            queue = Queue()
-            self.queues.append(queue)
-            # 프로그래스바 생성
-            progress_bar = QProgressBar()
-            self.progress_bars.append(progress_bar)
-            scroll_layout.addWidget(progress_bar)
-            # 워커 생성
-            worker = Worker()
-            self.workers.append(worker)
-
-
-        
-    def object_queue_to_worker(self):
-        '''객체와 큐 연결 '''
-        for i in range(len(self.workers)):
-            self.workers[i].queue = self.queues[i]
-            self.workers[i].obj = self.objects[i]
-        
     
-    def terminate_workers(self):
-        '''모든 워커를 종료'''
-        if self.workers is not None:
-            for worker in self.workers:
-                if worker.is_alive():
-                    worker.terminate()
-
- 
-
-    def clear_status_bars(self):
-        '''상태바를 모두 제거'''
-        for i in reversed(range(self.vLayout_dongzip_statusbar.count())):  
-            widget = self.vLayout_dongzip_statusbar.itemAt(i).widget()
-            if widget is not None:  # 위젯이 있는 경우
-                widget.deleteLater()  # 위젯 제거
-
-
-    def run_workers(self):
-        '''워커 시작: 멀티프로세스 열일 시작'''
-        self.active_workers = 0
-        for _ in range(min(int(self.thread) - 1, len(DT.fileNames))):  # 코어 수 - 2개의 작업을 시작
-            roi = DT.roi
-            roi = tools.rel_to_abs(self.img_shape, roi[0], roi[1], roi[2], roi[3])
-            self.workers[self.active_workers].x1 = roi[0]
-            self.workers[self.active_workers].x2 = roi[2]
-            self.workers[self.active_workers].y1 = roi[1]
-            self.workers[self.active_workers].y2 = roi[3]
-            self.workers[self.active_workers].start()
-            self.active_workers += 1
-
-
-    def update_progress(self):
-        '''진행 상태 업데이트'''
-        for i in range(self.active_workers):
-            while not self.queues[i].empty():
-                msg = self.queues[i].get()
-                if msg[0] == 'done':
-                    # 워커 종료시
-                    file = os.path.basename(msg[4])
-                    one_page_summary = (f'{file}\n{round(msg[1]/msg[3],1)}초 => {round(msg[2]/msg[3],1)}초\n관심영역에 움직임이 감지된 {round(msg[2]/msg[1]*100,1)}% 만 남김\n')
-                    self.textBrowser_multi.append(one_page_summary)
-                    self.flag_dongzip_btn = False
-                    self.progress_bars[i].setValue(100)
-                    self.completed_count += 1
-                    self.statusBar().showMessage(f'상태바: 완료 {self.completed_count}/{self.len_filenames}')
-                    if self.active_workers < self.len_filenames:  # 추가 작업이 있는 경우
-                        self.workers[self.active_workers].start()  # 새 작업 시작
-                        self.active_workers += 1
-                else:
-                    try:
-                        self.progress_bars[i].setValue(msg[0])
-                    except:
-                        return
-        # 모든 작업이 완료되었는지 확인하고 메시지 박스가 아직 표시되지 않았다면 표시
-        if self.completed_count == self.len_filenames and not self.message_box_shown:
-            if self.completed_count == 0:
-                return
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Information)
-            msg.setText("모든 작업이 완료되었습니다!")
-            msg.setWindowTitle("작업 완료")
-            self.startBtn.setText('작업 완료!')
-            msg.exec_()
-            self.message_box_shown = True  # 메시지 박스 표시 플래그 업데이트        self.update()
-            self.slot_btn_multi_reset()
-            self.btn_flag_multi_start= False
-
-            
-    def button_clicked(self):
-        print("Button clicked")
-
-
-    def update_progressBar(self, value):
-        self.progressBar.setValue(value)
-
-
-
     ############
     # 모자이크 #
     ############
@@ -935,11 +692,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.listView_mosaic.addItem(str(frame))
         self.update()
 
-
-
-
-
-
     def update_label(self, value, selected_menu_text, label1, label2, arg):
         label1.setText(str(value))  # 버튼명
         DT.sliderDict[selected_menu_text][arg] = value
@@ -948,9 +700,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         print(value)
 
     
-
-
-
     def signal_6(self, value):
         self.progressChanged(int(value))
         
@@ -968,39 +717,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         
  
     # df => 리스트뷰
-    def df_to_tableView_mosaic_frame(self):
-        '''detector.df를 테이블에 출력'''
-        # 모델 초기화를 데터 추가 전에 수행
-        self.qmodel_mosaic_frame = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
-        columns = DT.df_plot.columns
-        self.qmodel_mosaic_frame.setColumnCount(len(columns))
-        self.qmodel_mosaic_frame.setHorizontalHeaderLabels(columns)
-        for row in range(len(DT.df_plot)):
-            value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df_plot.iloc[row]]
-            self.qmodel_mosaic_frame.appendRow(value_objs)
-        self.tableView_mosaic_frame.setModel(self.qmodel_mosaic_frame)
-
-    def df_to_tableView_mosaic_ID(self):
-        '''detector.df를 테이블에 출력'''
-        df = DT.df[['ID','label']].copy()
-        df = df.drop_duplicates()
-        print(df)
-
-        # 모델 초기화를 데터 추가 전에 수행
-        self.qmodel_mosaic_ID = QtGui.QStandardItemModel()
-        columns = df.columns
-        self.qmodel_mosaic_ID.setColumnCount(len(columns))
-        self.qmodel_mosaic_ID.setHorizontalHeaderLabels(columns)
-        for row in range(len(df)):
-            value_objs = [QtGui.QStandardItem(str(value)) for value in df.iloc[row]]
-            self.qmodel_mosaic_ID.appendRow(value_objs)
-        self.tableView_mosaic_ID.setModel(self.qmodel_mosaic_ID)
-        self.update()
-
+    
  
-
-
-
     def mosaic_analyze_percent(self):
         start = DT.start_point
         end = DT.end_point

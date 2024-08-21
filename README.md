@@ -43,8 +43,11 @@ root
 - module.readme.md 참고해서 작성
 
 # ui파일 => 파이썬 파일로 변환
-untitled.ui 파일 위치에서 명령어 실행
+<!-- untitled.ui 파일 위치에서 명령어 실행 -->
 pyside6-uic untitled.ui -o untitled_ui.py  
+pyside6-uic mosaic.ui -o mosaic_ui.py  
+pyside6-uic bike.ui -o bike_ui.py  
+pyside6-uic cctv.ui -o cctv_ui.py  
 
 
 #### Using Pyinstaller
