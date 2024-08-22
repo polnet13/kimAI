@@ -34,7 +34,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         # 로드 탭
-        self.selected_tab = None
         self.tab_mosaic = Mosaic() 
         self.stackedWidget.addWidget(self.tab_mosaic)   
         self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_mosaic))
@@ -45,6 +44,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.stackedWidget.addWidget(self.tab_cctv)
         self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_cctv))
         self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
+        self.detector = self.tab_cctv
 
 
         # 멀티 프로세싱 관련 변수
@@ -52,7 +52,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.statusBar().showMessage(f'스레드: {self.thread}')
         # 메시지 박스 표시 플래그
         self.message_box_shown = False  
-        self.checkbox_yolo.setChecked(True)
         # qslider 설정
         self.playSlider.valueChanged.connect(self.play_slider_moved)  # 재생구간
         # 플레이창
@@ -64,21 +63,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.flag_dongzip_btn = False
         # 플레이어 객체 생성
         self.player = generic.PlayerClass()
-        # 모델 드롭다운 메뉴
-        detectors = tools.get_classes(enrolled)
-        for detector in detectors:
-            DT.setSliderValue(detector.tag, detector.slider_dict)
-            DT.enrollDetectors(detector.tag, detector)
-        self.check_realsize.setChecked(DT.check_realsize)
-        DT.setDetector('cctv')
-        self.detector = None
+        # 삭제 예정
 
         #################
         ## 시그널 연결 ##
         ################
-        self.check_realsize.stateChanged.connect(self.slot_btn_df_reset)
-        self.btn_page_print.clicked.connect(self.slot_btn_print)
         self.btn_fileopen.clicked.connect(self.slot_btn_fileopen)
+        self.btn_page_print.clicked.connect(self.slot_btn_print)
+        self.btn_play.clicked.connect(self.slot_btn_play)
         # 버튼 좌 메뉴 
         self.btn_home.clicked.connect(self.buttonClick)
         self.btn_cctv.clicked.connect(self.buttonClick)
@@ -120,82 +112,38 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.esc_key.activated.connect(self.program_exit)   
         # delete키 눌렀을 때 설정
         self.delete_key = QShortcut(QKeySequence(Qt.Key_Delete), self)
-        self.delete_key.activated.connect(self.delete_tableview_row) 
+        self.delete_key.activated.connect(self.slot_delete_key) 
         # 디텍터 버튼 숫자 단축키 456|123
         self.key_4 = QShortcut(QKeySequence(Qt.Key_4), self)
-        self.key_4.activated.connect(self.btn1)
+        self.key_4.activated.connect(self.btn4)
         self.key_5 = QShortcut(QKeySequence(Qt.Key_5), self)
-        self.key_5.activated.connect(self.btn2)
+        self.key_5.activated.connect(self.btn5)
         self.key_6 = QShortcut(QKeySequence(Qt.Key_6), self)
-        self.key_6.activated.connect(self.btn3)
+        self.key_6.activated.connect(self.btn6)
         self.key_1 = QShortcut(QKeySequence(Qt.Key_1), self)
-        self.key_1.activated.connect(self.btn4)
+        self.key_1.activated.connect(self.btn1)
         self.key_2 = QShortcut(QKeySequence(Qt.Key_2), self)
-        self.key_2.activated.connect(self.btn5)
+        self.key_2.activated.connect(self.btn2)
         self.key_3 = QShortcut(QKeySequence(Qt.Key_3), self)
-        self.key_3.activated.connect(self.btn6)
+        self.key_3.activated.connect(self.btn3)
 
     def btn1(self):
-        DT.detector.btn1()
-        if DT.selected_mode == 'cctv':
-            pass
-        if DT.selected_mode == 'mosaic':
-            self.btn_mosaic_start.setText(f'시작({DT.start_point})')
-        if DT.selected_mode == 'bike':
-            pass
+        self.detector.btn1()
  
     def btn2(self):
-        DT.detector.btn2()
-        if DT.selected_mode == 'cctv':
-            pass
-        if DT.selected_mode == 'mosaic':
-            self.btn_mosaic_end.setText(f'시작({DT.end_point})')
-        if DT.selected_mode == 'bike':
-            pass
+        self.detector.btn2()
    
     def btn3(self):
-        if DT.selected_mode == 'cctv':
-            print('cctv')
-            pass
-        if DT.selected_mode == 'mosaic':
-            DT.detector.btn3()
-            self.df_to_tableView_mosaic_frame()
-            self.df_to_tableView_mosaic_ID()
-        if DT.selected_mode == 'bike':
-            print('bike')
-            pass
+        self.detector.btn3()
 
     def btn4(self):
-        if type(DT.detector) == type(DT.detector_dict['cctv']):
-            pass
-        if type(DT.detector) == type(DT.detector_dict['mosaic']):
-            DT.detector.btn4()
-            self.df_to_tableView_mosaic_frame()
-            self.df_to_tableView_mosaic_ID()
-        if type(DT.detector) == type(DT.detector_dict['bike']):
-            pass
+        self.detector.btn4()
 
     def btn5(self):
-        if type(DT.detector) == type(DT.detector_dict['cctv']):
-            pass
-        if type(DT.detector) == type(DT.detector_dict['mosaic']):
-            DT.detector.btn5()
-            self.df_to_tableView_mosaic_frame()
-            self.df_to_tableView_mosaic_ID()
-        if type(DT.detector) == type(DT.detector_dict['bike']):
-            pass
+        self.detector.btn5()
 
     def btn6(self):
-        if type(DT.detector) == type(DT.detector_dict['cctv']):
-            pass
-        if type(DT.detector) == type(DT.detector_dict['mosaic']):
-
-            DT.detector.btn6()
-            self.df_to_tableView_mosaic_frame()
-            self.df_to_tableView_mosaic_ID()
-            
-        if type(DT.detector) == type(DT.detector_dict['bike']):
-            pass
+        self.detector.btn6()
 
     def buttonClick(self):
         '''좌 메뉴 버튼 클릭시 실행되는 함수 정의'''
@@ -206,25 +154,22 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # SHOW HOME PAGE
         if btnName == "btn_home":
             self.stackedWidget.setCurrentWidget(self.stack_home)
-            self.selected_tab = None
+            self.detector = None
         if btnName == "btn_cctv":
             self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_cctv))
-            DT.setSelectedMode('cctv')
-            self.selected_tab = self.tab_cctv
+            self.detector = self.tab_cctv
         if btnName == "btn_mosaic":
             self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_mosaic))
-            DT.setSelectedMode('mosaic')
-            self.selected_tab = self.tab_mosaic
+            self.detector = self.tab_mosaic
         if btnName == "btn_bike":
             self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_bike))
-            DT.setSelectedMode('bike')
-            self.selected_tab = self.tab_bike
+            self.detector = self.tab_bike
         if btnName == "btn_temp1":
             self.stackedWidget.setCurrentWidget(self.stack_temp)
-            self.selected_tab = None
+            self.detector = None
         if btnName == "btn_settings":
             self.stackedWidget.setCurrentWidget(self.stack_settings)
-            self.selected_tab = None    
+            self.detector = None    
 
     ##############
     ## 슬롯함수 ##
@@ -232,11 +177,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def slot_btn_df_reset(self):
         '''탐지내역 초기화'''
         DT.reset()
-        self.modelclass.df_to_tableview()
-        self.textBrowser.clear()
-        DT.setRealsize(self.check_realsize.isChecked())
         DT.setMoveSliderScale()
-        print(DT.check_realsize)
+        print(DT.realsizeChecked)
 
     def slot_btn_print(self):
         # 현재 df.img 를 main.py의 부모 폴더에 저장
@@ -316,41 +258,13 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.process_time_print()
             return
         # 분석용 이미지 선택
-        if self.check_realsize.isChecked():
-            img = DT.img
-            DT.setOriginalShape(img.shape[:2])
-            x1, y1, x2, y2 = DT.roi_point[0]
-        else:
-            img = tools.resize_img(DT.img, 680)
-            DT.setResizedShape(img.shape[:2])
-            x1, y1, x2, y2 = DT.roi_point[1]
-        # roi 움직임 감지
-        roi_img = img[y1:y2, x1:x2]
-        roi_img, move_detect_bool = DT.detector.detect_move(roi_img)
-        # 움직임이 없는 경우 원본 이미지 출력
-        if move_detect_bool == False:
-            self.display_img(img, (0,0,255))
-            self.process_time_print()
-            return
-        #######################################################################
-        # ROI 부분만 욜로 디텍션
-        #######################################################################
-        if self.checkbox_yolo.isChecked():
-            # 이후 추가 디텍션은 원본이미지로 수행함
-            realsize_bool = self.check_realsize.isChecked()
-            roi_img, text  = DT.detector.detect_yolo_track(roi_img, DT.cap_num, realsize_bool)
-            # roi 무시: bike, 모자이크함
-            if text:
-                self.text_si.setPlainText(text)
-        #################################################################################
-        # self.img에 roi_img를 붙여서 출력
-        img[y1:y2, x1:x2] = roi_img
-        # 재생시간 / 프레임번호 업데이트
+        img = DT.img
+        DT.setOriginalShape(img.shape[:2])
+        x1, y1, x2, y2 = DT.roi_point[0]
         frameTimer = time.strftime('%H:%M:%S', time.gmtime(DT.cap_num/DT.fps))
         self.playTimer.setText(f'{frameTimer}')
         self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
         #
-        self.display_img(img, (0,255,0))
         if DT.selected_mode == 'bike':
             # 초기화
             self.text_si.clear()
@@ -360,6 +274,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.text_giho.setText(DT.bike_giho)
             self.text_num.setText(str(DT.bike_num))
         self.process_time_print()
+        img = self.detector.playplot(img)
+        self.display_img(img)
 
     def process_time_print(self):
         end_time = time.time()  
@@ -371,7 +287,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.statusBar().showMessage(
             f'{DT.width}*{DT.height}     roi: {DT.roi[0]:.2f} {DT.roi[1]:.2f} {DT.roi[2]:.2f} {DT.roi[3]:.2f}     fps: {int(fps)}'
             )
- 
+    
+
+
+
+
+
     def player_fileopen(self):
         '''
         DT의 현재 파일을 불러와서 GUI에 반영하고
@@ -426,13 +347,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     def minus_gap(self):
         self.jump_frameSlider.setValue(self.jump_frameSlider.value() - 3)
     # 테이블뷰 선택된 행 삭제
-    def delete_tableview_row(self):
-        index = self.tableView_mosaic_frame.currentIndex().row()
-        # 디텍터 마다 테이블 삭제시 작동하는 함수를 다르게 하기 위해서 detector에 위임함
-        DT.detector.drop(index, inplace=True)
-        # 테이블뷰 다시 출력
-        self.tableView_mosaic_frame()
-        self.update()    
+    def slot_delete_key(self):
+        '''delete_tableview_row'''
+        self.detector.slot_delete_key()
+
     # 리스트뷰 항목 클릭시 해당 프레임으로 이동
     def on_item_clicked(self, index):
         # 해당 위치의 항목을 가져옴
@@ -444,10 +362,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.playSlider.setValue(n) 
         self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
         self.player.cap_read()
-        if self.check_realsize.isChecked():
-            img = DT.img
-        if self.check_realsize.isChecked() == False:
-            img = tools.resize_img(DT.img, 680)
+        img = DT.img
         # cap_num 에 맞춰 바운딩 박스 그림
         if DT.play_status is False:
             cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
@@ -469,10 +384,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.playSlider.setValue(n) 
         self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
         self.player.cap_read()
-        if self.check_realsize.isChecked():
-            img = DT.img
-        if self.check_realsize.isChecked() == False:
-            img = tools.resize_img(DT.img, 680)
+        img = DT.img
         # cap_num 에 맞춰 바운딩 박스 그림
         if DT.play_status is False:
             cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
@@ -493,10 +405,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.playSlider.setValue(n) 
         self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
         self.player.cap_read()
-        if self.check_realsize.isChecked():
-            img = DT.img
-        if self.check_realsize.isChecked() == False:
-            img = tools.resize_img(DT.img, 680)
+        img = DT.img
         # cap_num 에 맞춰 바운딩 박스 그림
         if DT.play_status is False:
             cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
@@ -525,8 +434,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
     def program_exit(self):
         '''워커와 GUI 종료'''
-        if self.selected_tab is not None:
-            self.selected_tab.program_exit()
+        if self.detector is not None:
+            self.detector.program_exit()
         self.close()        
 
 
@@ -557,23 +466,17 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.play_status:
             return
         x, y = event.pos().x(), event.pos().y()
-        print(x, y)
-
         # a, b값이 play창 밖이면 무시하도록
         if x < 70 or x > 790 or y < 10 or y > 490 or DT.img is None:
             return
         if DT.img is None:
             return
         x, y = tools.shape_to_adjust(x, y)
-        if self.check_realsize.isChecked():
-            img = DT.img.copy()
-        else:
-            img = tools.resize_img(DT.img, 680)
+        img = DT.img.copy()
         DT.setRoi((DT.roi[0], DT.roi[1], x, y))
         x1, y1, x2, y2 = DT.roi[0], DT.roi[1], DT.roi[2], DT.roi[3]
         x1, y1, x2, y2 = tools.sort_roi(x1, y1, x2, y2)
         DT.setRoi((x1, y1, x2, y2))
-        
         # 영상비율 자동 조절되도록 수정 필요
         self.display_img(img)
         self.label_roi_update()
@@ -581,10 +484,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     # 마우스 왼쪽 버튼이 떼졌을 때의 동작
     def mouseReleaseEvent(self, event):
         x, y = event.pos().x(), event.pos().y()
-        print(x, y)
-        
         x, y = tools.shape_to_adjust(x, y)
-
         if DT.img is None:
             return
         # a, b값이 play창 밖이면 무시하도록
@@ -593,23 +493,18 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.play_status:
             return
         # a, b값을 gui좌표에서 백분율로 변환
-        if self.check_realsize.isChecked():
-            img = DT.img
-        else:
-            img = tools.resize_img(DT.img, 680)
+        img = DT.img
         _, _, x, y = tools.abs_to_rel(img.shape, DT.roi[0], DT.roi[1], x, y, )
         # 마우스 왼쪽 버튼이 떼지고 재생중이 아닐 때
         if (event.button() == Qt.LeftButton):
             DT.region_status = True
             self.drawing = False  #???? 뭐지??
             DT.setRoi((DT.roi[0], DT.roi[1], x, y))
-
         x1, y1, x2, y2 = DT.roi[0], DT.roi[1], DT.roi[2], DT.roi[3]
         x1, y1, x2, y2 = tools.sort_roi(x1, y1, x2, y2)
         DT.setRoi((x1, y1, x2, y2))
         DT.setRoiPoint()
         DT.setMoveSliderScale()
-        print(DT.move_slider_scale)
         self.slot_btn_df_reset()
         self.display_img(img)
         self.label_roi_update()
@@ -628,7 +523,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             )
         self.update()
         
-    def display_img(self, img=None, color=(0, 0, 255)):
+    def display_img(self, img=None):
         '''
         최종적으로 roi를 표시한 이미지를 출력하는 함수
         img를 입력 받으면 입력받은 이미지를 출력하고, 입력받지 않으면 self.img를 출력
@@ -638,14 +533,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         else:
             plot_img = img.copy()
         # ROI 좌표가 모두 있는지 확인
-        if self.check_realsize.isChecked():
-            roi = DT.roi_point[0]
-        else:
-            roi = DT.roi_point[1]
+        roi = DT.roi_point[0]
         if roi[0] is None or roi[2] is None or roi[1] is None or roi[3] is None:
             pass
         else:
-            cv2.rectangle(plot_img, (roi[0], roi[1]),(roi[2], roi[3]), color, 2)
+            cv2.rectangle(plot_img, (roi[0], roi[1]),(roi[2], roi[3]), DT.roi_color, 2)
         # 욜로 감지된 경우(구현 예정)
         # plot 이미지의 x축이 680 넘어가면 비율대로 x를 680 맞춤
         if plot_img.shape[1] > 680:

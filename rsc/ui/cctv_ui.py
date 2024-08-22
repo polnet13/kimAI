@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'cctv.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -67,19 +67,19 @@ class Ui_CCTV(object):
 
         self.horizontalLayout_4.addWidget(self.label_thr)
 
-        self.slider_multi_thr = QSlider(self.verticalLayoutWidget)
-        self.slider_multi_thr.setObjectName(u"slider_multi_thr")
+        self.slider_move_thr = QSlider(self.verticalLayoutWidget)
+        self.slider_move_thr.setObjectName(u"slider_move_thr")
         font = QFont()
         font.setFamilies([u"Segoe UI"])
         font.setPointSize(10)
         font.setBold(False)
         font.setItalic(False)
-        self.slider_multi_thr.setFont(font)
-        self.slider_multi_thr.setMinimum(1)
-        self.slider_multi_thr.setValue(50)
-        self.slider_multi_thr.setOrientation(Qt.Horizontal)
+        self.slider_move_thr.setFont(font)
+        self.slider_move_thr.setMinimum(1)
+        self.slider_move_thr.setValue(50)
+        self.slider_move_thr.setOrientation(Qt.Horizontal)
 
-        self.horizontalLayout_4.addWidget(self.slider_multi_thr)
+        self.horizontalLayout_4.addWidget(self.slider_move_thr)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
@@ -88,6 +88,11 @@ class Ui_CCTV(object):
         self.textBrowser_multi.setObjectName(u"textBrowser_multi")
 
         self.verticalLayout.addWidget(self.textBrowser_multi)
+
+        self.vLayout_dongzip_statusbar = QVBoxLayout()
+        self.vLayout_dongzip_statusbar.setObjectName(u"vLayout_dongzip_statusbar")
+
+        self.verticalLayout.addLayout(self.vLayout_dongzip_statusbar)
 
 
         self.retranslateUi(CCTV)

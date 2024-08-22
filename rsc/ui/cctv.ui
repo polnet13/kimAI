@@ -72,7 +72,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="slider_multi_thr">
+       <widget class="QSlider" name="slider_move_thr">
         <property name="font">
          <font>
           <family>Segoe UI</family>
@@ -97,6 +97,9 @@
     </item>
     <item>
      <widget class="QTextBrowser" name="textBrowser_multi"/>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="vLayout_dongzip_statusbar"/>
     </item>
    </layout>
   </widget>

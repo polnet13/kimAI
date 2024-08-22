@@ -32,7 +32,6 @@ class DT:
     roi_frame_2 = None
     roi_frame_3 = None
     # 움직임
-    thr_move_slider_multi = 50
     scale_move_thr = 1
     roi_color = (0, 0, 255)   # 움직임 감지 ROI 색상
     # 트래킹
@@ -52,7 +51,7 @@ class DT:
     fpst = 0
     width = 0
     height = 0
-    check_realsize = False
+    realsizeChecked = True
     time_delay = 0
     # 시작, 종료점
     start_point = None
@@ -77,12 +76,12 @@ class DT:
         roi 변화에 따른 슬라이더 스케일 조정
 
         영상이 바뀌거나 => player_fileopen
-        디텍터가 바뀌거나 => cls.setDetector
+        디텍터가 바뀌거나 => 메인윈도우의 self.detector 인스턴스 생성시
         checkbox_realsize가 바뀔때 => mainwindwo.slot_btn_df_reset
         roi가 바뀔때 => mainwindow.mouseReleaseEvent
         멀티 open 했을 때 => mainwindow.slot_btn_multi_open
         '''
-        if cls.check_realsize:
+        if cls.realsizeChecked:
             resolution = DT.roi_point[0]
         else:
             resolution = DT.roi_point[1]
@@ -98,7 +97,7 @@ class DT:
 
     @classmethod
     def setRealsize(cls, bool):
-        cls.check_realsize = bool
+        cls.realsizeChecked = bool
 
     @classmethod
     def detection_add(cls, cap_num, track_id, label, x1, y1, x2, y2, thr):
@@ -142,13 +141,6 @@ class DT:
         '''
         cls.df = None
         cls.df = pd.DataFrame(columns=cls.columns) 
-        cls.detector = cls.detector_dict[cls.selected_mode]
-        DT.dfReset()
-        DT.setSliderValue(DT.detector_dict[DT.selected_mode].tag, 
-                          DT.detector_dict[DT.selected_mode].slider_dict)
-        # cls.detector 객체에 df 속성이 있는 지 확인하는 코드
-        if hasattr(cls.detector, 'df'):
-            cls.detector.reset_df()
         
 
     @classmethod

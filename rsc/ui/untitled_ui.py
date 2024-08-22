@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'untitled.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,19 +15,19 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QGridLayout,
-    QHBoxLayout, QHeaderView, QKeySequenceEdit, QLabel,
-    QLayout, QLineEdit, QMainWindow, QProgressBar,
-    QPushButton, QScrollBar, QSizePolicy, QSlider,
-    QSpacerItem, QStackedWidget, QStatusBar, QTableView,
-    QTextBrowser, QToolButton, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QHBoxLayout,
+    QHeaderView, QKeySequenceEdit, QLabel, QLayout,
+    QLineEdit, QMainWindow, QProgressBar, QPushButton,
+    QScrollBar, QSizePolicy, QSlider, QSpacerItem,
+    QStackedWidget, QStatusBar, QTableView, QTextBrowser,
+    QToolButton, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.setWindowModality(Qt.ApplicationModal)
-        MainWindow.resize(1179, 613)
+        MainWindow.resize(1179, 612)
         font = QFont()
         font.setBold(False)
         MainWindow.setFont(font)
@@ -69,7 +69,7 @@ class Ui_MainWindow(object):
 
         self.topMenu = QFrame(self.leftMenuFrame)
         self.topMenu.setObjectName(u"topMenu")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.topMenu.sizePolicy().hasHeightForWidth())
@@ -82,7 +82,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_8.setContentsMargins(0, 0, 0, 0)
         self.btn_home = QPushButton(self.topMenu)
         self.btn_home.setObjectName(u"btn_home")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.btn_home.sizePolicy().hasHeightForWidth())
@@ -94,7 +94,7 @@ class Ui_MainWindow(object):
         font1.setBold(False)
         font1.setItalic(False)
         self.btn_home.setFont(font1)
-        self.btn_home.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_home.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_home.setLayoutDirection(Qt.LeftToRight)
         self.btn_home.setStyleSheet(u"")
 
@@ -106,7 +106,7 @@ class Ui_MainWindow(object):
         self.btn_cctv.setSizePolicy(sizePolicy1)
         self.btn_cctv.setMinimumSize(QSize(0, 45))
         self.btn_cctv.setFont(font1)
-        self.btn_cctv.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_cctv.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_cctv.setLayoutDirection(Qt.LeftToRight)
         self.btn_cctv.setStyleSheet(u"")
 
@@ -118,7 +118,7 @@ class Ui_MainWindow(object):
         self.btn_mosaic.setSizePolicy(sizePolicy1)
         self.btn_mosaic.setMinimumSize(QSize(0, 45))
         self.btn_mosaic.setFont(font1)
-        self.btn_mosaic.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_mosaic.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_mosaic.setLayoutDirection(Qt.LeftToRight)
         self.btn_mosaic.setStyleSheet(u"")
 
@@ -130,7 +130,7 @@ class Ui_MainWindow(object):
         self.btn_bike.setSizePolicy(sizePolicy1)
         self.btn_bike.setMinimumSize(QSize(0, 45))
         self.btn_bike.setFont(font1)
-        self.btn_bike.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_bike.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_bike.setLayoutDirection(Qt.LeftToRight)
         self.btn_bike.setStyleSheet(u"")
 
@@ -142,7 +142,7 @@ class Ui_MainWindow(object):
         self.btn_temp2.setSizePolicy(sizePolicy1)
         self.btn_temp2.setMinimumSize(QSize(0, 45))
         self.btn_temp2.setFont(font1)
-        self.btn_temp2.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_temp2.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_temp2.setLayoutDirection(Qt.LeftToRight)
         self.btn_temp2.setStyleSheet(u"")
 
@@ -154,7 +154,7 @@ class Ui_MainWindow(object):
         self.btn_temp1_2.setSizePolicy(sizePolicy1)
         self.btn_temp1_2.setMinimumSize(QSize(0, 45))
         self.btn_temp1_2.setFont(font1)
-        self.btn_temp1_2.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_temp1_2.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_temp1_2.setLayoutDirection(Qt.LeftToRight)
         self.btn_temp1_2.setStyleSheet(u"")
 
@@ -166,7 +166,7 @@ class Ui_MainWindow(object):
         self.btn_temp1_3.setSizePolicy(sizePolicy1)
         self.btn_temp1_3.setMinimumSize(QSize(0, 45))
         self.btn_temp1_3.setFont(font1)
-        self.btn_temp1_3.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_temp1_3.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_temp1_3.setLayoutDirection(Qt.LeftToRight)
         self.btn_temp1_3.setStyleSheet(u"")
 
@@ -178,7 +178,7 @@ class Ui_MainWindow(object):
         self.btn_temp1_4.setSizePolicy(sizePolicy1)
         self.btn_temp1_4.setMinimumSize(QSize(0, 45))
         self.btn_temp1_4.setFont(font1)
-        self.btn_temp1_4.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_temp1_4.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_temp1_4.setLayoutDirection(Qt.LeftToRight)
         self.btn_temp1_4.setStyleSheet(u"")
 
@@ -190,7 +190,7 @@ class Ui_MainWindow(object):
         self.btn_temp1.setSizePolicy(sizePolicy1)
         self.btn_temp1.setMinimumSize(QSize(0, 45))
         self.btn_temp1.setFont(font1)
-        self.btn_temp1.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_temp1.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_temp1.setLayoutDirection(Qt.LeftToRight)
         self.btn_temp1.setStyleSheet(u"")
 
@@ -199,7 +199,7 @@ class Ui_MainWindow(object):
 
         self.verticalMenuLayout.addWidget(self.topMenu, 0, Qt.AlignTop)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalMenuLayout.addItem(self.verticalSpacer)
 
@@ -209,7 +209,7 @@ class Ui_MainWindow(object):
         self.btn_settings.setSizePolicy(sizePolicy1)
         self.btn_settings.setMinimumSize(QSize(0, 45))
         self.btn_settings.setFont(font1)
-        self.btn_settings.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_settings.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_settings.setLayoutDirection(Qt.LeftToRight)
         self.btn_settings.setStyleSheet(u"")
 
@@ -510,7 +510,7 @@ class Ui_MainWindow(object):
         self.label.setFrameShape(QFrame.WinPanel)
         self.label_cap_num = QLabel(self.widget_center)
         self.label_cap_num.setObjectName(u"label_cap_num")
-        self.label_cap_num.setGeometry(QRect(10, 530, 211, 18))
+        self.label_cap_num.setGeometry(QRect(90, 550, 161, 31))
         self.playSlider = QSlider(self.widget_center)
         self.playSlider.setObjectName(u"playSlider")
         self.playSlider.setEnabled(True)
@@ -518,30 +518,22 @@ class Ui_MainWindow(object):
         self.playSlider.setOrientation(Qt.Horizontal)
         self.btn_region_reset = QPushButton(self.widget_center)
         self.btn_region_reset.setObjectName(u"btn_region_reset")
-        self.btn_region_reset.setGeometry(QRect(100, 560, 111, 31))
+        self.btn_region_reset.setGeometry(QRect(240, 550, 111, 31))
         self.btn_fileopen = QPushButton(self.widget_center)
         self.btn_fileopen.setObjectName(u"btn_fileopen")
-        self.btn_fileopen.setGeometry(QRect(650, 560, 81, 31))
+        self.btn_fileopen.setGeometry(QRect(510, 550, 81, 31))
         self.btn_play = QToolButton(self.widget_center)
         self.btn_play.setObjectName(u"btn_play")
-        self.btn_play.setGeometry(QRect(20, 560, 61, 31))
+        self.btn_play.setGeometry(QRect(20, 550, 61, 31))
         self.btn_play.setStyleSheet(u"color: #ffffff;\n"
 "background-color: rgb(61, 50, 44);")
         self.playTimer = QLabel(self.widget_center)
         self.playTimer.setObjectName(u"playTimer")
-        self.playTimer.setGeometry(QRect(653, 530, 71, 20))
+        self.playTimer.setGeometry(QRect(633, 550, 91, 20))
+        self.playTimer.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.btn_page_print = QPushButton(self.widget_center)
         self.btn_page_print.setObjectName(u"btn_page_print")
-        self.btn_page_print.setGeometry(QRect(510, 560, 121, 31))
-        self.checkbox_yolo = QCheckBox(self.widget_center)
-        self.checkbox_yolo.setObjectName(u"checkbox_yolo")
-        self.checkbox_yolo.setGeometry(QRect(420, 530, 81, 19))
-        self.checkbox_yolo.setChecked(False)
-        self.check_realsize = QCheckBox(self.widget_center)
-        self.check_realsize.setObjectName(u"check_realsize")
-        self.check_realsize.setEnabled(True)
-        self.check_realsize.setGeometry(QRect(510, 530, 121, 19))
-        self.check_realsize.setChecked(False)
+        self.btn_page_print.setGeometry(QRect(370, 550, 121, 31))
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -621,10 +613,5 @@ class Ui_MainWindow(object):
         self.btn_play.setText(QCoreApplication.translate("MainWindow", u"play", None))
         self.playTimer.setText(QCoreApplication.translate("MainWindow", u"00:00", None))
         self.btn_page_print.setText(QCoreApplication.translate("MainWindow", u"\ud604\uc7ac \ud654\uba74 \uc800\uc7a5", None))
-        self.checkbox_yolo.setText(QCoreApplication.translate("MainWindow", u"AI \uac10\uc9c0", None))
-#if QT_CONFIG(tooltip)
-        self.check_realsize.setToolTip(QCoreApplication.translate("MainWindow", u"\ud574\uc0c1\ub3c4\uac00 \ub192\uc740 \uacbd\uc6b0 \uc2e4\uc81c \uc0ac\uc774\uc988\ub85c \ubd84\uc11d\ud558\uba74 \ub290\ub824\uc9c8 \uc218 \uc788\uc74c", None))
-#endif // QT_CONFIG(tooltip)
-        self.check_realsize.setText(QCoreApplication.translate("MainWindow", u"\uc2e4\uc81c \uc0ac\uc774\uc988", None))
     # retranslateUi
 

@@ -20,23 +20,23 @@ class Mosaic(Ui_mosaic, QWidget):
         super().__init__()
         self.setupUi(self)
         # 시그널 슬롯 연결
-        self.pushButton_4.clicked.connect(self.slot_pushButton_4)
-        self.pushButton_5.clicked.connect(self.slot_pushButton_5)
-        self.pushButton_6.clicked.connect(self.slot_pushButton_6)
-        self.pushButton_1.clicked.connect(self.slot_pushButton_1)
-        self.pushButton_2.clicked.connect(self.slot_pushButton_2)
-        self.pushButton_3.clicked.connect(self.slot_pushButton_3)
+        self.pushButton_4.clicked.connect(self.btn4)
+        self.pushButton_5.clicked.connect(self.btn5)
+        self.pushButton_6.clicked.connect(self.btn6)
+        self.pushButton_1.clicked.connect(self.btn1)
+        self.pushButton_2.clicked.connect(self.btn2)
+        self.pushButton_3.clicked.connect(self.btn3)
         self.slider_mosaic.valueChanged.connect(self.slot_mosaic_valueChanged)
         
-    def slot_pushButton_4(self):
+    def btn4(self):
         DT.start_point = DT.cap_num
         self.pushButton_4.setText(f'시작: {DT.start_point}')
 
-    def slot_pushButton_5(self):
+    def btn5(self):
         DT.end_point = DT.cap_num
         self.pushButton_5.setText(f'끝: {DT.end_point}')
 
-    def slot_pushButton_6(self):
+    def btn6(self):
         '''숫자6 입력시 분석 실행되는 함수'''
         self.start = DT.start_point if DT.start_point else 0
         self.end = DT.end_point if DT.end_point else DT.total_frames
@@ -89,7 +89,7 @@ class Mosaic(Ui_mosaic, QWidget):
         # frame 리스트 뷰 출력
 
 
-    def slot_pushButton_1(self):
+    def btn1(self):
         print('btn4: roi값 프레임에 추가 => df에 저장')
         ID = 3
         x1, y1, x2, y2 = DT.roi
@@ -100,7 +100,7 @@ class Mosaic(Ui_mosaic, QWidget):
         print(DT.df)
         
 
-    def slot_pushButton_2(self):
+    def btn2(self):
         print('btn5: 전체 프레임에 roi값 모자이크 추가 => df에 저장')
         start = DT.start_point if DT.start_point else 0
         end = DT.end_point if DT.end_point else DT.total_frames
@@ -113,8 +113,8 @@ class Mosaic(Ui_mosaic, QWidget):
         self.df_to_tableView_mosaic_ID()
         print(DT.df)
         
-    def slot_pushButton_3(self):
-        print('slot_pushButton_3')
+    def btn3(self):
+        print('btn3')
         '''
         모자이크 처리
         '''
@@ -132,7 +132,7 @@ class Mosaic(Ui_mosaic, QWidget):
             DT.fps, 
             DT.width, 
             DT.height,
-            DT.getValue(DetectorMosaic_v2.tag, '가림정도')/600)
+            self.slider_mosaic.value()/600)
         DetectorMosaic_v2.worker_mosaic_print.start()
         DetectorMosaic_v2.worker_mosaic_print.join()
         DT.df = None
@@ -171,8 +171,27 @@ class Mosaic(Ui_mosaic, QWidget):
         self.update()
 
 
+    def slot_delete_key(self):
+        if self.tableView_mosaic_frame.selectionModel().hasSelection():
+            index = self.tableView_mosaic_frame.currentIndex().row()
+            print('무엇을 삭제할지 여기서 정의 frame')
+            self.qmodel_mosaic_frame.removeRow(index)
+            self.df_to_tableView_mosaic_frame()
+        if self.tableView_mosaic_ID.selectionModel().hasSelection():
+            index = self.tableView_mosaic_ID.currentIndex().row()
+            print('무엇을 삭제할지 여기서 정의 ID')
+            self.qmodel_mosaic_ID.removeRow(index)
+            self.df_to_tableView_mosaic_ID()
+        index = self.tableView_mosaic_frame.currentIndex().row()
+        
+
+
     def program_exit(self):
         print('Ui_Bike 프로그램 종료')
+
+    def playplot(self, img):
+        print('모자이크 이미지 처리')
+        return img
 
 
 

@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1179</width>
-    <height>613</height>
+    <height>612</height>
    </rect>
   </property>
   <property name="font">
@@ -1092,10 +1092,10 @@ color:
     <widget class="QLabel" name="label_cap_num">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>530</y>
-       <width>211</width>
-       <height>18</height>
+       <x>90</x>
+       <y>550</y>
+       <width>161</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
@@ -1121,8 +1121,8 @@ color:
     <widget class="QPushButton" name="btn_region_reset">
      <property name="geometry">
       <rect>
-       <x>100</x>
-       <y>560</y>
+       <x>240</x>
+       <y>550</y>
        <width>111</width>
        <height>31</height>
       </rect>
@@ -1134,8 +1134,8 @@ color:
     <widget class="QPushButton" name="btn_fileopen">
      <property name="geometry">
       <rect>
-       <x>650</x>
-       <y>560</y>
+       <x>510</x>
+       <y>550</y>
        <width>81</width>
        <height>31</height>
       </rect>
@@ -1151,7 +1151,7 @@ color:
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>560</y>
+       <y>550</y>
        <width>61</width>
        <height>31</height>
       </rect>
@@ -1170,65 +1170,30 @@ background-color: rgb(61, 50, 44);</string>
     <widget class="QLabel" name="playTimer">
      <property name="geometry">
       <rect>
-       <x>653</x>
-       <y>530</y>
-       <width>71</width>
+       <x>633</x>
+       <y>550</y>
+       <width>91</width>
        <height>20</height>
       </rect>
      </property>
      <property name="text">
       <string>00:00</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
     </widget>
     <widget class="QPushButton" name="btn_page_print">
      <property name="geometry">
       <rect>
-       <x>510</x>
-       <y>560</y>
+       <x>370</x>
+       <y>550</y>
        <width>121</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
       <string>현재 화면 저장</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkbox_yolo">
-     <property name="geometry">
-      <rect>
-       <x>420</x>
-       <y>530</y>
-       <width>81</width>
-       <height>19</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>AI 감지</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="check_realsize">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>510</x>
-       <y>530</y>
-       <width>121</width>
-       <height>19</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>해상도가 높은 경우 실제 사이즈로 분석하면 느려질 수 있음</string>
-     </property>
-     <property name="text">
-      <string>실제 사이즈</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
      </property>
     </widget>
    </widget>

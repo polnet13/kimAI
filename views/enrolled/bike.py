@@ -21,33 +21,38 @@ class Bike(Ui_Bike, QWidget):
         super().__init__()
         self.setupUi(self)
         # 시그널 슬롯 연결
-        self.pushButton_4.clicked.connect(self.slot_pushButton_4)
-        self.pushButton_5.clicked.connect(self.slot_pushButton_5)
-        self.pushButton_6.clicked.connect(self.slot_pushButton_6)
-        self.pushButton_1.clicked.connect(self.slot_pushButton_1)
-        self.pushButton_2.clicked.connect(self.slot_pushButton_2)
-        self.pushButton_3.clicked.connect(self.slot_pushButton_3)
+        self.pushButton_4.clicked.connect(self.btn4)
+        self.pushButton_5.clicked.connect(self.btn5)
+        self.pushButton_6.clicked.connect(self.btn6)
+        self.pushButton_1.clicked.connect(self.btn1)
+        self.pushButton_2.clicked.connect(self.btn2)
+        self.pushButton_3.clicked.connect(self.btn3)
         
-    def slot_pushButton_4(self):
+    def btn4(self):
         print('slot_pushButton_4')
 
-    def slot_pushButton_5(self):
+    def btn5(self):
         print('slot_pushButton_5')
 
-    def slot_pushButton_6(self):
+    def btn6(self):
         print('slot_pushButton_6')
 
-    def slot_pushButton_1(self):
+    def btn1(self):
         print('slot_pushButton_1')
 
-    def slot_pushButton_2(self):
+    def btn2(self):
         print('slot_pushButton_2')
         
-    def slot_pushButton_3(self):
+    def btn3(self):
         print('slot_pushButton_3')
 
     def program_exit(self):
         print('Ui_Bike 프로그램 종료')
+
+    def playplot(self, img):
+        '''bike 모드에서는 아직 미확정'''
+        print('bike 이미지 처리')
+        return img
 
 
 
