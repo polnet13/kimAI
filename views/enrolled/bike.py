@@ -27,6 +27,17 @@ class Bike(Ui_Bike, QWidget):
         self.pushButton_1.clicked.connect(self.btn1)
         self.pushButton_2.clicked.connect(self.btn2)
         self.pushButton_3.clicked.connect(self.btn3)
+
+        self.models = {
+        'base': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt')),
+        'model_nbp': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
+        'reader': OcrReader()
+        }
+        # 변수
+        self.img_path = os.path.join(DT.BASE_DIR, 'rsc/init.jpg')
+        self.df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
+        self.track_ids = {}
+        
         
     def btn4(self):
         print('slot_pushButton_4')
@@ -52,58 +63,12 @@ class Bike(Ui_Bike, QWidget):
     def applyImageProcessing(self, img):
         '''bike 모드에서는 아직 미확정'''
         print('bike 이미지 처리')
-        return img
-
-
-
-class DetectorBike(QObject):
-
-    tag = 'bike'
-    slider_dict = {
-        '감지_민감도':1,
-        }
-    models = {
-        'base': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt')),
-        'model_nbp': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
-        'reader': OcrReader(),
-    }
-    btn_names = ['btn_1', 'btn_2', 'btn_3', 'btn_4', 'btn_5', 'btn_6']
-    
-    # 시그널
-    reset = Signal()
-    signal_1 = Signal(int)
-    signal_2 = Signal(int)
-    signal_3 = Signal()
-    signal_4 = Signal()
-    signal_5 = Signal()
-    signal_6 = Signal()
-
-    # 변수
-    img_path = os.path.join(DT.BASE_DIR, 'rsc/init.jpg')
-    df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
-    track_ids = {}
- 
-    ##############
-    ## 슬롯함수 ##
-    ##############
-    
-    # yolo 이미지 디텍션 함수
-    def detect_yolo_track(frame, cap_num, realsize_bool):
-        '''
-        이 함수에서 실질적인 탐지 작업을 수행함
-        input: origin_img
-
-        output
-        frame: 원본 해상도의 욜로 처리된 이미지
-        img: cv2 이미지(바운딩 박스 처리된 이미지)
-        track_id: 추적된 객체의 id값
-        ''' 
         text = ''
         try:
-            detections = DetectorBike.models['base'].track(frame, persist=True, device=DT.device)[0]
+            detections = self.models['base'].track(img, persist=True, device=DT.device)[0]
         except:
-            DetectorBike.models['base'] = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt'))
-            detections = DetectorBike.models['base'].track(frame, persist=True, device=DT.device)[0]
+            self.models['base'] = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8n.pt'))
+            detections = self.models['base'].track(img, persist=True, device=DT.device)[0]
         # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
         for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
             xmin, ymin, xmax, ymax  = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
@@ -115,11 +80,10 @@ class DetectorBike(QObject):
             if label not in [3, 9]:
                 continue
             # 임계값 이하는 생략 하라는 코드
-            thr = DT.sliderDict[DetectorBike.tag]['감지_민감도'] 
-            if confidence < thr/100:
+            if confidence < 1/100:
                 continue
 
-            xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
+            xmin, ymin, xmax, ymax = tools.abs_to_rel(img.shape, xmin, ymin, xmax, ymax)
             if DT.play_status:
                 DT.detection_add(DT.cap_num, track_id, label, xmin, ymin, xmax, ymax, confidence)
             xmin, ymin, xmax, ymax = tools.rel_to_abs(DT.img.shape, xmin, ymin, xmax, ymax)
@@ -129,36 +93,38 @@ class DetectorBike(QObject):
                 # 신호등 처리
                 signal_light_img = DT.img[ymin:ymax, xmin:xmax]
                 # frame의 6/10 위치에 신호등 이미지 삽입
-                x = int(frame.shape[0]/10*6)
-                frame[x:x+signal_light_img.shape[0], 0:signal_light_img.shape[1]] = signal_light_img
+                x = int(img.shape[0]/10*6)
+                img[x:x+signal_light_img.shape[0], 0:signal_light_img.shape[1]] = signal_light_img
             if label == 3:
                 # 오토바이 처리
                 bike_img = DT.img[ymin:ymax, xmin:xmax]
-                nbp_img = DetectorBike.detect_nbp_img(bike_img)
+                nbp_img = self.detect_nbp_img(bike_img)
                 # 휘어진 번호판 이미지 처리
                 try:
-                    nbp_img = DetectorBike.nbp_transform(nbp_img)
+                    nbp_img = self.nbp_transform(nbp_img)
                 except:
-                    return frame, None
+                    return img, None
                 # ocr
                 if nbp_img is not None:
-                    si, giho, num = DetectorBike.models['reader'].read(nbp_img)
-                    text = f'{si} {giho} {num}'
+                    si, giho, num = self.models['reader'].read(nbp_img)
                     _df = pd.DataFrame({'si':[si], 'giho':[giho], 'num':[num]})
-                    DetectorBike.df = pd.concat([DetectorBike.df, _df], ignore_index=True)
-                    frame[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img
+                    self.df = pd.concat([self.df, _df], ignore_index=True)
+                    img[0:nbp_img.shape[0], 0:nbp_img.shape[1]] = nbp_img
         try:
-            DT.bike_si = DetectorBike.df['si'].value_counts().idxmax()
-            DT.bike_giho = DetectorBike.df['giho'].value_counts().idxmax()
-            DT.bike_num = int(DetectorBike.df['num'].value_counts().idxmax())
+            DT.bike_si = self.df['si'].value_counts().idxmax()
+            DT.bike_giho = self.df['giho'].value_counts().idxmax()
+            DT.bike_num = int(self.df['num'].value_counts().idxmax())
 
         except:
             pass
-        return frame, ''
+        self.text_si.setText(DT.bike_si)
+        self.text_giho.setText(DT.bike_giho)
+        self.text_num.setText(str(DT.bike_num))
+ 
         
 
 
-    def detect_nbp_img(bike_img):
+    def detect_nbp_img(self, bike_img):
         '''
         return 
         성공: 번호판 이미지
@@ -168,7 +134,7 @@ class DetectorBike(QObject):
             print(bike_img.shape)
             return
         roi_img = None
-        detection = DetectorBike.models['model_nbp'](bike_img, device=DT.device)[0]
+        detection = self.models['model_nbp'](bike_img, device=DT.device)[0]
         # 번호판 검출
         for data_nbp in detection.boxes.data.tolist():
             xmin, ymin, xmax, ymax = int(data_nbp[0]), int(data_nbp[1]), int(data_nbp[2]), int(data_nbp[3])
@@ -182,7 +148,7 @@ class DetectorBike(QObject):
             return roi_img
     
 
-    def nbp_transform(frame):
+    def nbp_transform(self, frame):
         img = frame.copy()
         # 출력 영상 설정
         dw, dh = 300, 150
@@ -204,13 +170,13 @@ class DetectorBike(QObject):
             if not cv2.isContourConvex(approx) or len(approx) != 4:
                 continue
             # cv2.polylines(frame, [approx], True, (0, 255, 0), 2, cv2.LINE_AA)
-            srcQuad = DetectorBike.reorderPts(approx.reshape(4, 2).astype(np.float32))
+            srcQuad = self.reorderPts(approx.reshape(4, 2).astype(np.float32))
             pers = cv2.getPerspectiveTransform(srcQuad, dstQuad)
             dst = cv2.warpPerspective(img, pers, (dw, dh), flags=cv2.INTER_CUBIC)
         return dst
     
 
-    def reorderPts(pts):
+    def reorderPts(self, pts):
         idx = np.lexsort((pts[:, 1], pts[:, 0]))  # 칼럼0 -> 칼럼1 순으로 정렬한 인덱스를 반환
         pts = pts[idx]  # x좌표로 정렬
         if pts[0, 1] > pts[1, 1]:
@@ -241,34 +207,9 @@ class DetectorBike(QObject):
     def make_plot_df():
         DT.df_plot = DT.df.copy()
 
-    @classmethod
-    def reset_df(cls):
-        cls.df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
+ 
+    def reset_df(self):
+        self.df = pd.DataFrame({'si':[], 'giho':[], 'num':[]})
 
-
-    #####################
-    ## 커스텀 버튼 함수 ##
-    #####################
-
-    def btn1():
-        print('btn1')
-
-    def btn2():
-        print('btn2')
-
-    def btn3():
-        print('btn3')
-
-    def btn4():
-        print('btn4')
-
-    def btn5():
-        print('btn5')
-
-    def btn6():
-        print('btn6')
-
-    btns = [btn1, btn2, btn3, btn4, btn5, btn6]
-    
-    
+ 
     

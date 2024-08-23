@@ -14,7 +14,7 @@ class csswindow(mainWindow):
         super().__init__()
         self.setWindowTitle(QCoreApplication.translate(
             "MainWindow", 
-            "하남경찰서 미사지구대", 
+            "K-Pol AI", 
             None
             ))
         icon_path = os.path.join(DT.BASE_DIR, 'rsc', 'ico', 'main.jpg')
@@ -22,17 +22,14 @@ class csswindow(mainWindow):
         self.setWindowIcon(QIcon(icon_path))
     
 
+
 def main():
     app = QApplication(sys.argv) 
     # apply_stylesheet(app, theme=theme[4])
     window = csswindow()
-
-
-    
     window.show()
     sys.exit(app.exec())
  
-
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     main()  
