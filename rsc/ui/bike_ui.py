@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'bike.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -28,9 +28,10 @@ class Ui_Bike(object):
         self.verticalLayoutWidget_12.setObjectName(u"verticalLayoutWidget_12")
         self.verticalLayoutWidget_12.setGeometry(QRect(0, 0, 371, 571))
         self.verticalLayout_7 = QVBoxLayout(self.verticalLayoutWidget_12)
+        self.verticalLayout_7.setSpacing(11)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.verticalLayout_7.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.verticalLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_7.setContentsMargins(11, 11, 11, 11)
         self.label = QLabel(self.verticalLayoutWidget_12)
         self.label.setObjectName(u"label")
 

@@ -8,7 +8,7 @@ import pandas as pd
 from views.sharedData import DT
 from PySide6.QtCore import Signal, QObject, QTimer 
 from PySide6 import QtGui
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QAbstractItemView
 import time
 from multiprocessing import Process, Queue
 from rsc.ui.mosaic_ui import Ui_mosaic 
@@ -19,6 +19,11 @@ class Mosaic(Ui_mosaic, QWidget):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.tableView_mosaic_ID.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView_mosaic_frame.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView_mosaic_ID.clicked.connect(lambda: self.selected_table('ID'))
+        self.tableView_mosaic_frame.clicked.connect(lambda: self.selected_table('frame'))
+        
         # 시그널 슬롯 연결
         self.pushButton_4.clicked.connect(self.btn4)
         self.pushButton_5.clicked.connect(self.btn5)
@@ -27,6 +32,7 @@ class Mosaic(Ui_mosaic, QWidget):
         self.pushButton_2.clicked.connect(self.btn2)
         self.pushButton_3.clicked.connect(self.btn3)
         self.slider_mosaic.valueChanged.connect(self.slot_mosaic_valueChanged)
+        
         
     def btn4(self):
         DT.start_point = DT.cap_num
@@ -38,6 +44,7 @@ class Mosaic(Ui_mosaic, QWidget):
 
     def btn6(self):
         '''숫자6 입력시 분석 실행되는 함수'''
+        self.progressBar_mosaic.setValue(0)
         self.start = DT.start_point if DT.start_point else 0
         self.end = DT.end_point if DT.end_point else DT.total_frames
         # 캡셋을 해서 시작점 설정
@@ -51,6 +58,7 @@ class Mosaic(Ui_mosaic, QWidget):
             DT.mosaic_current_frame = cap_num
             # cap_num = cap.get(프레임) 
             try:
+                print('btn6', DT.device)
                 detections = self.detector.track(frame, persist=True, device=DT.device)[0]
             except Exception as e:
                 print(e)
@@ -77,12 +85,15 @@ class Mosaic(Ui_mosaic, QWidget):
                 xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
                 # df, temp_df 정리
                 DT.detection_add(cap_num-1, track_id, label, xmin, ymin, xmax, ymax, confidence)
+            progress_var = int((cap_num / (self.end+1)) * 100)
+            self.progressBar_mosaic.setValue(progress_var)
         DT.df = pd.DataFrame(DT.detection_list, columns=DT.columns)
         DT.detection_list.clear()
-        DT.df_plot = pd.DataFrame({'frame': DT.df['frame']})
+        self.df_frame = pd.DataFrame({'frame': DT.df['frame']})
         r = range(DT.start_point, DT.end_point+1)
         df = pd.DataFrame({'frame': r})
-        DT.df_plot = pd.concat([DT.df_plot, df], axis=0).drop_duplicates()
+        self.df_frame = pd.concat([self.df_frame, df], axis=0).drop_duplicates()
+        self.progressBar_mosaic.setValue(100)
         self.df_to_tableView_mosaic_frame()
         self.df_to_tableView_mosaic_ID()
         # ID 리스트 뷰와
@@ -114,84 +125,168 @@ class Mosaic(Ui_mosaic, QWidget):
         print(DT.df)
         
     def btn3(self):
-        print('btn3')
         '''
         모자이크 처리
         '''
+        self.progressBar_mosaic.setValue(0)
         if DT.df is None:
             print('df가 없습니다.')
             return
         queue = Queue()
-        DetectorMosaic_v2.worker_mosaic_print = WorkerMosaic(
+        start_point = int(DT.df['frame'].min())
+        end_point = int(DT.df['frame'].max())
+        self.worker_mosaic_video = WorkerMosaic(
             queue,
             DT.fileName, 
             DT.df,
-            DT.start_point, 
-            DT.end_point, 
+            start_point, 
+            end_point, 
             DT.total_frames, 
             DT.fps, 
             DT.width, 
             DT.height,
             self.slider_mosaic.value()/600)
-        DetectorMosaic_v2.worker_mosaic_print.start()
-        DetectorMosaic_v2.worker_mosaic_print.join()
-        DT.df = None
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.updateProgressBar)
+        self.timer.start(1)
+        self.worker_mosaic_video.start()
+        # self.worker_mosaic_video.join()
+
+    def updateProgressBar(self):
+        var = self.worker_mosaic_video.queue.get()
+        self.progressBar_mosaic.setValue(var)
+        self.update()
+        print(f'var: {var}')
+        if var >= 100:
+            self.progressBar_mosaic.setValue(100)
+            self.timer.stop()
+ 
+
+    def applyImageProcessing(self, img=None):
+        if img is None:
+            img = DT.img.copy()
+        print('모자이크 이미지 처리')
+        print(DT.df)
+        df = DT.df[DT.df['frame']==DT.cap_num]
+        # 모자이크 처리
+        for index, row in df.iterrows():
+            xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']
+            xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)
+            img = tools.mosaic(img, xmin, ymin, xmax, ymax, ratio=self.slider_mosaic.value()/600)
+            img = cv2.putText(img, f'{row["ID"]}', (xmin, ymin-5), cv2.FONT_ITALIC, 3, (0,255,0))
+        return img
 
     def slot_mosaic_valueChanged(self):
         self.label.setText(f'{self.slider_mosaic.value()}')
 
 
     def df_to_tableView_mosaic_frame(self):
-        '''detector.df를 테이블에 출력'''
         # 모델 초기화를 데터 추가 전에 수행
         self.qmodel_mosaic_frame = QtGui.QStandardItemModel()  # 초기 행과 열의 수를 설정하지 않음
-        columns = DT.df_plot.columns
+        columns = self.df_frame.columns
         self.qmodel_mosaic_frame.setColumnCount(len(columns))
         self.qmodel_mosaic_frame.setHorizontalHeaderLabels(columns)
-        for row in range(len(DT.df_plot)):
-            value_objs = [QtGui.QStandardItem(str(value)) for value in DT.df_plot.iloc[row]]
+        for row in range(len(self.df_frame)):
+            value_objs = [QtGui.QStandardItem(str(value)) for value in self.df_frame.iloc[row]]
             self.qmodel_mosaic_frame.appendRow(value_objs)
         self.tableView_mosaic_frame.setModel(self.qmodel_mosaic_frame)
 
     def df_to_tableView_mosaic_ID(self):
-        '''detector.df를 테이블에 출력'''
-        df = DT.df[['ID','label']].copy()
-        df = df.drop_duplicates()
-        print(df)
+        self.df_id = DT.df[['ID','label']].copy()
+        self.df_id = self.df_id.drop_duplicates()
 
         # 모델 초기화를 데터 추가 전에 수행
         self.qmodel_mosaic_ID = QtGui.QStandardItemModel()
-        columns = df.columns
+        columns = self.df_id.columns
         self.qmodel_mosaic_ID.setColumnCount(len(columns))
         self.qmodel_mosaic_ID.setHorizontalHeaderLabels(columns)
-        for row in range(len(df)):
-            value_objs = [QtGui.QStandardItem(str(value)) for value in df.iloc[row]]
+        for row in range(len(self.df_id)):
+            value_objs = [QtGui.QStandardItem(str(value)) for value in self.df_id.iloc[row]]
             self.qmodel_mosaic_ID.appendRow(value_objs)
         self.tableView_mosaic_ID.setModel(self.qmodel_mosaic_ID)
         self.update()
 
-
-    def slot_delete_key(self):
-        if self.tableView_mosaic_frame.selectionModel().hasSelection():
-            index = self.tableView_mosaic_frame.currentIndex().row()
-            print('무엇을 삭제할지 여기서 정의 frame')
-            self.qmodel_mosaic_frame.removeRow(index)
-            self.df_to_tableView_mosaic_frame()
-        if self.tableView_mosaic_ID.selectionModel().hasSelection():
-            index = self.tableView_mosaic_ID.currentIndex().row()
-            print('무엇을 삭제할지 여기서 정의 ID')
-            self.qmodel_mosaic_ID.removeRow(index)
+    def delete_key(self):
+        # 2가지 테이블중 어떤 테이블이 선택되었는지 확인
+        if self.table == 'ID':
+            print('id')
+            index = self.tableView_mosaic_ID.currentIndex()
+            row = index.row()
+            id = self.df_id.iloc[row]['ID']
+            DT.df = DT.df[DT.df['ID'] != id]
             self.df_to_tableView_mosaic_ID()
-        index = self.tableView_mosaic_frame.currentIndex().row()
-        
+        elif self.table == 'frame':
+            index = self.tableView_mosaic_frame.currentIndex()
+            row = index.row()
+            frame = self.df_frame.iloc[row]['frame']
+            DT.df = DT.df[DT.df['frame'] != frame]
+            self.df_frame = DT.df[['frame']].drop_duplicates()
+            self.df_to_tableView_mosaic_frame()
+
+    def selected_table(self, table_name):
+        if table_name == 'ID':
+            self.table = 'ID'
+        elif table_name == 'frame':
+            self.table = 'frame'
+        else:
+            print('테이블이 선택되지 않음')
+        self.update()
 
 
     def program_exit(self):
         print('Ui_Bike 프로그램 종료')
 
-    def playplot(self, img):
-        print('모자이크 이미지 처리')
+
+class WorkerMosaic(Process):
+
+    def __init__(self, queue, fileName, df, start_point, end_point, total_frames, fps, width, height, ratio):
+        Process.__init__(self)   
+        self.fileName = fileName
+        self.df = df
+        self.start_point = start_point
+        self.end_point = end_point
+        self.total_frames = total_frames
+        self.fps = fps
+        self.width = width
+        self.height = height
+        self.ratio = ratio
+        self.queue = queue
+        
+    def run(self):
+        self.queue.put(0)
+        start = self.start_point  
+        end = self.end_point  
+        cap = cv2.VideoCapture(self.fileName)
+        fileName = os.path.basename(self.fileName)
+        outdir  = os.path.dirname(self.fileName)
+        output_path = os.path.join(outdir, 'output')
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+        outfile = os.path.join(output_path, f'{fileName}')
+        self.video = cv2.VideoWriter(outfile, cv2.VideoWriter_fourcc(*'mp4v'), self.fps, (self.width, self.height))
+        for frame in range(start, end+1):
+            processed_frame = frame - start
+            progress_var = int((processed_frame / (end) * 100 ) )+1
+            self.queue.put(progress_var)
+            print(f'progress_var: {progress_var}')
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+            _, img = cap.read()
+            img = self.plot_df_to_mosaic(img, frame)
+            self.video.write(img)             
+        self.video.release()
+        tools.openpath(output_path)
+
+    def plot_df_to_mosaic(self, img, cap_num):
+        img = img.copy()
+        df = self.df
+        cap_num = int(cap_num)
+        df = df[df['frame']== cap_num]
+        for index, row in df.iterrows():
+            xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']  # roi에서의 상대적 좌표
+            xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)  # roi에서 전체 이미지로 좌표 변환
+            img = tools.mosaic(img, xmin, ymin, xmax, ymax, ratio=self.ratio)
         return img
+
 
 
 
@@ -322,55 +417,4 @@ class DetectorMosaic_v2(QObject):
         return pts
 
 
-class WorkerMosaic(Process):
-    
-    def __init__(self, queue, fileName, df, start_point, end_point, total_frames, fps, width, height, ratio):
-        super().__init__()  # Process 클래스의 __init__ 호출
-        self.fileName = fileName
-        self.df = df
-        self.start_point = start_point
-        self.end_point = end_point
-        self.total_frames = total_frames
-        self.fps = fps
-        self.width = width
-        self.height = height
-        self.ratio = ratio
-        self.queue = queue
-        
-        
-
-    def run(self):
-        start = self.start_point if self.start_point else 0
-        end = self.end_point if self.end_point else self.total_frames
-        cap = cv2.VideoCapture(self.fileName)
-        fileName = os.path.basename(self.fileName)
-        outdir  = os.path.dirname(self.fileName)
-        output_path = os.path.join(outdir, 'output')
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
-        outfile = os.path.join(output_path, f'{fileName}')
-        self.video = cv2.VideoWriter(outfile, cv2.VideoWriter_fourcc(*'mp4v'), self.fps, (self.width, self.height))
-        for frame in range(start, end+1):
-            processed_frame = frame - start
-            progress = int((processed_frame / end+1) * 100)
-            print(progress)
-            text = f'{progress}'
-            self.queue.put(text)
-            cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
-            ret, img = cap.read()
-            img = self.plot_df_to_mosaic(img, frame)
-            self.video.write(img)             
-        self.video.release()
-        tools.openpath(output_path)
-
-    def plot_df_to_mosaic(self, img, cap_num):
-        img = img.copy()
-        df = self.df
-        cap_num = int(cap_num)
-        df = df[df['frame']== cap_num]
-        for index, row in df.iterrows():
-            xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']  # roi에서의 상대적 좌표
-            xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)  # roi에서 전체 이미지로 좌표 변환
-            img = tools.mosaic(img, xmin, ymin, xmax, ymax, ratio=self.ratio)
-        return img
 

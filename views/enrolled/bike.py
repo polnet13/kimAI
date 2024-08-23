@@ -49,7 +49,7 @@ class Bike(Ui_Bike, QWidget):
     def program_exit(self):
         print('Ui_Bike 프로그램 종료')
 
-    def playplot(self, img):
+    def applyImageProcessing(self, img):
         '''bike 모드에서는 아직 미확정'''
         print('bike 이미지 처리')
         return img

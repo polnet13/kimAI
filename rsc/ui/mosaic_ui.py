@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mosaic.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,7 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
     QProgressBar, QPushButton, QSizePolicy, QSlider,
-    QTableView, QVBoxLayout, QWidget)
+    QSpacerItem, QTableView, QVBoxLayout, QWidget)
 
 class Ui_mosaic(object):
     def setupUi(self, mosaic):
@@ -29,18 +29,13 @@ class Ui_mosaic(object):
         self.verticalLayoutWidget_12.setGeometry(QRect(0, 0, 371, 571))
         self.verticalLayout_7 = QVBoxLayout(self.verticalLayoutWidget_12)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.verticalLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_7.setContentsMargins(11, 11, 11, 11)
         self.horizontalLayout_7 = QHBoxLayout()
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.label_11 = QLabel(self.verticalLayoutWidget_12)
         self.label_11.setObjectName(u"label_11")
 
         self.horizontalLayout_7.addWidget(self.label_11)
-
-        self.label = QLabel(self.verticalLayoutWidget_12)
-        self.label.setObjectName(u"label")
-
-        self.horizontalLayout_7.addWidget(self.label)
 
         self.slider_mosaic = QSlider(self.verticalLayoutWidget_12)
         self.slider_mosaic.setObjectName(u"slider_mosaic")
@@ -50,17 +45,31 @@ class Ui_mosaic(object):
 
         self.horizontalLayout_7.addWidget(self.slider_mosaic)
 
+        self.label = QLabel(self.verticalLayoutWidget_12)
+        self.label.setObjectName(u"label")
+
+        self.horizontalLayout_7.addWidget(self.label)
+
+        self.horizontalSpacer = QSpacerItem(10, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_7.addItem(self.horizontalSpacer)
+
 
         self.verticalLayout_7.addLayout(self.horizontalLayout_7)
 
-        self.progressBar_mosaic = QProgressBar(self.verticalLayoutWidget_12)
-        self.progressBar_mosaic.setObjectName(u"progressBar_mosaic")
-        self.progressBar_mosaic.setValue(0)
+        self.label_2 = QLabel(self.verticalLayoutWidget_12)
+        self.label_2.setObjectName(u"label_2")
 
-        self.verticalLayout_7.addWidget(self.progressBar_mosaic)
+        self.verticalLayout_7.addWidget(self.label_2)
 
         self.tableView_mosaic_ID = QTableView(self.verticalLayoutWidget_12)
         self.tableView_mosaic_ID.setObjectName(u"tableView_mosaic_ID")
+        self.tableView_mosaic_ID.setEnabled(True)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(5)
+        sizePolicy.setHeightForWidth(self.tableView_mosaic_ID.sizePolicy().hasHeightForWidth())
+        self.tableView_mosaic_ID.setSizePolicy(sizePolicy)
         self.tableView_mosaic_ID.setStyleSheet(u"background-color: rgb(40, 44, 52);\n"
 "selection-background-color: rgb(255, 35, 86);\n"
 "alternate-background-color: rgb(157, 255, 29);\n"
@@ -69,8 +78,18 @@ class Ui_mosaic(object):
 
         self.verticalLayout_7.addWidget(self.tableView_mosaic_ID)
 
+        self.label_3 = QLabel(self.verticalLayoutWidget_12)
+        self.label_3.setObjectName(u"label_3")
+
+        self.verticalLayout_7.addWidget(self.label_3)
+
         self.tableView_mosaic_frame = QTableView(self.verticalLayoutWidget_12)
         self.tableView_mosaic_frame.setObjectName(u"tableView_mosaic_frame")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(3)
+        sizePolicy1.setHeightForWidth(self.tableView_mosaic_frame.sizePolicy().hasHeightForWidth())
+        self.tableView_mosaic_frame.setSizePolicy(sizePolicy1)
         self.tableView_mosaic_frame.setStyleSheet(u"background-color: rgb(40, 44, 52);\n"
 "border: 1px solid #CCCCCC;\n"
 "gridline-color: #CCCCCC;\n"
@@ -82,6 +101,12 @@ class Ui_mosaic(object):
 "")
 
         self.verticalLayout_7.addWidget(self.tableView_mosaic_frame)
+
+        self.progressBar_mosaic = QProgressBar(self.verticalLayoutWidget_12)
+        self.progressBar_mosaic.setObjectName(u"progressBar_mosaic")
+        self.progressBar_mosaic.setValue(0)
+
+        self.verticalLayout_7.addWidget(self.progressBar_mosaic)
 
         self.verticalLayout_10 = QVBoxLayout()
         self.verticalLayout_10.setObjectName(u"verticalLayout_10")
@@ -138,6 +163,8 @@ class Ui_mosaic(object):
         mosaic.setWindowTitle(QCoreApplication.translate("mosaic", u"Form", None))
         self.label_11.setText(QCoreApplication.translate("mosaic", u"\ubaa8\uc790\uc774\ud06c \uc815\ub3c4", None))
         self.label.setText(QCoreApplication.translate("mosaic", u"50", None))
+        self.label_2.setText(QCoreApplication.translate("mosaic", u"\uac1d\uccb4", None))
+        self.label_3.setText(QCoreApplication.translate("mosaic", u"frame", None))
 #if QT_CONFIG(tooltip)
         self.pushButton_4.setToolTip(QCoreApplication.translate("mosaic", u"\ub2e8\ucd95\ud0a4: 4", None))
 #endif // QT_CONFIG(tooltip)

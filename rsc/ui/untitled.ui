@@ -13,6 +13,12 @@
     <height>612</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="font">
    <font>
     <weight>50</weight>
@@ -23,11 +29,30 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(40, 44, 52);</string>
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="styleSheet">
-    <string notr="true">color: rgb(211, 211, 211);</string>
+    <string notr="true">background-color: rgb(40, 44, 52);
+
+color: rgb(211, 211, 211);
+
+QPushButton {
+    border: 1px solid #CCCCCC;
+	font-size: 11px; /* 글자 크기 */
+	padding: 5px 5px; /* 내부 여백 */
+}
+QPushButton:hover {
+	background-color: rgb(85, 170, 255);
+	font-size: 12px; /* 글자 크기 */
+    color: black; /* 호버 상태 텍스트 색상 */
+    }</string>
    </property>
    <widget class="QFrame" name="leftMenuBg">
     <property name="geometry">
@@ -74,6 +99,12 @@
      </property>
      <item>
       <widget class="QFrame" name="leftMenuFrame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
@@ -97,48 +128,25 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QFrame" name="toggleBox">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>45</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="sizeConstraint">
-            <enum>QLayout::SetFixedSize</enum>
-           </property>
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-          </layout>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignTop">
          <widget class="QFrame" name="topMenu">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+	border-style: none;
+  	font-size: 11px; /* 글자 크기 */
+	padding: 5px 5px; /* 내부 여백 */
+}
+QPushButton:hover {
+	
+	background-color: rgb(61, 67, 79);
+    font-size: 12px; /* 글자 크기 */
+	color: rgb(255, 248, 171);
+    }</string>
           </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
@@ -179,7 +187,7 @@
              <property name="font">
               <font>
                <family>Segoe UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>-1</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -195,7 +203,7 @@
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>home</string>
+              <string>Home</string>
              </property>
             </widget>
            </item>
@@ -216,7 +224,7 @@
              <property name="font">
               <font>
                <family>Segoe UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>-1</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -253,7 +261,7 @@
              <property name="font">
               <font>
                <family>Segoe UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>-1</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -290,7 +298,7 @@
              <property name="font">
               <font>
                <family>Segoe UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>-1</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -327,7 +335,7 @@
              <property name="font">
               <font>
                <family>Segoe UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>-1</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -364,7 +372,7 @@
              <property name="font">
               <font>
                <family>Segoe UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>-1</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -401,7 +409,7 @@
              <property name="font">
               <font>
                <family>Segoe UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>-1</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -438,7 +446,7 @@
              <property name="font">
               <font>
                <family>Segoe UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>-1</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -475,7 +483,7 @@
              <property name="font">
               <font>
                <family>Segoe UI</family>
-               <pointsize>10</pointsize>
+               <pointsize>-1</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -495,6 +503,42 @@
              </property>
             </widget>
            </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="toggleBox">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>45</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="sizeConstraint">
+            <enum>QLayout::SetFixedSize</enum>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
           </layout>
          </widget>
         </item>
@@ -528,7 +572,7 @@
           <property name="font">
            <font>
             <family>Segoe UI</family>
-            <pointsize>10</pointsize>
+            <pointsize>-1</pointsize>
             <weight>50</weight>
             <italic>false</italic>
             <bold>false</bold>
@@ -541,7 +585,17 @@
            <enum>Qt::LeftToRight</enum>
           </property>
           <property name="styleSheet">
-           <string notr="true"/>
+           <string notr="true">QPushButton {
+	border-style: none;
+  	font-size: 15px; /* 글자 크기 */
+	padding: 5px 5px; /* 내부 여백 */
+}
+QPushButton:hover {
+	
+	background-color: rgb(61, 67, 79);
+    
+	color: rgb(255, 248, 171);
+    }</string>
           </property>
           <property name="text">
            <string>설정</string>
@@ -589,6 +643,18 @@
       <height>591</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    border: 1px solid #CCCCCC;
+	border-radius: 10px; /* 둥근 모서리 */
+	font-size: 12px; /* 글자 크기 */
+	padding: 2px 2px; /* 내부 여백 */
+}
+QPushButton:hover {
+	background-color: rgb(85, 170, 255);
+    color: black; /* 호버 상태 텍스트 색상 */
+    }</string>
+    </property>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="geometry">
       <rect>
@@ -599,473 +665,8 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>-1</number>
      </property>
-     <widget class="QWidget" name="stack_settings">
-      <widget class="QScrollBar" name="horizontalScrollBar">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>220</y>
-         <width>160</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QScrollBar" name="verticalScrollBar">
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>280</y>
-         <width>16</width>
-         <height>160</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-      <widget class="QSlider" name="horizontalSlider">
-       <property name="geometry">
-        <rect>
-         <x>90</x>
-         <y>190</y>
-         <width>160</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QSlider" name="verticalSlider">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>360</y>
-         <width>22</width>
-         <height>160</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-      <widget class="QKeySequenceEdit" name="keySequenceEdit">
-       <property name="geometry">
-        <rect>
-         <x>90</x>
-         <y>260</y>
-         <width>113</width>
-         <height>24</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_12">
-       <property name="geometry">
-        <rect>
-         <x>230</x>
-         <y>30</y>
-         <width>64</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>설정</string>
-       </property>
-      </widget>
-      <widget class="QProgressBar" name="progressBar_6">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>340</y>
-         <width>291</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="value">
-        <number>24</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_13">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>20</y>
-         <width>64</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>해상도</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_xy_">
-       <property name="geometry">
-        <rect>
-         <x>100</x>
-         <y>20</y>
-         <width>64</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_fps_">
-       <property name="geometry">
-        <rect>
-         <x>100</x>
-         <y>50</y>
-         <width>64</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="stack_home">
-      <widget class="QLabel" name="label_10">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>20</y>
-         <width>64</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>home</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="stack_temp"/>
-     <widget class="QWidget" name="stack_mosaic">
-      <widget class="QWidget" name="verticalLayoutWidget_12">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>341</width>
-         <height>561</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_7">
-        <item>
-         <widget class="QProgressBar" name="progressBar_mosaic">
-          <property name="value">
-           <number>0</number>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTableView" name="tableView_mosaic_ID">
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(40, 44, 52);
-selection-background-color: rgb(255, 35, 86);
-alternate-background-color: rgb(157, 255, 29);
-</string>
-          </property>
-          <attribute name="horizontalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTableView" name="tableView_mosaic_frame">
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(40, 44, 52);
-border: 1px solid #CCCCCC;
-gridline-color: #CCCCCC;
-selection-background-color: #E1F5FE;
-selection-color: #0366d6;
-font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;
-
-color:
-</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_10">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QPushButton" name="btn_mosaic_start">
-              <property name="toolTip">
-               <string>단축키: 4</string>
-              </property>
-              <property name="text">
-               <string>시작 점</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btn_mosaic_end">
-              <property name="toolTip">
-               <string>단축키: 5</string>
-              </property>
-              <property name="text">
-               <string>끝 점</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btn_mosaic_analyze">
-              <property name="toolTip">
-               <string>단축키: 6</string>
-              </property>
-              <property name="text">
-               <string>분석</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QPushButton" name="btn_mosaic_add_frame">
-              <property name="toolTip">
-               <string>단축키: 1</string>
-              </property>
-              <property name="text">
-               <string>프레임 추가</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btn_mosaic_add_frams">
-              <property name="toolTip">
-               <string>단축키: 2</string>
-              </property>
-              <property name="text">
-               <string>전체 추가</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btn_mosaic_video_out">
-              <property name="toolTip">
-               <string>단축키: 3</string>
-              </property>
-              <property name="text">
-               <string>생성</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>모자이크 정도</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="slider_bike_mosaic">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="stack_bike">
-      <widget class="QWidget" name="gridLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>9</x>
-         <y>440</y>
-         <width>331</width>
-         <height>145</height>
-        </rect>
-       </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="5">
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>5</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="6">
-         <widget class="QLineEdit" name="text_num">
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="6">
-         <widget class="QPushButton" name="pushButton_3">
-          <property name="text">
-           <string>6</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <widget class="QLineEdit" name="text_giho">
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="text_si">
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>4</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QPushButton" name="pushButton_4">
-          <property name="text">
-           <string>1</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="5">
-         <widget class="QPushButton" name="pushButton_5">
-          <property name="text">
-           <string>2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="6">
-         <widget class="QPushButton" name="pushButton_6">
-          <property name="text">
-           <string>3</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QTableView" name="tableView_bike">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>20</y>
-         <width>311</width>
-         <height>411</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="stack_cctv">
-      <widget class="QWidget" name="verticalLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>20</y>
-         <width>361</width>
-         <height>471</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QPushButton" name="btn_multi_reset">
-            <property name="text">
-             <string>reset</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btn_multi_open">
-            <property name="text">
-             <string>파일 열기</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btn_multi_complete_open">
-            <property name="text">
-             <string>완료 열기</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>민감도</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="slider_multi_thr">
-            <property name="font">
-             <font>
-              <family>Segoe UI</family>
-              <pointsize>10</pointsize>
-              <weight>50</weight>
-              <italic>false</italic>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="value">
-             <number>50</number>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QTextBrowser" name="textBrowser_multi"/>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="vLayout_dongzip_statusbar">
-          <property name="sizeConstraint">
-           <enum>QLayout::SetMinimumSize</enum>
-          </property>
-          <property name="leftMargin">
-           <number>3</number>
-          </property>
-          <property name="topMargin">
-           <number>3</number>
-          </property>
-          <property name="rightMargin">
-           <number>3</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </widget>
     </widget>
     <widget class="QLabel" name="label">
      <property name="geometry">
@@ -1199,6 +800,12 @@ background-color: rgb(61, 50, 44);</string>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="contextMenuPolicy">
     <enum>Qt::NoContextMenu</enum>
    </property>

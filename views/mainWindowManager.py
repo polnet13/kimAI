@@ -1,9 +1,8 @@
 import subprocess
 import sys
-from PySide6.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QLabel, QGridLayout, QHBoxLayout, QComboBox
-from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout, QSlider, QTableView, QHeaderView
-from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
-from PySide6.QtCore import QTimer, Qt
+import json
+from PySide6.QtWidgets import QMainWindow, QFileDialog  
+from PySide6.QtCore import QTimer, Qt 
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6 import QtGui
 from PySide6.QtGui import QKeySequence, QShortcut  
@@ -12,15 +11,16 @@ from rsc.ui.untitled_ui import Ui_MainWindow
 # 외부 모듈
 import os, time
 import cv2
-from multiprocessing import Process, Queue
+import torch
 # 사용자
 from control import tools
-from views import enrolled, generic
+from views import generic
 from views.sharedData import DT
-from views.enrolled.cctv_multi import CCTV, MultiCCTV
-from views.enrolled.bike import Bike, DetectorBike
-from views.enrolled.mosaic_v2 import Mosaic, DetectorMosaic_v2  
-import pandas as pd
+from views.enrolled.cctv_multi import CCTV 
+from views.enrolled.bike import Bike 
+from views.enrolled.mosaic_v2 import Mosaic 
+from views.enrolled.home import Home
+from views.enrolled.settings import Settings
 
 
 
@@ -30,25 +30,38 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
     def __init__(self):
         super().__init__()
-
         self.setupUi(self)
-
+        self.setFixedSize(1179,612)
+        
         # 로드 탭
+        self.tab_home = Home()
+        self.stackedWidget.addWidget(self.tab_home)
+        
+        json_path = os.path.join(DT.BASE_DIR, 'rsc', 'json', 'options.json')
+        with open(json_path, "r") as f:
+            options = json.load(f)
+        self.tab_settings = Settings(options)
+        self.stackedWidget.addWidget(self.tab_settings)
+
         self.tab_mosaic = Mosaic() 
         self.stackedWidget.addWidget(self.tab_mosaic)   
-        self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_mosaic))
         self.tab_bike = Bike() 
         self.stackedWidget.addWidget(self.tab_bike)
-        self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_bike))
         self.tab_cctv = CCTV() 
         self.stackedWidget.addWidget(self.tab_cctv)
-        self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_cctv))
+
+        self.stackedWidget.setCurrentIndex(DT.index)
         self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
-        self.detector = self.tab_cctv
 
-
+        index_dict = {
+            0: self.tab_home, 
+            1: self.tab_settings, 
+            2: self.tab_mosaic, 
+            3: self.tab_bike, 
+            4: self.tab_cctv
+            }
+        self.detector = index_dict[DT.index]
         # 멀티 프로세싱 관련 변수
-        
         self.statusBar().showMessage(f'스레드: {self.thread}')
         # 메시지 박스 표시 플래그
         self.message_box_shown = False  
@@ -64,7 +77,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 플레이어 객체 생성
         self.player = generic.PlayerClass()
         # 삭제 예정
-
         #################
         ## 시그널 연결 ##
         ################
@@ -126,6 +138,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.key_2.activated.connect(self.btn2)
         self.key_3 = QShortcut(QKeySequence(Qt.Key_3), self)
         self.key_3.activated.connect(self.btn3)
+        
 
     def btn1(self):
         self.detector.btn1()
@@ -152,24 +165,24 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         btnName = btn.objectName()
         
         # SHOW HOME PAGE
-        if btnName == "btn_home":
-            self.stackedWidget.setCurrentWidget(self.stack_home)
-            self.detector = None
-        if btnName == "btn_cctv":
-            self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_cctv))
+        if btnName == "btn_home": #0
+            DT.index = self.stackedWidget.indexOf(self.tab_home)
+            self.detector = self.tab_home
+        if btnName == "btn_cctv": #4
+            DT.index = self.stackedWidget.indexOf(self.tab_cctv)
             self.detector = self.tab_cctv
-        if btnName == "btn_mosaic":
-            self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_mosaic))
+        if btnName == "btn_mosaic": #2
+            DT.index = self.stackedWidget.indexOf(self.tab_mosaic)
             self.detector = self.tab_mosaic
-        if btnName == "btn_bike":
-            self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.tab_bike))
+        if btnName == "btn_bike": #3
+            DT.index = self.stackedWidget.indexOf(self.tab_bike)
             self.detector = self.tab_bike
-        if btnName == "btn_temp1":
-            self.stackedWidget.setCurrentWidget(self.stack_temp)
-            self.detector = None
-        if btnName == "btn_settings":
-            self.stackedWidget.setCurrentWidget(self.stack_settings)
-            self.detector = None    
+        if btnName == "btn_settings": #1
+            DT.index = self.stackedWidget.indexOf(self.tab_settings)
+            self.detector = self.tab_settings
+        self.stackedWidget.setCurrentIndex(DT.index)
+        DT.saveOption(index=DT.index)
+        print(DT.index)
 
     ##############
     ## 슬롯함수 ##
@@ -264,17 +277,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         frameTimer = time.strftime('%H:%M:%S', time.gmtime(DT.cap_num/DT.fps))
         self.playTimer.setText(f'{frameTimer}')
         self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
-        #
-        if DT.selected_mode == 'bike':
-            # 초기화
-            self.text_si.clear()
-            self.text_giho.clear()
-            self.text_num.clear()
-            self.text_si.setText(DT.bike_si)
-            self.text_giho.setText(DT.bike_giho)
-            self.text_num.setText(str(DT.bike_num))
         self.process_time_print()
-        img = self.detector.playplot(img)
+        img = self.detector.applyImageProcessing(img) 
         self.display_img(img)
 
     def process_time_print(self):
@@ -302,11 +306,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.player.open(DT.fileName)
         DT.setMoveSliderScale()
         self.reset_roi()
-        self.statusBar().showMessage(f'파일 경로: {DT.fileName}')
+        self.statusBar().showMessage(f'해상도: {DT.width}*{DT.height}   fps : {DT.fps}')
         # 영상의 전체 프레임수를 가지고 옴
-        self.label_xy_.setText(f'해상도: {DT.width}*{DT.height}')
         self.playSlider.setMaximum(DT.total_frames -1)
-        self.label_fps_.setText(f'fps : {DT.fps}')
         DT.setRoiPoint()
         self.update()
         self.display_img()
@@ -349,7 +351,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     # 테이블뷰 선택된 행 삭제
     def slot_delete_key(self):
         '''delete_tableview_row'''
-        self.detector.slot_delete_key()
+        self.detector.delete_key()
 
     # 리스트뷰 항목 클릭시 해당 프레임으로 이동
     def on_item_clicked(self, index):
@@ -424,6 +426,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.play_status == False:
             self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
             self.player.cap_read()
+            self.detector.applyImageProcessing(DT.img)
             self.display_img()
         
     def jump_frameSlider_moved(self, value):

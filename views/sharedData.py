@@ -1,4 +1,4 @@
-import os
+import os, json
 from control import tools
 import pandas as pd
 
@@ -9,7 +9,9 @@ class DT:
 
     DT.sliderDict: {'태그':{'민감도':3}, ...} 찾을 때: DT.sliderDict['태그']['민감도']
     ''' 
-    device = 'cpu'   # 'cuda' or 'cpu'
+    index = 1
+    check_cuda = None
+    device = None
     # BASE_DIR
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     OUT_DIR = os.path.join(BASE_DIR, 'output')
@@ -48,7 +50,7 @@ class DT:
     region_status = False
     cap_num = 0
     total_frames = 0
-    fpst = 0
+    fps = 0
     width = 0
     height = 0
     realsizeChecked = True
@@ -68,7 +70,23 @@ class DT:
     bike_giho = None
     bike_num = None
     
+    @classmethod
+    def setOption(cls, options):
+        for key, value in options.items():
+            setattr(cls, key, value)
 
+    @classmethod
+    def saveOption(cls, **args):
+
+        json_path = os.path.join(DT.BASE_DIR, 'rsc', 'json', 'options.json')
+        with open(json_path, "r") as f:
+            options = json.load(f)
+            for k, v in args.items():
+                options[k] = v  
+        print(options)
+
+        with open(json_path, "w") as f:
+            json.dump(options, f, indent=4)
 
     @classmethod
     def setMoveSliderScale(cls):

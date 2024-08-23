@@ -111,7 +111,7 @@ class CCTV(Ui_CCTV, QWidget):
         self.queues = []
         self.progress_bars = [] 
         self.workers = []
-        for i in range(self.len_filenames):
+        for filename in fileNames:
             # 큐 생성
             queue = Queue()
             self.queues.append(queue)
@@ -122,6 +122,9 @@ class CCTV(Ui_CCTV, QWidget):
             # 워커 생성
             worker = Worker()
             self.workers.append(worker)
+            # 파일 네임 리스트 생성
+
+
 
     def program_exit(self):
         '''멀티 CCTV 프로그램 종료'''
@@ -129,7 +132,7 @@ class CCTV(Ui_CCTV, QWidget):
         self.terminate_workers()
 
 
-    def playplot(self, img):
+    def applyImageProcessing(self, img):
         '''cctv 모드에서는 roi이미지를 움직임 감지 하여 전체 이미지에 합성'''
         x1, y1, x2, y2 = DT.roi
         x1, y1, x2, y2 = tools.rel_to_abs(DT.img.shape, x1, y1, x2, y2)
@@ -142,12 +145,12 @@ class CCTV(Ui_CCTV, QWidget):
         # 움직임 감지
         self.thr_move_slider = self.slider_move_thr.value()
         roi_img = img[y1:y2, x1:x2]
+        plot_img = roi_img.copy()
         # roi 이미지 가우시안 블러 처리
         height, width = roi_img.shape[:2]
         kernel_size = (width // 70, height // 70)  # 예: 이미지 크기의 1/70
         # 커널 크기는 홀수여야 함
         kernel_size = (kernel_size[0] | 1, kernel_size[1] | 1)
-        print(f'가우시안 블러 커널 사이즈: {kernel_size}')
         roi_img = cv2.GaussianBlur(roi_img, kernel_size, 0)
         # ROI 부분만 움직임 감지
         roi_img, detect_move_bool, contours = self.detect_move(roi_img)     
@@ -156,9 +159,9 @@ class CCTV(Ui_CCTV, QWidget):
             return img
         # # ROI 부분만 욜로 디텍션
         # 컨투어 표시
-        roi_img = tools.draw_contours(roi_img, contours)        
+        plot_img = tools.draw_contours(plot_img, contours)        
         # ROI 이미지를 원본이미지에 합성
-        img = tools.merge_roi_img(img, roi_img, x1, y1)
+        img = tools.merge_roi_img(img, plot_img, x1, y1)
         # 녹화 옵션
         cv2.rectangle(img, (x1, y1),(x2, y2),(0,255,0), 1)
         return img
@@ -174,6 +177,7 @@ class CCTV(Ui_CCTV, QWidget):
             print(f'self.workers: {len(self.workers)}')
             self.workers[i].queue = self.queues[i]
             self.workers[i].obj = self.objects[i]
+            self.workers[i].filename = self.fileNames[i]
         
     def terminate_workers(self):
         '''모든 워커를 종료'''
