@@ -69,6 +69,27 @@ class DT:
     bike_si = None
     bike_giho = None
     bike_num = None
+    # 기타 
+    color_map = {
+        0: (0, 0, 255),   # Red
+        1: (0, 255, 0),   # Green
+        2: (255, 0, 0),   # Blue
+        3: (255, 255, 0), # Yellow
+        4: (255, 0, 255), # Magenta
+        5: (0, 255, 255), # Cyan
+        6: (128, 0, 0),   # Maroon
+        7: (0, 128, 0),   # Dark Green
+        8: (0, 0, 128),   # Navy
+        9: (128, 128, 0), # Olive
+        10: (128, 0, 128),# Purple
+        11: (0, 128, 128),# Teal
+        12: (128, 128, 128), # Gray
+        13: (192, 192, 192), # Silver
+        14: (255, 165, 0),   # Orange
+        15: (255, 192, 203), # Pink
+        16: (0, 0, 0),       # Black
+        17: (255, 255, 255), # White
+    }
     
     @classmethod
     def setOption(cls, options):

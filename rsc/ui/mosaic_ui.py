@@ -15,9 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
-    QProgressBar, QPushButton, QSizePolicy, QSlider,
-    QSpacerItem, QTableView, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QHBoxLayout, QHeaderView,
+    QLabel, QProgressBar, QPushButton, QSizePolicy,
+    QSlider, QSpacerItem, QTableView, QVBoxLayout,
+    QWidget)
 
 class Ui_mosaic(object):
     def setupUi(self, mosaic):
@@ -57,6 +58,11 @@ class Ui_mosaic(object):
 
         self.verticalLayout_7.addLayout(self.horizontalLayout_7)
 
+        self.checkBox_mosaic = QCheckBox(self.verticalLayoutWidget_12)
+        self.checkBox_mosaic.setObjectName(u"checkBox_mosaic")
+
+        self.verticalLayout_7.addWidget(self.checkBox_mosaic)
+
         self.label_2 = QLabel(self.verticalLayoutWidget_12)
         self.label_2.setObjectName(u"label_2")
 
@@ -67,7 +73,7 @@ class Ui_mosaic(object):
         self.tableView_mosaic_ID.setEnabled(True)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(5)
+        sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tableView_mosaic_ID.sizePolicy().hasHeightForWidth())
         self.tableView_mosaic_ID.setSizePolicy(sizePolicy)
         self.tableView_mosaic_ID.setStyleSheet(u"background-color: rgb(40, 44, 52);\n"
@@ -85,9 +91,9 @@ class Ui_mosaic(object):
 
         self.tableView_mosaic_frame = QTableView(self.verticalLayoutWidget_12)
         self.tableView_mosaic_frame.setObjectName(u"tableView_mosaic_frame")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(3)
+        sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.tableView_mosaic_frame.sizePolicy().hasHeightForWidth())
         self.tableView_mosaic_frame.setSizePolicy(sizePolicy1)
         self.tableView_mosaic_frame.setStyleSheet(u"background-color: rgb(40, 44, 52);\n"
@@ -153,6 +159,8 @@ class Ui_mosaic(object):
 
         self.verticalLayout_7.addLayout(self.verticalLayout_10)
 
+        self.verticalLayout_7.setStretch(3, 6)
+        self.verticalLayout_7.setStretch(5, 3)
 
         self.retranslateUi(mosaic)
 
@@ -163,6 +171,7 @@ class Ui_mosaic(object):
         mosaic.setWindowTitle(QCoreApplication.translate("mosaic", u"Form", None))
         self.label_11.setText(QCoreApplication.translate("mosaic", u"\ubaa8\uc790\uc774\ud06c \uc815\ub3c4", None))
         self.label.setText(QCoreApplication.translate("mosaic", u"50", None))
+        self.checkBox_mosaic.setText(QCoreApplication.translate("mosaic", u"\ubaa8\uc790\uc774\ud06c \ubbf8\ub9ac\ubcf4\uae30", None))
         self.label_2.setText(QCoreApplication.translate("mosaic", u"\uac1d\uccb4", None))
         self.label_3.setText(QCoreApplication.translate("mosaic", u"frame", None))
 #if QT_CONFIG(tooltip)

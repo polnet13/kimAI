@@ -83,6 +83,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.btn_fileopen.clicked.connect(self.slot_btn_fileopen)
         self.btn_page_print.clicked.connect(self.slot_btn_print)
         self.btn_play.clicked.connect(self.slot_btn_play)
+        self.btn_region_reset.clicked.connect(self.slot_btn_region_reset)
         # 버튼 좌 메뉴 
         self.btn_home.clicked.connect(self.buttonClick)
         self.btn_cctv.clicked.connect(self.buttonClick)
@@ -318,8 +319,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''관심영역 초기화'''
         print(DT.roi_point)
         if DT.img is None:
-            self.label_roi.setText(f'관심영역: {DT.region_status}') 
-            self.update()
+            return
         else:
             self.reset_roi()
             self.display_img()
@@ -555,8 +555,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     ##########            
     def slot_btn_region_reset(self):
         if DT.img is None:
-            self.label_roi.setText(f'관심영역: {DT.region_status}') 
-            self.update()
+            return
         else:
             self.reset_roi()
             self.display_img()

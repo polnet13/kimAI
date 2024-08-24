@@ -190,3 +190,14 @@ def openpath(path):
         os.startfile(path)
     elif sys.platform.startswith('linux'):
         subprocess.run(['xdg-open', path])
+
+
+
+def getTime(method):
+    def timed(*args, **kw):
+        ts = time.time()
+        result = method(*args, **kw)
+        te = time.time()
+        print(f'{method.__name__} 실행시간: {te-ts:.3f} 초')
+        return result
+    return timed

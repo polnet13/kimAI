@@ -341,7 +341,7 @@ class Ui_MainWindow(object):
         self.btn_home.setText(QCoreApplication.translate("MainWindow", u"Home", None))
         self.btn_cctv.setText(QCoreApplication.translate("MainWindow", u"CCTV", None))
         self.btn_mosaic.setText(QCoreApplication.translate("MainWindow", u"Mosaic", None))
-        self.btn_bike.setText(QCoreApplication.translate("MainWindow", u"\ucea0\ub2e8\uc18d", None))
+        self.btn_bike.setText(QCoreApplication.translate("MainWindow", u"Bike", None))
         self.btn_temp2.setText(QCoreApplication.translate("MainWindow", u"?", None))
         self.btn_temp1_2.setText(QCoreApplication.translate("MainWindow", u"?", None))
         self.btn_temp1_3.setText(QCoreApplication.translate("MainWindow", u"?", None))

@@ -314,7 +314,7 @@ QPushButton:hover {
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>캠단속</string>
+              <string>Bike</string>
              </property>
             </widget>
            </item>

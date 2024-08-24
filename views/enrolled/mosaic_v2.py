@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QWidget, QAbstractItemView
 import time
 from multiprocessing import Process, Queue
 from rsc.ui.mosaic_ui import Ui_mosaic 
-
+from control.tools import getTime
  
 
 class Mosaic(Ui_mosaic, QWidget):
@@ -42,6 +42,7 @@ class Mosaic(Ui_mosaic, QWidget):
         DT.end_point = DT.cap_num
         self.pushButton_5.setText(f'끝: {DT.end_point}')
 
+    @getTime
     def btn6(self):
         '''숫자6 입력시 분석 실행되는 함수'''
         self.progressBar_mosaic.setValue(0)
@@ -65,8 +66,6 @@ class Mosaic(Ui_mosaic, QWidget):
                 # 욜로 트래커 초기화
                 self.detector = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt'))
                 detections = self.detector.track(frame, persist=True, device=DT.device)[0]
-            # yolo result 객체의 boxes 속성에는 xmin, ymin, xmax, ymax, confidence_score, class_id 값이 담겨 있음
-            
             for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
                 if len(data) < 7:  # data 리스트의 길이가 7보다 작은 경우 해당 데이터를 건너뛰도록 합니다. 이를 통해 인덱스 오류를 방지
                     continue
@@ -78,10 +77,6 @@ class Mosaic(Ui_mosaic, QWidget):
                     continue
                 if confidence < 1/100:
                     continue
-                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (200,100,200), 1)
-                cv2.putText(frame, f'{track_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 0.5, (255,255,255), 1)
-                # 추적한 id값이 새로운 id 이고 태그 옵션이 켜져 있으면 값을 딕셔너리에 추가
-                # xmin, ymin, xmax, ymax의 값은 roi_img의 상대좌표인데, 이를 전체 이미지에서의 상대좌표로 변환(전체 이미지 shape은 DT.img.shape)
                 xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
                 # df, temp_df 정리
                 DT.detection_add(cap_num-1, track_id, label, xmin, ymin, xmax, ymax, confidence)
@@ -165,15 +160,18 @@ class Mosaic(Ui_mosaic, QWidget):
     def applyImageProcessing(self, img=None):
         if img is None:
             img = DT.img.copy()
-        print('모자이크 이미지 처리')
-        print(DT.df)
         df = DT.df[DT.df['frame']==DT.cap_num]
         # 모자이크 처리
         for index, row in df.iterrows():
             xmin, ymin, xmax, ymax = row['x1'], row['y1'], row['x2'], row['y2']
             xmin, ymin, xmax, ymax = tools.rel_to_abs(img.shape, xmin, ymin, xmax, ymax)
-            img = tools.mosaic(img, xmin, ymin, xmax, ymax, ratio=self.slider_mosaic.value()/600)
-            img = cv2.putText(img, f'{row["ID"]}', (xmin, ymin-5), cv2.FONT_ITALIC, 3, (0,255,0))
+            _id = int(row["ID"])
+            color = DT.color_map[_id%18]
+            if self.checkBox_mosaic.isChecked():
+                img = tools.mosaic(img, xmin, ymin, xmax, ymax, ratio=self.slider_mosaic.value()/600)
+            else:
+                img = cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color, 5)
+                img = cv2.putText(img, f'{_id}', (xmin, ymin-5), cv2.FONT_ITALIC, 3, color, 5)
         return img
 
     def slot_mosaic_valueChanged(self):
