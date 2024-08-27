@@ -15,9 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton,
-    QSizePolicy, QSlider, QTextBrowser, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLayout,
+    QPushButton, QSizePolicy, QSlider, QSpacerItem,
+    QVBoxLayout, QWidget)
 
 class Ui_CCTV(object):
     def setupUi(self, CCTV):
@@ -28,15 +28,23 @@ class Ui_CCTV(object):
         self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
         self.verticalLayoutWidget.setGeometry(QRect(0, 0, 371, 571))
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout.setSpacing(7)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.verticalLayout.setContentsMargins(11, 11, 11, 11)
         self.label_2 = QLabel(self.verticalLayoutWidget)
         self.label_2.setObjectName(u"label_2")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
+        self.label_2.setSizePolicy(sizePolicy)
 
         self.verticalLayout.addWidget(self.label_2)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setSizeConstraint(QLayout.SetMinimumSize)
         self.btn_multi_open = QPushButton(self.verticalLayoutWidget)
         self.btn_multi_open.setObjectName(u"btn_multi_open")
 
@@ -84,16 +92,20 @@ class Ui_CCTV(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
 
-        self.textBrowser_multi = QTextBrowser(self.verticalLayoutWidget)
-        self.textBrowser_multi.setObjectName(u"textBrowser_multi")
+        self.verticalSpacer = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.verticalLayout.addWidget(self.textBrowser_multi)
+        self.verticalLayout.addItem(self.verticalSpacer)
 
         self.vLayout_dongzip_statusbar = QVBoxLayout()
         self.vLayout_dongzip_statusbar.setObjectName(u"vLayout_dongzip_statusbar")
+        self.vLayout_dongzip_statusbar.setSizeConstraint(QLayout.SetMaximumSize)
 
         self.verticalLayout.addLayout(self.vLayout_dongzip_statusbar)
 
+        self.verticalLayout.setStretch(0, 1)
+        self.verticalLayout.setStretch(1, 1)
+        self.verticalLayout.setStretch(2, 1)
+        self.verticalLayout.setStretch(4, 9)
 
         self.retranslateUi(CCTV)
 

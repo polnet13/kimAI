@@ -22,7 +22,13 @@
      <height>571</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1,1,0,9">
+    <property name="spacing">
+     <number>7</number>
+    </property>
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
     <property name="leftMargin">
      <number>11</number>
     </property>
@@ -37,6 +43,12 @@
     </property>
     <item>
      <widget class="QLabel" name="label_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="text">
        <string>CCTV 관심영역 추출하기(동영상 여러개 선택)</string>
       </property>
@@ -44,6 +56,9 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
+      </property>
       <item>
        <widget class="QPushButton" name="btn_multi_open">
         <property name="text">
@@ -108,10 +123,24 @@
      </layout>
     </item>
     <item>
-     <widget class="QTextBrowser" name="textBrowser_multi"/>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>10</height>
+       </size>
+      </property>
+     </spacer>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="vLayout_dongzip_statusbar"/>
+     <layout class="QVBoxLayout" name="vLayout_dongzip_statusbar">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMaximumSize</enum>
+      </property>
+     </layout>
     </item>
    </layout>
   </widget>

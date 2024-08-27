@@ -63,10 +63,20 @@ class Ui_mosaic(object):
 
         self.verticalLayout_7.addWidget(self.checkBox_mosaic)
 
-        self.label_2 = QLabel(self.verticalLayoutWidget_12)
-        self.label_2.setObjectName(u"label_2")
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.btn_move_start = QPushButton(self.verticalLayoutWidget_12)
+        self.btn_move_start.setObjectName(u"btn_move_start")
 
-        self.verticalLayout_7.addWidget(self.label_2)
+        self.horizontalLayout.addWidget(self.btn_move_start)
+
+        self.btn_move_end = QPushButton(self.verticalLayoutWidget_12)
+        self.btn_move_end.setObjectName(u"btn_move_end")
+
+        self.horizontalLayout.addWidget(self.btn_move_end)
+
+
+        self.verticalLayout_7.addLayout(self.horizontalLayout)
 
         self.tableView_mosaic_ID = QTableView(self.verticalLayoutWidget_12)
         self.tableView_mosaic_ID.setObjectName(u"tableView_mosaic_ID")
@@ -83,30 +93,6 @@ class Ui_mosaic(object):
         self.tableView_mosaic_ID.horizontalHeader().setVisible(False)
 
         self.verticalLayout_7.addWidget(self.tableView_mosaic_ID)
-
-        self.label_3 = QLabel(self.verticalLayoutWidget_12)
-        self.label_3.setObjectName(u"label_3")
-
-        self.verticalLayout_7.addWidget(self.label_3)
-
-        self.tableView_mosaic_frame = QTableView(self.verticalLayoutWidget_12)
-        self.tableView_mosaic_frame.setObjectName(u"tableView_mosaic_frame")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.tableView_mosaic_frame.sizePolicy().hasHeightForWidth())
-        self.tableView_mosaic_frame.setSizePolicy(sizePolicy1)
-        self.tableView_mosaic_frame.setStyleSheet(u"background-color: rgb(40, 44, 52);\n"
-"border: 1px solid #CCCCCC;\n"
-"gridline-color: #CCCCCC;\n"
-"selection-background-color: #E1F5FE;\n"
-"selection-color: #0366d6;\n"
-"font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n"
-"\n"
-"color:\n"
-"")
-
-        self.verticalLayout_7.addWidget(self.tableView_mosaic_frame)
 
         self.progressBar_mosaic = QProgressBar(self.verticalLayoutWidget_12)
         self.progressBar_mosaic.setObjectName(u"progressBar_mosaic")
@@ -160,7 +146,6 @@ class Ui_mosaic(object):
         self.verticalLayout_7.addLayout(self.verticalLayout_10)
 
         self.verticalLayout_7.setStretch(3, 6)
-        self.verticalLayout_7.setStretch(5, 3)
 
         self.retranslateUi(mosaic)
 
@@ -172,8 +157,8 @@ class Ui_mosaic(object):
         self.label_11.setText(QCoreApplication.translate("mosaic", u"\ubaa8\uc790\uc774\ud06c \uc815\ub3c4", None))
         self.label.setText(QCoreApplication.translate("mosaic", u"50", None))
         self.checkBox_mosaic.setText(QCoreApplication.translate("mosaic", u"\ubaa8\uc790\uc774\ud06c \ubbf8\ub9ac\ubcf4\uae30", None))
-        self.label_2.setText(QCoreApplication.translate("mosaic", u"\uac1d\uccb4", None))
-        self.label_3.setText(QCoreApplication.translate("mosaic", u"frame", None))
+        self.btn_move_start.setText(QCoreApplication.translate("mosaic", u"\uc2dc\uc791 \uc810 \ubc14\ub85c\uac00\uae30", None))
+        self.btn_move_end.setText(QCoreApplication.translate("mosaic", u"\ub05d \uc810 \ubc14\ub85c\uac00\uae30", None))
 #if QT_CONFIG(tooltip)
         self.pushButton_4.setToolTip(QCoreApplication.translate("mosaic", u"\ub2e8\ucd95\ud0a4: 4", None))
 #endif // QT_CONFIG(tooltip)

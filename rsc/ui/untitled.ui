@@ -105,6 +105,22 @@ QPushButton:hover {
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="styleSheet">
+        <string notr="true">QFrame {
+    border-right: 1px solid rgb(0, 0, 0); /* 오른쪽 테두리만 설정 */
+}
+
+
+QPushButton {
+	font-size: 11px; /* 글자 크기 */
+	padding: 5px 5px; /* 내부 여백 */
+}
+QPushButton:hover {
+	background-color: rgb(255, 255, 127);
+	font-size: 12px; /* 글자 크기 */
+    color: black; /* 호버 상태 텍스트 색상 */
+    }</string>
+       </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
@@ -136,17 +152,7 @@ QPushButton:hover {
            </sizepolicy>
           </property>
           <property name="styleSheet">
-           <string notr="true">QPushButton {
-	border-style: none;
-  	font-size: 11px; /* 글자 크기 */
-	padding: 5px 5px; /* 내부 여백 */
-}
-QPushButton:hover {
-	
-	background-color: rgb(61, 67, 79);
-    font-size: 12px; /* 글자 크기 */
-	color: rgb(255, 248, 171);
-    }</string>
+           <string notr="true"/>
           </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
@@ -170,43 +176,6 @@ QPushButton:hover {
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item>
-            <widget class="QPushButton" name="btn_home">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Segoe UI</family>
-               <pointsize>-1</pointsize>
-               <weight>50</weight>
-               <italic>false</italic>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="cursor">
-              <cursorShape>PointingHandCursor</cursorShape>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>Home</string>
-             </property>
-            </widget>
-           </item>
            <item>
             <widget class="QPushButton" name="btn_cctv">
              <property name="sizePolicy">
@@ -278,228 +247,6 @@ QPushButton:hover {
              </property>
              <property name="text">
               <string>Mosaic</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_bike">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Segoe UI</family>
-               <pointsize>-1</pointsize>
-               <weight>50</weight>
-               <italic>false</italic>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="cursor">
-              <cursorShape>PointingHandCursor</cursorShape>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>Bike</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_temp2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Segoe UI</family>
-               <pointsize>-1</pointsize>
-               <weight>50</weight>
-               <italic>false</italic>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="cursor">
-              <cursorShape>PointingHandCursor</cursorShape>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>?</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_temp1_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Segoe UI</family>
-               <pointsize>-1</pointsize>
-               <weight>50</weight>
-               <italic>false</italic>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="cursor">
-              <cursorShape>PointingHandCursor</cursorShape>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>?</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_temp1_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Segoe UI</family>
-               <pointsize>-1</pointsize>
-               <weight>50</weight>
-               <italic>false</italic>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="cursor">
-              <cursorShape>PointingHandCursor</cursorShape>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>?</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_temp1_4">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Segoe UI</family>
-               <pointsize>-1</pointsize>
-               <weight>50</weight>
-               <italic>false</italic>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="cursor">
-              <cursorShape>PointingHandCursor</cursorShape>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>?</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_temp1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>45</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Segoe UI</family>
-               <pointsize>-1</pointsize>
-               <weight>50</weight>
-               <italic>false</italic>
-               <bold>false</bold>
-              </font>
-             </property>
-             <property name="cursor">
-              <cursorShape>PointingHandCursor</cursorShape>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>?</string>
              </property>
             </widget>
            </item>
@@ -585,17 +332,7 @@ QPushButton:hover {
            <enum>Qt::LeftToRight</enum>
           </property>
           <property name="styleSheet">
-           <string notr="true">QPushButton {
-	border-style: none;
-  	font-size: 15px; /* 글자 크기 */
-	padding: 5px 5px; /* 내부 여백 */
-}
-QPushButton:hover {
-	
-	background-color: rgb(61, 67, 79);
-    
-	color: rgb(255, 248, 171);
-    }</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>설정</string>
@@ -642,6 +379,13 @@ QPushButton:hover {
       <width>1111</width>
       <height>591</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial Black</family>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
@@ -693,8 +437,8 @@ QPushButton:hover {
     <widget class="QLabel" name="label_cap_num">
      <property name="geometry">
       <rect>
-       <x>90</x>
-       <y>550</y>
+       <x>500</x>
+       <y>540</y>
        <width>161</width>
        <height>31</height>
       </rect>
@@ -722,9 +466,9 @@ QPushButton:hover {
     <widget class="QPushButton" name="btn_region_reset">
      <property name="geometry">
       <rect>
-       <x>240</x>
-       <y>550</y>
-       <width>111</width>
+       <x>140</x>
+       <y>530</y>
+       <width>91</width>
        <height>31</height>
       </rect>
      </property>
@@ -735,8 +479,8 @@ QPushButton:hover {
     <widget class="QPushButton" name="btn_fileopen">
      <property name="geometry">
       <rect>
-       <x>510</x>
-       <y>550</y>
+       <x>370</x>
+       <y>530</y>
        <width>81</width>
        <height>31</height>
       </rect>
@@ -748,33 +492,13 @@ QPushButton:hover {
       <string>파일열기</string>
      </property>
     </widget>
-    <widget class="QToolButton" name="btn_play">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>550</y>
-       <width>61</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>단축키: s</string>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">color: #ffffff;
-background-color: rgb(61, 50, 44);</string>
-     </property>
-     <property name="text">
-      <string>play</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="playTimer">
      <property name="geometry">
       <rect>
-       <x>633</x>
-       <y>550</y>
-       <width>91</width>
-       <height>20</height>
+       <x>663</x>
+       <y>540</y>
+       <width>61</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
@@ -787,14 +511,103 @@ background-color: rgb(61, 50, 44);</string>
     <widget class="QPushButton" name="btn_page_print">
      <property name="geometry">
       <rect>
-       <x>370</x>
-       <y>550</y>
-       <width>121</width>
+       <x>250</x>
+       <y>530</y>
+       <width>101</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
       <string>현재 화면 저장</string>
+     </property>
+    </widget>
+    <widget class="QSlider" name="slider_delay">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>570</y>
+       <width>161</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>50</number>
+     </property>
+     <property name="singleStep">
+      <number>1</number>
+     </property>
+     <property name="pageStep">
+      <number>1</number>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>570</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>재생 지연시간</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_delay_time">
+     <property name="geometry">
+      <rect>
+       <x>420</x>
+       <y>570</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>0 ms</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_play">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>540</y>
+       <width>51</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    color: rgb(0, 0, 0);
+	background-color: rgb(255, 225, 208);
+	font-size: 11px; /* 글자 크기 */
+	padding: 5px 5px; /* 내부 여백 */
+}
+QPushButton:hover {
+	background-color: rgb(85, 170, 255);
+	font-size: 12px; /* 글자 크기 */
+    color: black; /* 호버 상태 텍스트 색상 */
+    }</string>
+     </property>
+     <property name="text">
+      <string>play</string>
      </property>
     </widget>
    </widget>

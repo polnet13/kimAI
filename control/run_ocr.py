@@ -1,6 +1,6 @@
 import os
 import cv2
-from easyocr.easyocr import *
+from easyocr import easyocr
 from fuzzywuzzy import fuzz
 from collections import Counter
 from views.sharedData import DT
@@ -40,7 +40,7 @@ class OcrReader:
     def __init__(self, model_name = DT.model_name):
         # 경로설정 14라인
         path = DT.OCR_MODEL
-        self.reader1 = Reader(['ko'],
+        self.reader1 = easyocr.Reader(['ko'],
                 model_storage_directory= path,
                 user_network_directory= path,
                 recog_network= model_name)

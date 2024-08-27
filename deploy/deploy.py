@@ -46,6 +46,7 @@ target = os.path.join(wd, 'dist', 'main','main.exe')
 comand = f'{target}'
 
 # 파일이 존재하는지 확인
+ 
 if not os.path.isfile(target):
     target = os.path.join(wd, 'dist','main.exe')
 

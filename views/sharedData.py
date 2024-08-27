@@ -128,9 +128,9 @@ class DT:
         h = resolution[3]-resolution[1]
         m = min(w, h)
         pic_count = m**2  # roi의 최소변 제곱
-        magic_num = 15260
-        cls.scale_move_thr = pic_count/magic_num
-        print(f'슬라이더 스케일: {DT.scale_move_thr}')
+        mosaic_const = 15260
+        cls.scale_move_thr = pic_count/mosaic_const
+        print(f'슬라이더 스케일: {cls.scale_move_thr}')
 
 
 
@@ -253,11 +253,7 @@ class DT:
     def addValue(cls, _tag_name, _valDict):
         '''삭제 ㅇ예정'''
         cls.valDict[_tag_name] = _valDict
-
-    @classmethod
-    def setSliderValue(cls, _tag_name, _sliderDict):
-        cls.sliderDict[_tag_name] = _sliderDict
-
+ 
     @classmethod
     def enrollDetectors(cls, tag, _model_dict):
         cls.detector_dict[tag] = _model_dict

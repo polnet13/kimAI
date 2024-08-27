@@ -17,10 +17,10 @@ from control import tools
 from views import generic
 from views.sharedData import DT
 from views.enrolled.cctv_multi import CCTV 
-from views.enrolled.bike import Bike 
 from views.enrolled.mosaic_v2 import Mosaic 
 from views.enrolled.home import Home
 from views.enrolled.settings import Settings
+# from views.enrolled.bike import Bike 
 
 
 
@@ -34,8 +34,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.setFixedSize(1179,612)
         
         # 로드 탭
-        self.tab_home = Home()
-        self.stackedWidget.addWidget(self.tab_home)
+        # self.tab_home = Home()
+        # self.stackedWidget.addWidget(self.tab_home)
         
         json_path = os.path.join(DT.BASE_DIR, 'rsc', 'json', 'options.json')
         with open(json_path, "r") as f:
@@ -45,8 +45,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
         self.tab_mosaic = Mosaic() 
         self.stackedWidget.addWidget(self.tab_mosaic)   
-        self.tab_bike = Bike() 
-        self.stackedWidget.addWidget(self.tab_bike)
+        # self.tab_bike = Bike() 
+        # self.stackedWidget.addWidget(self.tab_bike)
         self.tab_cctv = CCTV() 
         self.stackedWidget.addWidget(self.tab_cctv)
 
@@ -54,13 +54,15 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
 
         index_dict = {
-            0: self.tab_home, 
+            # 0: self.tab_home, 
             1: self.tab_settings, 
             2: self.tab_mosaic, 
-            3: self.tab_bike, 
+            # 3: self.tab_bike, 
             4: self.tab_cctv
             }
         self.detector = index_dict[DT.index]
+        # 시그널 슬롯 연결
+        self.tab_mosaic.signal_frame_move.connect(self.mosaic_move_clicked)
         # 멀티 프로세싱 관련 변수
         self.statusBar().showMessage(f'스레드: {self.thread}')
         # 메시지 박스 표시 플래그
@@ -85,23 +87,24 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.btn_play.clicked.connect(self.slot_btn_play)
         self.btn_region_reset.clicked.connect(self.slot_btn_region_reset)
         # 버튼 좌 메뉴 
-        self.btn_home.clicked.connect(self.buttonClick)
         self.btn_cctv.clicked.connect(self.buttonClick)
-        self.btn_bike.clicked.connect(self.buttonClick)
         self.btn_mosaic.clicked.connect(self.buttonClick)
-        self.btn_temp1.clicked.connect(self.buttonClick)
         self.btn_settings.clicked.connect(self.buttonClick)
+        self.slider_delay.valueChanged.connect(self.slot_delay_valueChanged)
+        # self.btn_home.clicked.connect(self.buttonClick)
+        # self.btn_bike.clicked.connect(self.buttonClick)
+        # self.btn_temp1.clicked.connect(self.buttonClick)
  
 
         #################
         ## 단축키 함수 ##
         ################
-        # 아래 화살표를 눌렀을 때 설정
-        self.down_key = QShortcut(QKeySequence(Qt.Key_Down), self)
-        self.down_key.activated.connect(self.tableview_df_down)
-        # 위 화살표를 눌렀을 때 설정
-        self.up_key = QShortcut(QKeySequence(Qt.Key_Up), self)
-        self.up_key.activated.connect(self.tableview_df_up)
+        # # 아래 화살표를 눌렀을 때 설정
+        # self.down_key = QShortcut(QKeySequence(Qt.Key_Down), self)
+        # self.down_key.activated.connect(self.tableview_df_down)
+        # # 위 화살표를 눌렀을 때 설정
+        # self.up_key = QShortcut(QKeySequence(Qt.Key_Up), self)
+        # self.up_key.activated.connect(self.tableview_df_up)
         # A키 눌렀을 때 설정
         self.s_key = QShortcut(QKeySequence(Qt.Key_A), self)
         self.s_key.activated.connect(self.slot_btn_minusOneFrame) 
@@ -114,12 +117,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # O키 눌렀을 때 설정
         self.d_key = QShortcut(QKeySequence(Qt.Key_O), self)
         self.d_key.activated.connect(self.slot_btn_fileopen)   
-        # 오른쪽 화살표 눌렀을 때 설정
-        self.right_key = QShortcut(QKeySequence(Qt.Key_Right), self)
-        self.right_key.activated.connect(self.plus_gap)       
-        # 왼쪽 화살표 눌렀을 때 설정
-        self.left_key = QShortcut(QKeySequence(Qt.Key_Left), self)
-        self.left_key.activated.connect(self.minus_gap)  
+        # # 오른쪽 화살표 눌렀을 때 설정
+        # self.right_key = QShortcut(QKeySequence(Qt.Key_Right), self)
+        # self.right_key.activated.connect(self.plus_gap)       
+        # # 왼쪽 화살표 눌렀을 때 설정
+        # self.left_key = QShortcut(QKeySequence(Qt.Key_Left), self)
+        # self.left_key.activated.connect(self.minus_gap)  
         # esc키 눌렀을 때 설정
         self.esc_key = QShortcut(QKeySequence(Qt.Key_Escape), self)
         self.esc_key.activated.connect(self.program_exit)   
@@ -166,18 +169,18 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         btnName = btn.objectName()
         
         # SHOW HOME PAGE
-        if btnName == "btn_home": #0
-            DT.index = self.stackedWidget.indexOf(self.tab_home)
-            self.detector = self.tab_home
+        # if btnName == "btn_home": #0
+        #     DT.index = self.stackedWidget.indexOf(self.tab_home)
+        #     self.detector = self.tab_home
         if btnName == "btn_cctv": #4
             DT.index = self.stackedWidget.indexOf(self.tab_cctv)
             self.detector = self.tab_cctv
         if btnName == "btn_mosaic": #2
             DT.index = self.stackedWidget.indexOf(self.tab_mosaic)
             self.detector = self.tab_mosaic
-        if btnName == "btn_bike": #3
-            DT.index = self.stackedWidget.indexOf(self.tab_bike)
-            self.detector = self.tab_bike
+        # if btnName == "btn_bike": #3
+        #     DT.index = self.stackedWidget.indexOf(self.tab_bike)
+        #     self.detector = self.tab_bike
         if btnName == "btn_settings": #1
             DT.index = self.stackedWidget.indexOf(self.tab_settings)
             self.detector = self.tab_settings
@@ -188,6 +191,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     ##############
     ## 슬롯함수 ##
     ##############
+    def slot_delay_valueChanged(self, value):
+        self.time_delay = value
+        self.label_delay_time.setText(f'{value} ms')
+
     def slot_btn_df_reset(self):
         '''탐지내역 초기화'''
         DT.reset()
@@ -212,7 +219,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             return
         DT.fileName = _fileName
         self.player_fileopen()
-        tools.plot_df_to_obj_img(DT.img, 0)
+        tools.plot_df_to_obj_img(DT.img, 0, DT.df)
         
     def slot_btn_minusOneFrame(self):
         _curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)-2
@@ -227,21 +234,25 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         qimage 객체로 변경해서 출력하는 것의 속도 측정
         '''
-        delay = DT.time_delay
         _play_status = not DT.play_status
         DT.setPlayStatus(_play_status)
         DT.setMoveSliderScale()
         self.playSlider.setEnabled(not _play_status)
+        self.slider_delay.setEnabled(not _play_status)
         if DT.play_status:
             # 타임이벤트 생성
             self.timer = QTimer()
             # self.timer.timeout.connect(self.play)
             self.timer.timeout.connect(self.play)
-            self.timer.start(delay)
+            self.timer.start(self.slider_delay.value())
         if DT.play_status == False:
             self.timer.stop()
             DT.detection_list_to_df()
             self.update()
+
+    def mosaic_move_clicked(self, value):
+        DT.cap_num = value
+        self.playSlider.setValue(value)
 
 
     # 이벤트 감지       
@@ -274,10 +285,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 분석용 이미지 선택
         img = DT.img
         DT.setOriginalShape(img.shape[:2])
-        x1, y1, x2, y2 = DT.roi_point[0]
-        frameTimer = time.strftime('%H:%M:%S', time.gmtime(DT.cap_num/DT.fps))
-        self.playTimer.setText(f'{frameTimer}')
-        self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
         self.process_time_print()
         img = self.detector.applyImageProcessing(img) 
         self.display_img(img)
@@ -342,77 +349,77 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     #####################
     def reverse_status_change(self):
         self.reverse_status = not self.reverse_status
-    # 점프 프레임값 +3    
-    def plus_gap(self):
-        self.jump_frameSlider.setValue(self.jump_frameSlider.value() + 3)
-    # 점프 프레임값 -3    
-    def minus_gap(self):
-        self.jump_frameSlider.setValue(self.jump_frameSlider.value() - 3)
+    # # 점프 프레임값 +3    
+    # def plus_gap(self):
+    #     self.jump_frameSlider.setValue(self.jump_frameSlider.value() + 3)
+    # # 점프 프레임값 -3    
+    # def minus_gap(self):
+    #     self.jump_frameSlider.setValue(self.jump_frameSlider.value() - 3)
     # 테이블뷰 선택된 행 삭제
     def slot_delete_key(self):
         '''delete_tableview_row'''
         self.detector.delete_key()
 
-    # 리스트뷰 항목 클릭시 해당 프레임으로 이동
-    def on_item_clicked(self, index):
-        # 해당 위치의 항목을 가져옴
-        row = index.row()
-        # 항목의 텍스트를 가져옴
-        n = self.qmodel_mosaic_frame.item(row, 0).text()
-        n = float(n)
-        # slider 위치를 n 값으로 이동
-        self.playSlider.setValue(n) 
-        self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
-        self.player.cap_read()
-        img = DT.img
-        # cap_num 에 맞춰 바운딩 박스 그림
-        if DT.play_status is False:
-            cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
-            img = tools.plot_df_to_obj_img(img, cap_num)        
-            self.display_img(img)
+    # # 리스트뷰 항목 클릭시 해당 프레임으로 이동
+    # def on_item_clicked(self, index):
+    #     # 해당 위치의 항목을 가져옴
+    #     row = index.row()
+    #     # 항목의 텍스트를 가져옴
+    #     n = self.qmodel_mosaic_frame.item(row, 0).text()
+    #     n = float(n)
+    #     # slider 위치를 n 값으로 이동
+    #     self.playSlider.setValue(n) 
+    #     self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
+    #     self.player.cap_read()
+    #     img = DT.img
+    #     # cap_num 에 맞춰 바운딩 박스 그림
+    #     if DT.play_status is False:
+    #         cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
+    #         img = tools.plot_df_to_obj_img(img, cap_num, DT.df)        
+    #         self.display_img(img)
 
-    def tableview_df_down(self):
-        # 테이블뷰에서 아래행으로 이동
-        if self.tableView_mosaic_frame.hasFocus():
-            row = self.tableView_mosaic_frame.currentIndex().row()
-            row += 1
-            self.tableView_mosaic_frame.selectRow(row)
-        # 항목의 텍스트를 가져옴
-        if self.qmodel_mosaic_frame.item(row, 0) is None:
-            return
-        n = self.qmodel_mosaic_frame.item(row, 0).text()
-        n = float(n)
-        # slider 위치를 n 값으로 이동
-        self.playSlider.setValue(n) 
-        self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
-        self.player.cap_read()
-        img = DT.img
-        # cap_num 에 맞춰 바운딩 박스 그림
-        if DT.play_status is False:
-            cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
-            img = DT.detector.plot_df_to_img(img, cap_num)        
-            self.display_img(img)
+    # def tableview_df_down(self):
+    #     # 테이블뷰에서 아래행으로 이동
+    #     if self.tableView_mosaic_frame.hasFocus():
+    #         row = self.tableView_mosaic_frame.currentIndex().row()
+    #         row += 1
+    #         self.tableView_mosaic_frame.selectRow(row)
+    #     # 항목의 텍스트를 가져옴
+    #     if self.qmodel_mosaic_frame.item(row, 0) is None:
+    #         return
+    #     n = self.qmodel_mosaic_frame.item(row, 0).text()
+    #     n = float(n)
+    #     # slider 위치를 n 값으로 이동
+    #     self.playSlider.setValue(n) 
+    #     self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
+    #     self.player.cap_read()
+    #     img = DT.img
+    #     # cap_num 에 맞춰 바운딩 박스 그림
+    #     if DT.play_status is False:
+    #         cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
+    #         img = DT.detector.plot_df_to_img(img, cap_num)        
+    #         self.display_img(img)
 
-    def tableview_df_up(self):
-        if self.tableView_mosaic_frame.hasFocus():
-            row = self.tableView_mosaic_frame.currentIndex().row()
-            row -= 1
-            self.tableView_mosaic_frame.selectRow(row)
-        if self.qmodel_mosaic_frame.item(row, 0) is None:
-            return
-        # 항목의 텍스트를 가져옴
-        n = self.qmodel_mosaic_frame.item(row, 0).text()
-        n = float(n)
-        # slider 위치를 n 값으로 이동
-        self.playSlider.setValue(n) 
-        self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
-        self.player.cap_read()
-        img = DT.img
-        # cap_num 에 맞춰 바운딩 박스 그림
-        if DT.play_status is False:
-            cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
-            img = DT.detector.plot_df_to_img(img, cap_num)       
-            self.display_img(img)
+    # def tableview_df_up(self):
+    #     if self.tableView_mosaic_frame.hasFocus():
+    #         row = self.tableView_mosaic_frame.currentIndex().row()
+    #         row -= 1
+    #         self.tableView_mosaic_frame.selectRow(row)
+    #     if self.qmodel_mosaic_frame.item(row, 0) is None:
+    #         return
+    #     # 항목의 텍스트를 가져옴
+    #     n = self.qmodel_mosaic_frame.item(row, 0).text()
+    #     n = float(n)
+    #     # slider 위치를 n 값으로 이동
+    #     self.playSlider.setValue(n) 
+    #     self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
+    #     self.player.cap_read()
+    #     img = DT.img
+    #     # cap_num 에 맞춰 바운딩 박스 그림
+    #     if DT.play_status is False:
+    #         cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
+    #         img = DT.detector.plot_df_to_img(img, cap_num)       
+    #         self.display_img(img)
         
         
     ##################    
@@ -424,16 +431,17 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         # 공통 코드 
         if DT.play_status == False:
+            
             self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
             self.player.cap_read()
             self.detector.applyImageProcessing(DT.img)
             self.display_img()
         
-    def jump_frameSlider_moved(self, value):
-        self.label_frame_gap.setText(str(value)) # label7 = self.jump_frameSlider 값
+    # def jump_frameSlider_moved(self, value):
+    #     self.label_frame_gap.setText(str(value)) # label7 = self.jump_frameSlider 값
     
-    def Slider_bright_moved(self, value):
-        self.label_bright.setText(str(value))
+    # def Slider_bright_moved(self, value):
+    #     self.label_bright.setText(str(value))
 
     def program_exit(self):
         '''워커와 GUI 종료'''
@@ -548,6 +556,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.label.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(plot_img.data, plot_img.shape[1], plot_img.shape[0], QtGui.QImage.Format_RGB888).rgbSwapped()))
         self.label.setScaledContents(True)
         self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
+        frameTimer = time.strftime('%H:%M:%S', time.gmtime(DT.cap_num/DT.fps))
+        self.playTimer.setText(f'{frameTimer}')
         self.label.update()
         
     ##########
@@ -565,64 +575,35 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         pass
         
     
-    ############
-    # 모자이크 #
-    ############
-    def signal_start_point(self, value):
-        # 시작 버튼명을 f'시작({value})'로 변경
-        self.btn_mosaic_start.setText(f'시작({value})')
-
-    def signal_end_point(self, value):
-        # 종료 버튼명을 f'시작({value})'로 변경
-        if value+1 < DT.start_point:
-            return
-        self.btn_mosaic_end.setText(f'종료({value})')
-
-    def frame_list_to_listview(self):
-        '''frame_list를 리스트뷰에 출력'''
-        frame_list = DT.df_plot
-        self.listView_mosaic.clear()
-        for frame in frame_list:
-            self.listView_mosaic.addItem(str(frame))
-        self.update()
-
-    def update_label(self, value, selected_menu_text, label1, label2, arg):
-        label1.setText(str(value))  # 버튼명
-        DT.sliderDict[selected_menu_text][arg] = value
-        if arg == '지연':
-            DT.time_delay = value
-        print(value)
-
-    
-    def signal_6(self, value):
-        self.progressChanged(int(value))
+    # def signal_6(self, value):
+    #     self.progressChanged(int(value))
         
     
     #########################
     # 테이블뷰 선택된 행 삭제 #
     #########################
-    def delete_tableview_row(self):
-        index = self.tableview_df.currentIndex().row()
-        # 디텍터 마다 테이블 삭제시 작동하는 함수를 다르게 하기 위해서 detector에 위임함
-        DT.df.drop(index).reset_index(drop=True)
-        # 테이블뷰 다시 출력
-        self.df_to_tableview()
-        self.tableview_df.update()
+    # def delete_tableview_row(self):
+    #     index = self.tableview_df.currentIndex().row()
+    #     # 디텍터 마다 테이블 삭제시 작동하는 함수를 다르게 하기 위해서 detector에 위임함
+    #     DT.df.drop(index).reset_index(drop=True)
+    #     # 테이블뷰 다시 출력
+    #     self.df_to_tableview()
+    #     self.tableview_df.update()
         
  
     # df => 리스트뷰
     
  
-    def mosaic_analyze_percent(self):
-        start = DT.start_point
-        end = DT.end_point
-        curent_frame = DT.mosaic_current_frame
-        if start <= curent_frame <= end:
-            percent = (curent_frame - start) / (end - start) * 100
-            self.progressBar_mosaic.setValue(percent)
-        else:
-            self.progressBar_mosaic.setValue(100)
-        self.update()
+    # def mosaic_analyze_percent(self):
+    #     start = DT.start_point
+    #     end = DT.end_point
+    #     curent_frame = DT.mosaic_current_frame
+    #     if start <= curent_frame <= end:
+    #         percent = (curent_frame - start) / (end - start) * 100
+    #         self.progressBar_mosaic.setValue(percent)
+    #     else:
+    #         self.progressBar_mosaic.setValue(100)
+    #     self.update()
     
 
 

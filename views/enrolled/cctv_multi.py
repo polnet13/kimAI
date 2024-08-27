@@ -2,22 +2,20 @@ import subprocess
 import sys
 from ultralytics import YOLO
 import cv2
-from PySide6.QtWidgets import QFileDialog, QMessageBox
+from PySide6.QtWidgets import QFileDialog, QMessageBox, QCheckBox
 from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout
 from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
 from PySide6.QtCore import QTimer
 # 시그널 임포트
 from PySide6.QtCore import Signal
 # 외부 모듈
-import os
+import os, json
 import cv2
 from multiprocessing import Process, Queue
-
-import os
 from control import tools
 from views.sharedData import DT
-
 from rsc.ui.cctv_ui import Ui_CCTV
+from control.tools import getTime
 
 
 
@@ -40,6 +38,7 @@ class CCTV(Ui_CCTV, QWidget):
         self.roi_frame_2 = None
         self.roi_frame_3 = None
         # 큐, 프로그래스 바, 워커 생성
+        self.workers = []
         self.thread = os.cpu_count()
 
     def getInstance(self):
@@ -83,7 +82,6 @@ class CCTV(Ui_CCTV, QWidget):
         self.flag_dongzip_btn = False
         self.btn_flag_multi_start = False
         self.flag_multiprocess = False
-        self.textBrowser_multi.clear()
         self.terminate_workers()
         self.clear_status_bars()
         self.update()
@@ -138,10 +136,7 @@ class CCTV(Ui_CCTV, QWidget):
         x1, y1, x2, y2 = tools.rel_to_abs(DT.img.shape, x1, y1, x2, y2)
         # cv2 이벤트 감지
         self.difframe = None
-        self.move_thr = 50
-        self.thr = 50
         self.roi_color = (0, 0, 255)
-        self.diff_max = 20
         # 움직임 감지
         self.thr_move_slider = self.slider_move_thr.value()
         roi_img = img[y1:y2, x1:x2]
@@ -177,7 +172,7 @@ class CCTV(Ui_CCTV, QWidget):
             print(f'self.workers: {len(self.workers)}')
             self.workers[i].queue = self.queues[i]
             self.workers[i].obj = self.objects[i]
-            self.workers[i].filename = self.fileNames[i]
+            self.workers[i].filename = DT.fileNames[i]
         
     def terminate_workers(self):
         '''모든 워커를 종료'''
@@ -219,7 +214,7 @@ class CCTV(Ui_CCTV, QWidget):
             MultiCCTV(
                 file, 
                 scale_move_thr = DT.scale_move_thr,
-                thr_move_slider = self.slider_move_thr.value()
+                thr_move_slider = self.slider_move_thr.value(),
                 ) for file in DT.fileNames
                 ]
         self.object_queue_to_worker()
@@ -237,6 +232,7 @@ class CCTV(Ui_CCTV, QWidget):
 
     def update_progress(self):
         '''진행 상태 업데이트'''
+
         self.completed_count = 0
         for i in range(self.active_workers):
             while not self.queues[i].empty():
@@ -245,7 +241,8 @@ class CCTV(Ui_CCTV, QWidget):
                     # 워커 종료시
                     file = os.path.basename(msg[4])
                     one_page_summary = (f'{file}\n{round(msg[1]/msg[3],1)}초 => {round(msg[2]/msg[3],1)}초\n관심영역에 움직임이 감지된 {round(msg[2]/msg[1]*100,1)}% 만 남김\n')
-                    self.textBrowser_multi.append(one_page_summary)
+                    with open(os.path.join(DT.OUT_DIR, 'summary.txt'), 'a') as f:
+                        f.write(one_page_summary)
                     self.flag_dongzip_btn = False
                     self.progress_bars[i].setValue(100)
                     self.completed_count += 1
@@ -296,8 +293,6 @@ class CCTV(Ui_CCTV, QWidget):
         # 움직임 감지
         diff_cnt, diff_img = self.get_diff_img()
         thr = DT.scale_move_thr * self.slider_move_thr.value() # * brightness
-        print(f'diff_cnt: {diff_cnt}')
-        print(f'thr: {thr}')
         if diff_cnt < thr:
             DT.roi_color = (0, 0, 255)
             cv2.rectangle(plot_img, (0, 0), (plot_img.shape[1], plot_img.shape[0]), DT.roi_color, 1)
@@ -336,16 +331,8 @@ class CCTV(Ui_CCTV, QWidget):
         # 영상에서 1인 부분의 갯수를 셈
         diff_cnt = cv2.countNonZero(diff)
         return diff_cnt, diff
-    
-    def set_roi(self, x1, y1, x2, y2):
-        self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
 
     def setRoiFrame123(self, gray_img):
-        '''
-        cls.roi_frame_1 = cls.roi_frame_2 
-        cls.roi_frame_2 = cls.roi_frame_3 
-        cls.roi_frame_3 = gray_img
-        '''
         self.roi_frame_1 = self.roi_frame_2 
         self.roi_frame_2 = self.roi_frame_3 
         self.roi_frame_3 = gray_img
@@ -359,13 +346,6 @@ class CCTV(Ui_CCTV, QWidget):
    
 class MultiCCTV:
     
-    tag = 'CCTV_멀티작업'
-    slider_dict = {
-        '움직임_픽셀차이': 5,
-        '감지_민감도': 1,
-        '띄엄띄엄_보기':1,
-        '밝기':0
-        }
     models = {
         'model': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt')),
         'model_nbp':  YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
@@ -373,30 +353,20 @@ class MultiCCTV:
     } # 어디서 읽어서 self.models 로 전달함
     columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
 
-    # MultiCCTV.arg
-
-
-
-
     def __init__(self, fileName, scale_move_thr=1, thr_move_slider=50):
-        # x1, y1, x2, y2 는 상대적 좌표임
-
-        # 슬라이더 설정
-        DT.setSliderValue(MultiCCTV.tag, MultiCCTV.slider_dict)
-        # self.arg = ModelClass(MultiCCTV.arg_dict)
+ 
         super().__init__()
         self.track = False
         self.queue = None
         # 경로 설정
         self.filePath = fileName
-        self.output_path = os.path.dirname(fileName)
-        self.output_path = os.path.join(self.output_path, 'output')
-        self.base = os.path.dirname(fileName)
-        self.fileName = os.path.basename(fileName)
+        self.output_base = os.path.join(os.path.dirname(fileName), 'output')
+        baseName = os.path.basename(fileName)   
+        self.file_name, _ = os.path.splitext(baseName)
         # 아웃풋 경로 생성
-        if not os.path.exists(self.output_path):
-            os.makedirs(self.output_path)
-        # 비디오 파일의 이미지 쉐입을 가져옴
+        if not os.path.exists(self.output_base):
+            os.makedirs(self.output_base)
+        # ROI 설정
         x1, y1, x2, y2 = DT.roi
         self.x1, self.y1, self.x2, self.y2 = tools.rel_to_abs(DT.img.shape, x1, y1, x2, y2)
         # cv2 이벤트 감지
@@ -404,18 +374,13 @@ class MultiCCTV:
         self.roi_frame_2 = None
         self.roi_frame_3 = None
         self.difframe = None
-        self.move_thr = 50
-        self.thr = 50
         self.roi_color = (0, 0, 255)
-        self.diff_max = 20
         # 움직임 감지
         self.thr_move_slider_multi = thr_move_slider
 
-
- 
-
+    @getTime
     def multi_process(self):
-        '''동집 실질적인 작업 함수'''
+        '''영상압축 함수'''
         # 비디오 파일 열기
         self.cap = cv2.VideoCapture(self.filePath)
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -425,9 +390,10 @@ class MultiCCTV:
         self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
         self.percentage = 0
         false = 0
-        outfile = os.path.join(self.output_path, f'{self.fileName}.mp4')
+        self.newFrameNum = 0
+        outvideo = os.path.join(self.output_base, f'{self.file_name}.mp4')
         # 비디오 생성
-        self.video = cv2.VideoWriter(outfile, cv2.VideoWriter_fourcc(*'mp4v'), self.fps, (self.width, self.height))
+        self.video = cv2.VideoWriter(outvideo, cv2.VideoWriter_fourcc(*'mp4v'), self.fps, (self.width, self.height))
         frame_cnt = 0
         # 루프 돌기
         while True: # 동영상이 올바로 열렸는지
@@ -453,8 +419,7 @@ class MultiCCTV:
                 # 움직임이 없는 경우 루프 건너뜀
                 if detect_move_bool == False:
                     continue
-                # # ROI 부분만 욜로 디텍션
-                # 컨투어 표시
+                # 움직임 표시
                 roi_img = tools.draw_contours(roi_img, contours)        
                 # ROI 이미지를 원본이미지에 합성
                 img = tools.merge_roi_img(self.img, roi_img, self.x1, self.y1)
@@ -465,11 +430,43 @@ class MultiCCTV:
             if false > 2:
                 break
         # total_frames/fps
-        message = ['done', total_frames, frame_cnt, self.fps, self.fileName]
+        message = ['done', total_frames, frame_cnt, self.fps, self.file_name]
         self.queue.put(message)
         self.cap.release()
         self.video.release()
 
+
+
+    def yolo_detection(self, roi_img, frame_number):
+        '''
+        이 함수는 roi_img를 받아서 yolo 디텍션을 수행함(이미지 처리X)
+        - 키: new 프레임번호 생성해서 딕셔너리 
+        - 밸류: 탐지된 객체의 집합 [(), (), ()] 구조를 만들어서 self.obj_dict에 저장
+        '''
+        frame_number = frame_number
+        values = []
+        tracking_id = None
+        try:
+            detections = self.detector.track(roi_img, persist=True, device=DT.device)[0]
+        except Exception as e:
+            # 욜로 트래커 초기화
+            self.detector = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt'))
+            detections = self.detector.track(roi_img, persist=True, device=DT.device)[0]
+        for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
+            if len(data) < 7:  # data 리스트의 길이가 7보다 작은 경우 해당 데이터를 건너뛰도록 합니다. 이를 통해 인덱스 오류를 방지
+                continue
+            xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
+            tracking_id, thr, label = int(data[4]), float(data[5]), int(data[6])
+            # (0, 'person'), (2, 'car'), (3, 'motorcycle'), (5, 'bus'), (7, 'truck'), (9, 'traffic light')
+            x1, y1, x2, y2 = tools.abs_to_rel(roi_img.shape, xmin, ymin, xmax, ymax)
+            if tracking_id in self.obj_dict.keys():
+                continue
+            if self.check_people and label in [0]:
+                values.append((frame_number, label, x1, y1, x2, y2, thr))
+            if self.check_car and label in [2, 3, 5, 7]:
+                values.append((frame_number, label, x1, y1, x2, y2, thr))
+        if tracking_id:
+            self.obj_dict[tracking_id] = values        
 
 
     def detect_move(self, roi_img):
@@ -529,16 +526,8 @@ class MultiCCTV:
         # 영상에서 1인 부분의 갯수를 셈
         diff_cnt = cv2.countNonZero(diff)
         return diff_cnt, diff
-    
-    def set_roi(self, x1, y1, x2, y2):
-        self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
 
     def setRoiFrame123(self, gray_img):
-        '''
-        cls.roi_frame_1 = cls.roi_frame_2 
-        cls.roi_frame_2 = cls.roi_frame_3 
-        cls.roi_frame_3 = gray_img
-        '''
         self.roi_frame_1 = self.roi_frame_2 
         self.roi_frame_2 = self.roi_frame_3 
         self.roi_frame_3 = gray_img

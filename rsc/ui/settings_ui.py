@@ -94,6 +94,9 @@ class Ui_Settings(object):
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:'Gulim'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">\ud504\ub85c\uadf8\ub7a8 \uc81c\uc548 </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">prudent13@naver.com</p></body></html>", None))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">prudent13@naver.com</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">\ubcf8 \ud504\ub85c\uadf8\ub7a8\uc740 \ub525\ub7ec\ub2dd"
+                        "\uc744 \uc774\uc6a9\ud574\uc11c \uac1d\uccb4(\uc0ac\ub78c, \uc790\ub3d9\ucc28 \ub4f1)\ub97c \uc778\uc2dd\ud558\uace0 \uc601\uc0c1\ubd84\uc11d\uc744 \ud569\ub2c8\ub2e4</p></body></html>", None))
     # retranslateUi
 

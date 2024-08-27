@@ -2,7 +2,6 @@ import cv2
 import os, time, sys
 import inspect
 import subprocess
-from views.sharedData import DT
 
 
 def sort_roi(x1, y1, x2, y2):
@@ -131,18 +130,19 @@ def mosaic(img, xmin, ymin, xmax, ymax, ratio=0.01, full=False):
         ymin, ymax, xmin, xmax = 0, img.shape[0], 0, img.shape[1]
     else:
         roi = img[ymin:ymax, xmin:xmax]
+    
     # 모자이크 처리
     h, w = roi.shape[:2]
-    if h == 0 or w == 0:
-        return img
-    print(roi.shape)
     small_w = max(1, int(w * ratio))
     small_h = max(1, int(h * ratio))
     small_roi = cv2.resize(roi, (small_w, small_h), interpolation=cv2.INTER_NEAREST)
+    
     # 원래 크기로 확대
     mosaic_roi = cv2.resize(small_roi, (w, h), interpolation=cv2.INTER_NEAREST)
+    
     # 모자이크 처리된 이미지를 원본 이미지에 삽입
     img[ymin:ymax, xmin:xmax] = mosaic_roi
+    
     return img
 
 
