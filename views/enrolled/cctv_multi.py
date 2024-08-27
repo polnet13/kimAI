@@ -2,7 +2,7 @@ import subprocess
 import sys
 from ultralytics import YOLO
 import cv2
-from PySide6.QtWidgets import QFileDialog, QMessageBox, QCheckBox
+from PySide6.QtWidgets import QFileDialog, QMessageBox
 from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout
 from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
 from PySide6.QtCore import QTimer

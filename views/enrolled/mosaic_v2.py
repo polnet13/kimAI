@@ -148,6 +148,7 @@ class Mosaic(Ui_mosaic, QWidget):
             img = self.plot_df_to_mosaic(img, frame)
             self.video.write(img)             
         self.video.release()
+        self.progressBar_mosaic.setValue(100)
         tools.openpath(output_path)
 
     def plot_df_to_mosaic(self, img, cap_num):

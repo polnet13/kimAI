@@ -8,7 +8,7 @@ os.chdir(path)  # 프로젝트 디렉토리로 이동
 
 # 옵션 설정
 onefile = False
-console = True
+console = False
 
 # 제외할 파일과 폴더를 지정
 excludes = ['영상자료', '__pycache__', '.vscode', 'build', 'dist', 'test_widget']

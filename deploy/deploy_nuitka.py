@@ -12,7 +12,8 @@ excludes = ['영상자료', '__pycache__', '.vscode', 'build', 'dist', 'test_wid
 
 # Nuitka 명령 생성
 nuitka_command = f"nuitka --standalone --output-dir=dist "  # Python 버전은 필요에 따라 변경
-nuitka_command += f"--include-data-dir={os.path.join(path, 'rsc')}=rsc "  # rsc 디렉토리 포함
+nuitka_command += f"--onefile "  
+nuitka_command += f"--include-data-dir={os.path.join(path, 'rsc')}=rsc "  # rsc 디렉토리 포함--onefile--onefile
 nuitka_command += f"--include-data-dir={os.path.join(path, 'rsc', 'ultralytics')}=ultralytics "  # rsc 디렉토리 포함
 nuitka_command += f"--windows-console-mode=disable "
 nuitka_command += f"--include-module=ultralytics "

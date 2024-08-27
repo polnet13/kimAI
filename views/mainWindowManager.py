@@ -18,7 +18,6 @@ from views import generic
 from views.sharedData import DT
 from views.enrolled.cctv_multi import CCTV 
 from views.enrolled.mosaic_v2 import Mosaic 
-from views.enrolled.home import Home
 from views.enrolled.settings import Settings
 # from views.enrolled.bike import Bike 
 
@@ -118,11 +117,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.d_key = QShortcut(QKeySequence(Qt.Key_O), self)
         self.d_key.activated.connect(self.slot_btn_fileopen)   
         # # 오른쪽 화살표 눌렀을 때 설정
-        # self.right_key = QShortcut(QKeySequence(Qt.Key_Right), self)
-        # self.right_key.activated.connect(self.plus_gap)       
+        self.right_key = QShortcut(QKeySequence(Qt.Key_Right), self)
+        self.right_key.activated.connect(self.slot_right_key)       
         # # 왼쪽 화살표 눌렀을 때 설정
-        # self.left_key = QShortcut(QKeySequence(Qt.Key_Left), self)
-        # self.left_key.activated.connect(self.minus_gap)  
+        self.left_key = QShortcut(QKeySequence(Qt.Key_Left), self)
+        self.left_key.activated.connect(self.slot_left_key)  
         # esc키 눌렀을 때 설정
         self.esc_key = QShortcut(QKeySequence(Qt.Key_Escape), self)
         self.esc_key.activated.connect(self.program_exit)   
@@ -191,6 +190,25 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     ##############
     ## 슬롯함수 ##
     ##############
+    def slot_right_key(self):
+        fps = self.player.cap.get(cv2.CAP_PROP_FPS)
+        _curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)
+        _curent_frame += 5*fps
+        if _curent_frame > DT.total_frames:
+            _curent_frame = DT.total_frames
+        self.playSlider.setValue(_curent_frame)
+
+
+    def slot_left_key(self):
+        fps = self.player.cap.get(cv2.CAP_PROP_FPS)
+        _curent_frame = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES)
+        _curent_frame -= 5*fps
+        if _curent_frame < 0:
+            _curent_frame = 0
+        self.playSlider.setValue(_curent_frame)
+
+        
+
     def slot_delay_valueChanged(self, value):
         self.time_delay = value
         self.label_delay_time.setText(f'{value} ms')
