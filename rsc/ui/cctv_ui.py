@@ -92,6 +92,31 @@ class Ui_CCTV(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_4)
 
+        self.horizontalLayout_jump = QHBoxLayout()
+        self.horizontalLayout_jump.setObjectName(u"horizontalLayout_jump")
+        self.label_3 = QLabel(self.verticalLayoutWidget)
+        self.label_3.setObjectName(u"label_3")
+
+        self.horizontalLayout_jump.addWidget(self.label_3)
+
+        self.label_jump = QLabel(self.verticalLayoutWidget)
+        self.label_jump.setObjectName(u"label_jump")
+
+        self.horizontalLayout_jump.addWidget(self.label_jump)
+
+        self.slider_jump = QSlider(self.verticalLayoutWidget)
+        self.slider_jump.setObjectName(u"slider_jump")
+        self.slider_jump.setFont(font)
+        self.slider_jump.setMinimum(1)
+        self.slider_jump.setMaximum(50)
+        self.slider_jump.setValue(3)
+        self.slider_jump.setOrientation(Qt.Horizontal)
+
+        self.horizontalLayout_jump.addWidget(self.slider_jump)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_jump)
+
         self.verticalSpacer = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
@@ -105,7 +130,7 @@ class Ui_CCTV(object):
         self.verticalLayout.setStretch(0, 1)
         self.verticalLayout.setStretch(1, 1)
         self.verticalLayout.setStretch(2, 1)
-        self.verticalLayout.setStretch(4, 9)
+        self.verticalLayout.setStretch(5, 9)
 
         self.retranslateUi(CCTV)
 
@@ -118,7 +143,21 @@ class Ui_CCTV(object):
         self.btn_multi_open.setText(QCoreApplication.translate("CCTV", u"\ud30c\uc77c \uc5f4\uae30", None))
         self.btn_multi_reset.setText(QCoreApplication.translate("CCTV", u"reset", None))
         self.btn_multi_complete_open.setText(QCoreApplication.translate("CCTV", u"\uc644\ub8cc \uc5f4\uae30", None))
-        self.label.setText(QCoreApplication.translate("CCTV", u"\ubbfc\uac10\ub3c4 ", None))
+#if QT_CONFIG(tooltip)
+        self.label.setToolTip("")
+#endif // QT_CONFIG(tooltip)
+        self.label.setText(QCoreApplication.translate("CCTV", u"\uc784\uacc4\uce58", None))
         self.label_thr.setText(QCoreApplication.translate("CCTV", u"50", None))
+#if QT_CONFIG(tooltip)
+        self.slider_move_thr.setToolTip("")
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        self.label_3.setToolTip("")
+#endif // QT_CONFIG(tooltip)
+        self.label_3.setText(QCoreApplication.translate("CCTV", u"\uac74\ub108\ub744\uae30", None))
+        self.label_jump.setText(QCoreApplication.translate("CCTV", u"3", None))
+#if QT_CONFIG(tooltip)
+        self.slider_jump.setToolTip("")
+#endif // QT_CONFIG(tooltip)
     # retranslateUi
 

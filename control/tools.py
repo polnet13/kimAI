@@ -5,6 +5,9 @@ import subprocess
 from views.sharedData import DT
 
 
+ 
+    
+
 def sort_roi(x1, y1, x2, y2):
     '''
     마우스 드래그시 roi를 정렬하는 함수
@@ -135,7 +138,6 @@ def mosaic(img, xmin, ymin, xmax, ymax, ratio=0.01, full=False):
     h, w = roi.shape[:2]
     if h == 0 or w == 0:
         return img
-    print(roi.shape)
     small_w = max(1, int(w * ratio))
     small_h = max(1, int(h * ratio))
     small_roi = cv2.resize(roi, (small_w, small_h), interpolation=cv2.INTER_NEAREST)

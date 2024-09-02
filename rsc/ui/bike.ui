@@ -129,21 +129,21 @@ color:
       <item>
        <widget class="QPushButton" name="pushButton_1">
         <property name="text">
-         <string>1</string>
+         <string>캡쳐 (1)</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_2">
         <property name="text">
-         <string>2</string>
+         <string>생성 (2)</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_3">
         <property name="text">
-         <string>3</string>
+         <string>자동화 (3)</string>
         </property>
        </widget>
       </item>

@@ -16,10 +16,12 @@ import torch
 from control import tools
 from views import generic
 from views.sharedData import DT
-from views.enrolled.cctv_multi import CCTV 
-from views.enrolled.mosaic_v2 import Mosaic 
-from views.enrolled.settings import Settings
-# from views.enrolled.bike import Bike 
+from views.tab.cctv_multi import CCTV 
+from views.tab.mosaic_v2 import Mosaic 
+from views.tab.settings import Settings
+from views.tab.bike import Bike 
+from views.tab.home import Home 
+from views.tab.singo import Chuldong 
 
 
 
@@ -33,8 +35,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.setFixedSize(1179,612)
         
         # 로드 탭
-        # self.tab_home = Home()
-        # self.stackedWidget.addWidget(self.tab_home)
+        self.tab_home = Home()
+        self.stackedWidget.addWidget(self.tab_home)
         
         json_path = os.path.join(DT.BASE_DIR, 'rsc', 'json', 'options.json')
         with open(json_path, "r") as f:
@@ -44,20 +46,23 @@ class mainWindow(QMainWindow, Ui_MainWindow):
 
         self.tab_mosaic = Mosaic() 
         self.stackedWidget.addWidget(self.tab_mosaic)   
-        # self.tab_bike = Bike() 
-        # self.stackedWidget.addWidget(self.tab_bike)
+        self.tab_bike = Bike() 
+        self.stackedWidget.addWidget(self.tab_bike)
         self.tab_cctv = CCTV() 
         self.stackedWidget.addWidget(self.tab_cctv)
+        self.tab_singo = Chuldong() 
+        self.stackedWidget.addWidget(self.tab_singo)
 
         self.stackedWidget.setCurrentIndex(DT.index)
         self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
 
         index_dict = {
-            # 0: self.tab_home, 
-            1: self.tab_settings, 
-            2: self.tab_mosaic, 
-            # 3: self.tab_bike, 
-            4: self.tab_cctv
+            0: self.tab_settings, 
+            1: self.tab_home, 
+            2: self.tab_cctv,
+            3: self.tab_mosaic, 
+            4: self.tab_bike, 
+            5: self.tab_singo
             }
         self.detector = index_dict[DT.index]
         # 시그널 슬롯 연결
@@ -89,10 +94,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.btn_cctv.clicked.connect(self.buttonClick)
         self.btn_mosaic.clicked.connect(self.buttonClick)
         self.btn_settings.clicked.connect(self.buttonClick)
+        self.btn_home.clicked.connect(self.buttonClick)
+        self.btn_bike.clicked.connect(self.buttonClick)
+        self.btn_112.clicked.connect(self.buttonClick)
         self.slider_delay.valueChanged.connect(self.slot_delay_valueChanged)
-        # self.btn_home.clicked.connect(self.buttonClick)
-        # self.btn_bike.clicked.connect(self.buttonClick)
-        # self.btn_temp1.clicked.connect(self.buttonClick)
  
 
         #################
@@ -168,21 +173,30 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         btnName = btn.objectName()
         
         # SHOW HOME PAGE
-        # if btnName == "btn_home": #0
-        #     DT.index = self.stackedWidget.indexOf(self.tab_home)
-        #     self.detector = self.tab_home
-        if btnName == "btn_cctv": #4
+        if btnName == "btn_home":
+            DT.index = self.stackedWidget.indexOf(self.tab_home)
+            self.detector = self.tab_home
+            self.change_stack(0)
+        if btnName == "btn_cctv":
             DT.index = self.stackedWidget.indexOf(self.tab_cctv)
             self.detector = self.tab_cctv
-        if btnName == "btn_mosaic": #2
+            self.change_stack(0)
+        if btnName == "btn_mosaic":
             DT.index = self.stackedWidget.indexOf(self.tab_mosaic)
             self.detector = self.tab_mosaic
-        # if btnName == "btn_bike": #3
-        #     DT.index = self.stackedWidget.indexOf(self.tab_bike)
-        #     self.detector = self.tab_bike
-        if btnName == "btn_settings": #1
+            self.change_stack(0)
+        if btnName == "btn_bike":
+            DT.index = self.stackedWidget.indexOf(self.tab_bike)
+            self.detector = self.tab_bike
+            self.change_stack(0)
+        if btnName == "btn_112":
+            DT.index = self.stackedWidget.indexOf(self.tab_singo)
+            self.detector = self.tab_singo
+            self.change_stack(1)
+        if btnName == "btn_settings":
             DT.index = self.stackedWidget.indexOf(self.tab_settings)
             self.detector = self.tab_settings
+            self.change_stack(0)
         self.stackedWidget.setCurrentIndex(DT.index)
         DT.saveOption(index=DT.index)
         print(DT.index)
@@ -281,6 +295,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.fileName is None:
             DT.play_status = False
             return
+        self.statusBar().showMessage(os.path.basename(DT.fileName))
         # 프레임을 읽어옴
         self.start_time = time.time()
         self.player.cap_read()
@@ -338,6 +353,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         DT.setRoiPoint()
         self.update()
         self.display_img()
+
         
 
     def slot_btn_reset(self):
@@ -354,12 +370,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         이미지의 해상도에 꽉차는 roi를 설정함
         '''
-        print(DT.roi_point)
         DT.setRegionStatus(False)
         DT.setRoi((0, 0, 1, 1))
         DT.setRoiPoint()
         self.label_roi_update()
-        print(DT.roi_point)
+        self.statusBar().showMessage(f'roi0: {DT.roi_point[0]}   roi1: {DT.roi_point[1]}')
         
     
     #####################
@@ -367,77 +382,15 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     #####################
     def reverse_status_change(self):
         self.reverse_status = not self.reverse_status
-    # # 점프 프레임값 +3    
-    # def plus_gap(self):
-    #     self.jump_frameSlider.setValue(self.jump_frameSlider.value() + 3)
-    # # 점프 프레임값 -3    
-    # def minus_gap(self):
-    #     self.jump_frameSlider.setValue(self.jump_frameSlider.value() - 3)
-    # 테이블뷰 선택된 행 삭제
+ 
     def slot_delete_key(self):
         '''delete_tableview_row'''
         self.detector.delete_key()
+ 
+ 
 
-    # # 리스트뷰 항목 클릭시 해당 프레임으로 이동
-    # def on_item_clicked(self, index):
-    #     # 해당 위치의 항목을 가져옴
-    #     row = index.row()
-    #     # 항목의 텍스트를 가져옴
-    #     n = self.qmodel_mosaic_frame.item(row, 0).text()
-    #     n = float(n)
-    #     # slider 위치를 n 값으로 이동
-    #     self.playSlider.setValue(n) 
-    #     self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
-    #     self.player.cap_read()
-    #     img = DT.img
-    #     # cap_num 에 맞춰 바운딩 박스 그림
-    #     if DT.play_status is False:
-    #         cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
-    #         img = tools.plot_df_to_obj_img(img, cap_num, DT.df)        
-    #         self.display_img(img)
-
-    # def tableview_df_down(self):
-    #     # 테이블뷰에서 아래행으로 이동
-    #     if self.tableView_mosaic_frame.hasFocus():
-    #         row = self.tableView_mosaic_frame.currentIndex().row()
-    #         row += 1
-    #         self.tableView_mosaic_frame.selectRow(row)
-    #     # 항목의 텍스트를 가져옴
-    #     if self.qmodel_mosaic_frame.item(row, 0) is None:
-    #         return
-    #     n = self.qmodel_mosaic_frame.item(row, 0).text()
-    #     n = float(n)
-    #     # slider 위치를 n 값으로 이동
-    #     self.playSlider.setValue(n) 
-    #     self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
-    #     self.player.cap_read()
-    #     img = DT.img
-    #     # cap_num 에 맞춰 바운딩 박스 그림
-    #     if DT.play_status is False:
-    #         cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
-    #         img = DT.detector.plot_df_to_img(img, cap_num)        
-    #         self.display_img(img)
-
-    # def tableview_df_up(self):
-    #     if self.tableView_mosaic_frame.hasFocus():
-    #         row = self.tableView_mosaic_frame.currentIndex().row()
-    #         row -= 1
-    #         self.tableView_mosaic_frame.selectRow(row)
-    #     if self.qmodel_mosaic_frame.item(row, 0) is None:
-    #         return
-    #     # 항목의 텍스트를 가져옴
-    #     n = self.qmodel_mosaic_frame.item(row, 0).text()
-    #     n = float(n)
-    #     # slider 위치를 n 값으로 이동
-    #     self.playSlider.setValue(n) 
-    #     self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, n)
-    #     self.player.cap_read()
-    #     img = DT.img
-    #     # cap_num 에 맞춰 바운딩 박스 그림
-    #     if DT.play_status is False:
-    #         cap_num = self.player.cap.get(cv2.CAP_PROP_POS_FRAMES) -1
-    #         img = DT.detector.plot_df_to_img(img, cap_num)       
-    #         self.display_img(img)
+    def change_stack(self, index):
+        self.stackedWidget_play.setCurrentIndex(index)
         
         
     ##################    
@@ -451,15 +404,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         if DT.play_status == False:
             
             self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
+            DT.cap_num = value
             self.player.cap_read()
             self.detector.applyImageProcessing(DT.img)
             self.display_img()
-        
-    # def jump_frameSlider_moved(self, value):
-    #     self.label_frame_gap.setText(str(value)) # label7 = self.jump_frameSlider 값
     
-    # def Slider_bright_moved(self, value):
-    #     self.label_bright.setText(str(value))
 
     def program_exit(self):
         '''워커와 GUI 종료'''

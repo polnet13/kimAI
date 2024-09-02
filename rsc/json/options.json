@@ -1,4 +1,13 @@
 {
     "check_cuda": 0,
-    "index": 1
+    "index": 4,
+    "btn_point_1": [
+        584,
+        347
+    ],
+    "btn_point_2": [
+        27,
+        65
+    ],
+    "jump": 11
 }

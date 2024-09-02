@@ -1,3 +1,4 @@
+import time
 import subprocess
 import sys
 from ultralytics import YOLO
@@ -6,6 +7,8 @@ from PySide6.QtWidgets import QFileDialog, QMessageBox
 from PySide6.QtWidgets import QPushButton, QProgressBar, QVBoxLayout
 from PySide6.QtWidgets import QWidget, QScrollArea, QMessageBox
 from PySide6.QtCore import QTimer
+# QSound 임포트
+
 # 시그널 임포트
 from PySide6.QtCore import Signal
 # 외부 모듈
@@ -32,14 +35,18 @@ class CCTV(Ui_CCTV, QWidget):
         self.btn_multi_reset.clicked.connect(self.slot_btn_multi_reset)
         self.btn_multi_complete_open.clicked.connect(self.slot_btn_open_complete)
         self.slider_move_thr.valueChanged.connect(self.slot_slider_move_thr)
+        self.slider_jump.valueChanged.connect(self.slot_slider_jump)
         self.flag_dongzip_btn = False
         self.flag_multiprocess = False
         self.roi_frame_1 = None
         self.roi_frame_2 = None
         self.roi_frame_3 = None
+        self.kernel_size = None
+
         # 큐, 프로그래스 바, 워커 생성
         self.workers = []
         self.thread = os.cpu_count()
+        
 
     def getInstance(self):
         '''시작시 한 번에 불러오면 대기시간이 올래 걸리므로 좌메뉴 클릭시 인스턴스 생성'''
@@ -50,6 +57,12 @@ class CCTV(Ui_CCTV, QWidget):
         '''슬라이더 값 변경'''
         self.label_thr.setText(f'{self.slider_move_thr.value()}')
         DT.setMoveSliderScale()
+
+    def slot_slider_jump(self):
+        '''점프 슬라이더 값 변경'''
+        self.label_jump.setText(f'{self.slider_jump.value()}')
+        DT.jump = self.slider_jump.value()
+        DT.saveOption(jump=DT.jump)
 
 
     def slot_btn_open_complete(self):
@@ -132,21 +145,15 @@ class CCTV(Ui_CCTV, QWidget):
 
     def applyImageProcessing(self, img):
         '''cctv 모드에서는 roi이미지를 움직임 감지 하여 전체 이미지에 합성'''
-        x1, y1, x2, y2 = DT.roi
-        x1, y1, x2, y2 = tools.rel_to_abs(DT.img.shape, x1, y1, x2, y2)
+        if DT.cap_num%DT.jump != 0:
+            return img
+        x1, y1, x2, y2 = DT.roi_point[0]
         # cv2 이벤트 감지
         self.difframe = None
         self.roi_color = (0, 0, 255)
         # 움직임 감지
         self.thr_move_slider = self.slider_move_thr.value()
         roi_img = img[y1:y2, x1:x2]
-        plot_img = roi_img.copy()
-        # roi 이미지 가우시안 블러 처리
-        height, width = roi_img.shape[:2]
-        kernel_size = (width // 70, height // 70)  # 예: 이미지 크기의 1/70
-        # 커널 크기는 홀수여야 함
-        kernel_size = (kernel_size[0] | 1, kernel_size[1] | 1)
-        roi_img = cv2.GaussianBlur(roi_img, kernel_size, 0)
         # ROI 부분만 움직임 감지
         roi_img, detect_move_bool, contours = self.detect_move(roi_img)     
         # 움직임이 없는 경우 루프 건너뜀
@@ -154,11 +161,11 @@ class CCTV(Ui_CCTV, QWidget):
             return img
         # # ROI 부분만 욜로 디텍션
         # 컨투어 표시
-        plot_img = tools.draw_contours(plot_img, contours)        
+        roi_img = tools.draw_contours(roi_img, contours)        
         # ROI 이미지를 원본이미지에 합성
-        img = tools.merge_roi_img(img, plot_img, x1, y1)
+        img = tools.merge_roi_img(img, roi_img, x1, y1)
         # 녹화 옵션
-        cv2.rectangle(img, (x1, y1),(x2, y2),(0,255,0), 1)
+        cv2.rectangle(img, (x1, y1),(x2, y2),(111,111,111), 1)
         return img
 
     ####################     
@@ -207,6 +214,7 @@ class CCTV(Ui_CCTV, QWidget):
         백그라운드 워커을 실행하고,
         프로그레스바를 업데이트하는 타이머를 실행
         '''
+        self.st = time.time()
         if self.flag_multiprocess:
             return
         # 메뉴 넘버 따오는 함수 추가예정
@@ -215,6 +223,7 @@ class CCTV(Ui_CCTV, QWidget):
                 file, 
                 scale_move_thr = DT.scale_move_thr,
                 thr_move_slider = self.slider_move_thr.value(),
+                jump=DT.jump
                 ) for file in DT.fileNames
                 ]
         self.object_queue_to_worker()
@@ -239,8 +248,13 @@ class CCTV(Ui_CCTV, QWidget):
                 msg = self.queues[i].get()
                 if msg[0] == 'done':
                     # 워커 종료시
+                    # ['done', total_frames, frame_cnt, self.fps, self.file_name, round(et-st), self.jump]
                     file = os.path.basename(msg[4])
-                    one_page_summary = (f'{file}\n{round(msg[1]/msg[3],1)}초 => {round(msg[2]/msg[3],1)}초\n관심영역에 움직임이 감지된 {round(msg[2]/msg[1]*100,1)}% 만 남김\n')
+                    before_time = round(msg[1]/msg[3],1)
+                    after_time = round(msg[2]/msg[3],1)
+                    detect_time = round(msg[2]/msg[1]*100,1)
+                    print('작업 완료')
+                    one_page_summary = (f'{file}\n{before_time}초 => {after_time}초\n관심영역에 움직임이 감지된 {detect_time}% 남김, {msg[5]}소요, jump: ({msg[6]})\n\n')
                     with open(os.path.join(DT.OUT_DIR, 'summary.txt'), 'a') as f:
                         f.write(one_page_summary)
                     self.flag_dongzip_btn = False
@@ -267,6 +281,8 @@ class CCTV(Ui_CCTV, QWidget):
             msg.setWindowTitle("작업 완료")
             msg.exec_()
             self.slot_btn_multi_reset()
+            self.et = time.time()
+            print(f'소요시간: {self.et - self.st}')
     
     def detect_move(self, roi_img):
         '''
@@ -276,12 +292,13 @@ class CCTV(Ui_CCTV, QWidget):
         두 차이 이미지를 비교하여 움직임이 있는 부분을 찾아내는 함수
         return plot_img, 움직임 Bool, contours
         '''
-        if roi_img is None or roi_img.size == 0:
-            return roi_img, False, 0
-        # 밝기 처리한 이미지를 리턴하므로 원본 이미지를 복사하여 사용
-        contours = 0
         plot_img = roi_img.copy()
         gray_img = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
+        if roi_img is None or roi_img.size == 0:
+            return roi_img, False, 0
+        gray_img = cv2.GaussianBlur(gray_img, DT.kernel_size, 0)
+        # 밝기 처리한 이미지를 리턴하므로 원본 이미지를 복사하여 사용
+        contours = 0
         # ROI를 설정합니다.
         self.setRoiFrame123(gray_img)
         # frame1, frame2, frame3이 하나라도 None이면 원본+밝기 이미지 출력
@@ -353,7 +370,7 @@ class MultiCCTV:
     } # 어디서 읽어서 self.models 로 전달함
     columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
 
-    def __init__(self, fileName, scale_move_thr=1, thr_move_slider=50):
+    def __init__(self, fileName, scale_move_thr=1, thr_move_slider=50, jump =1):
  
         super().__init__()
         self.track = False
@@ -369,19 +386,24 @@ class MultiCCTV:
         # ROI 설정
         x1, y1, x2, y2 = DT.roi
         self.x1, self.y1, self.x2, self.y2 = tools.rel_to_abs(DT.img.shape, x1, y1, x2, y2)
+        height, width = DT.img.shape[:2]
+        kernel_size = (width // 20, height // 20)  # 예: 이미지 크기의 1/70
+        self.kernel_size = (kernel_size[0] | 1, kernel_size[1] | 1) # 커널 크기는 홀수여야 함
         # cv2 이벤트 감지
         self.roi_frame_1 = None
         self.roi_frame_2 = None
         self.roi_frame_3 = None
         self.difframe = None
         self.roi_color = (0, 0, 255)
+        self.jump = jump
         # 움직임 감지
         self.thr_move_slider_multi = thr_move_slider
 
-    @getTime
+
     def multi_process(self):
         '''영상압축 함수'''
         # 비디오 파일 열기
+        st = time.time()
         self.cap = cv2.VideoCapture(self.filePath)
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -399,6 +421,10 @@ class MultiCCTV:
         while True: # 동영상이 올바로 열렸는지
             ret, self.img = self.cap.read() 
             curent_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES) 
+            if curent_frame%self.jump != 0:
+                if curent_frame >= total_frames:
+                    break
+                continue
             # 상태바 업데이트를 위해 작업 진행률을 계산
             self.percentage_1 = self.percentage
             self.percentage_2 = round(curent_frame/total_frames*100)
@@ -414,15 +440,17 @@ class MultiCCTV:
             else:
                 false=0
                 roi_img = self.img[self.y1:self.y2, self.x1:self.x2]
+                # roi 이미지 가우시안 블러 처리
+                final_img = roi_img.copy()
                 # ROI 부분만 움직임 감지
                 roi_img, detect_move_bool, contours = self.detect_move(roi_img)     
                 # 움직임이 없는 경우 루프 건너뜀
                 if detect_move_bool == False:
                     continue
                 # 움직임 표시
-                roi_img = tools.draw_contours(roi_img, contours)        
+                final_img = tools.draw_contours(final_img, contours)        
                 # ROI 이미지를 원본이미지에 합성
-                img = tools.merge_roi_img(self.img, roi_img, self.x1, self.y1)
+                img = tools.merge_roi_img(self.img, final_img, self.x1, self.y1)
                 # 녹화 옵션
                 cv2.rectangle(img, (self.x1, self.y1),(self.x2, self.y2),(0,255,0), 1)
                 self.video.write(img) 
@@ -430,12 +458,12 @@ class MultiCCTV:
             if false > 2:
                 break
         # total_frames/fps
-        message = ['done', total_frames, frame_cnt, self.fps, self.file_name]
+        et = time.time()
+        message = ['done', total_frames, frame_cnt, self.fps, self.file_name, round(et-st), self.jump]
         self.queue.put(message)
         self.cap.release()
         self.video.release()
-
-
+        
 
     def yolo_detection(self, roi_img, frame_number):
         '''
@@ -477,22 +505,29 @@ class MultiCCTV:
         두 차이 이미지를 비교하여 움직임이 있는 부분을 찾아내는 함수
         return plot_img, 움직임 Bool, contours
         '''
-        # 밝기 처리한 이미지를 리턴하므로 원본 이미지를 복사하여 사용
-        contours = 0
         plot_img = roi_img.copy()
         gray_img = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
+        if roi_img is None or roi_img.size == 0:
+            return roi_img, False, 0
+        gray_img = cv2.GaussianBlur(gray_img, self.kernel_size, 0)
+        # 밝기 처리한 이미지를 리턴하므로 원본 이미지를 복사하여 사용
+        contours = 0
         # ROI를 설정합니다.
         self.setRoiFrame123(gray_img)
         # frame1, frame2, frame3이 하나라도 None이면 원본+밝기 이미지 출력
         if self.roi_frame_1 is None or self.roi_frame_2 is None or self.roi_frame_3 is None:
-            self.roiColor = (0, 0, 255)
+            DT.roi_color = (0, 0, 255)
+            # plot_img의 테두리를 self.roiColor로 설정
+            cv2.rectangle(plot_img, (0, 0), (plot_img.shape[1], plot_img.shape[0]), DT.roi_color, 1)
             return plot_img, False, contours
         # 움직임 감지
         diff_cnt, diff_img = self.get_diff_img()
         thr = DT.scale_move_thr * self.thr_move_slider_multi # * brightness
         if diff_cnt < thr:
+            DT.roi_color = (0, 0, 255)
+            cv2.rectangle(plot_img, (0, 0), (plot_img.shape[1], plot_img.shape[0]), DT.roi_color, 1)
             return plot_img, False, contours
-        self.roiColor = (0, 255, 0)
+        DT.roi_color = (0, 255, 0)
         # 영상에서 1인 부분이 thr 이상이면 움직임이 있다고 판단 영상출력을 하는데 움직임이 있는 부분은 빨간색으로 테두리를 표시
         contours, _ = cv2.findContours(diff_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         return plot_img, True, contours

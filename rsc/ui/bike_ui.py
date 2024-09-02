@@ -137,8 +137,8 @@ class Ui_Bike(object):
         self.pushButton_4.setText(QCoreApplication.translate("Bike", u"4", None))
         self.pushButton_5.setText(QCoreApplication.translate("Bike", u"5", None))
         self.pushButton_6.setText(QCoreApplication.translate("Bike", u"6", None))
-        self.pushButton_1.setText(QCoreApplication.translate("Bike", u"1", None))
-        self.pushButton_2.setText(QCoreApplication.translate("Bike", u"2", None))
-        self.pushButton_3.setText(QCoreApplication.translate("Bike", u"3", None))
+        self.pushButton_1.setText(QCoreApplication.translate("Bike", u"\ucea1\uccd0 (1)", None))
+        self.pushButton_2.setText(QCoreApplication.translate("Bike", u"\uc0dd\uc131 (2)", None))
+        self.pushButton_3.setText(QCoreApplication.translate("Bike", u"\uc790\ub3d9\ud654 (3)", None))
     # retranslateUi
 

@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QLayout,
-    QMainWindow, QPushButton, QSizePolicy, QSlider,
-    QSpacerItem, QStackedWidget, QStatusBar, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QFrame, QHeaderView, QLabel,
+    QLayout, QMainWindow, QPushButton, QSizePolicy,
+    QSlider, QSpacerItem, QStackedWidget, QStatusBar,
+    QTableView, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -105,18 +105,30 @@ class Ui_MainWindow(object):
         self.verticalLayout_8.setSpacing(0)
         self.verticalLayout_8.setObjectName(u"verticalLayout_8")
         self.verticalLayout_8.setContentsMargins(0, 0, 0, 0)
-        self.btn_cctv = QPushButton(self.topMenu)
-        self.btn_cctv.setObjectName(u"btn_cctv")
+        self.btn_home = QPushButton(self.topMenu)
+        self.btn_home.setObjectName(u"btn_home")
         sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.btn_cctv.sizePolicy().hasHeightForWidth())
-        self.btn_cctv.setSizePolicy(sizePolicy3)
-        self.btn_cctv.setMinimumSize(QSize(0, 45))
+        sizePolicy3.setHeightForWidth(self.btn_home.sizePolicy().hasHeightForWidth())
+        self.btn_home.setSizePolicy(sizePolicy3)
+        self.btn_home.setMinimumSize(QSize(0, 45))
         font1 = QFont()
         font1.setFamilies([u"Segoe UI"])
         font1.setBold(False)
         font1.setItalic(False)
+        self.btn_home.setFont(font1)
+        self.btn_home.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_home.setLayoutDirection(Qt.LeftToRight)
+        self.btn_home.setStyleSheet(u"")
+
+        self.verticalLayout_8.addWidget(self.btn_home)
+
+        self.btn_cctv = QPushButton(self.topMenu)
+        self.btn_cctv.setObjectName(u"btn_cctv")
+        sizePolicy3.setHeightForWidth(self.btn_cctv.sizePolicy().hasHeightForWidth())
+        self.btn_cctv.setSizePolicy(sizePolicy3)
+        self.btn_cctv.setMinimumSize(QSize(0, 45))
         self.btn_cctv.setFont(font1)
         self.btn_cctv.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btn_cctv.setLayoutDirection(Qt.LeftToRight)
@@ -135,6 +147,30 @@ class Ui_MainWindow(object):
         self.btn_mosaic.setStyleSheet(u"")
 
         self.verticalLayout_8.addWidget(self.btn_mosaic)
+
+        self.btn_bike = QPushButton(self.topMenu)
+        self.btn_bike.setObjectName(u"btn_bike")
+        sizePolicy3.setHeightForWidth(self.btn_bike.sizePolicy().hasHeightForWidth())
+        self.btn_bike.setSizePolicy(sizePolicy3)
+        self.btn_bike.setMinimumSize(QSize(0, 45))
+        self.btn_bike.setFont(font1)
+        self.btn_bike.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_bike.setLayoutDirection(Qt.LeftToRight)
+        self.btn_bike.setStyleSheet(u"")
+
+        self.verticalLayout_8.addWidget(self.btn_bike)
+
+        self.btn_112 = QPushButton(self.topMenu)
+        self.btn_112.setObjectName(u"btn_112")
+        sizePolicy3.setHeightForWidth(self.btn_112.sizePolicy().hasHeightForWidth())
+        self.btn_112.setSizePolicy(sizePolicy3)
+        self.btn_112.setMinimumSize(QSize(0, 45))
+        self.btn_112.setFont(font1)
+        self.btn_112.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.btn_112.setLayoutDirection(Qt.LeftToRight)
+        self.btn_112.setStyleSheet(u"")
+
+        self.verticalLayout_8.addWidget(self.btn_112)
 
 
         self.verticalMenuLayout.addWidget(self.topMenu)
@@ -202,12 +238,6 @@ class Ui_MainWindow(object):
         self.stackedWidget = QStackedWidget(self.widget_center)
         self.stackedWidget.setObjectName(u"stackedWidget")
         self.stackedWidget.setGeometry(QRect(740, 20, 370, 570))
-        self.label = QLabel(self.widget_center)
-        self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(10, 20, 720, 480))
-        self.label.setAutoFillBackground(False)
-        self.label.setStyleSheet(u"")
-        self.label.setFrameShape(QFrame.WinPanel)
         self.label_cap_num = QLabel(self.widget_center)
         self.label_cap_num.setObjectName(u"label_cap_num")
         self.label_cap_num.setGeometry(QRect(500, 540, 161, 31))
@@ -260,6 +290,24 @@ class Ui_MainWindow(object):
 "	font-size: 12px; /* \uae00\uc790 \ud06c\uae30 */\n"
 "    color: black; /* \ud638\ubc84 \uc0c1\ud0dc \ud14d\uc2a4\ud2b8 \uc0c9\uc0c1 */\n"
 "    }")
+        self.stackedWidget_play = QStackedWidget(self.widget_center)
+        self.stackedWidget_play.setObjectName(u"stackedWidget_play")
+        self.stackedWidget_play.setGeometry(QRect(10, 20, 721, 481))
+        self.page_play = QWidget()
+        self.page_play.setObjectName(u"page_play")
+        self.label = QLabel(self.page_play)
+        self.label.setObjectName(u"label")
+        self.label.setGeometry(QRect(0, 0, 720, 480))
+        self.label.setAutoFillBackground(False)
+        self.label.setStyleSheet(u"")
+        self.label.setFrameShape(QFrame.WinPanel)
+        self.stackedWidget_play.addWidget(self.page_play)
+        self.page_tableview = QWidget()
+        self.page_tableview.setObjectName(u"page_tableview")
+        self.tableView = QTableView(self.page_tableview)
+        self.tableView.setObjectName(u"tableView")
+        self.tableView.setGeometry(QRect(10, 0, 700, 480))
+        self.stackedWidget_play.addWidget(self.page_tableview)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -271,6 +319,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget.setCurrentIndex(-1)
+        self.stackedWidget_play.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -278,10 +327,12 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        self.btn_home.setText(QCoreApplication.translate("MainWindow", u"Home", None))
         self.btn_cctv.setText(QCoreApplication.translate("MainWindow", u"CCTV", None))
         self.btn_mosaic.setText(QCoreApplication.translate("MainWindow", u"Mosaic", None))
+        self.btn_bike.setText(QCoreApplication.translate("MainWindow", u"Bike", None))
+        self.btn_112.setText(QCoreApplication.translate("MainWindow", u"\ucd9c\ub3d9\uc218\ub2f9", None))
         self.btn_settings.setText(QCoreApplication.translate("MainWindow", u"\uc124\uc815", None))
-        self.label.setText("")
         self.label_cap_num.setText(QCoreApplication.translate("MainWindow", u"\ud504\ub808\uc784 \ubc88\ud638", None))
         self.btn_region_reset.setText(QCoreApplication.translate("MainWindow", u"\uad00\uc2ec\uc601\uc5ed \ub9ac\uc14b", None))
 #if QT_CONFIG(tooltip)
@@ -293,5 +344,6 @@ class Ui_MainWindow(object):
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"\uc7ac\uc0dd \uc9c0\uc5f0\uc2dc\uac04", None))
         self.label_delay_time.setText(QCoreApplication.translate("MainWindow", u"0 ms", None))
         self.btn_play.setText(QCoreApplication.translate("MainWindow", u"play", None))
+        self.label.setText("")
     # retranslateUi
 

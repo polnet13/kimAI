@@ -5,10 +5,8 @@ import pandas as pd
 from ultralytics import YOLO
 from control import tools
 from control.run_ocr import OcrReader
-# from module.generic import CustomBaseClass
 from views.sharedData import DT
 from PySide6.QtWidgets import QWidget
-
 from rsc.ui.bike_ui import Ui_Bike
 
 

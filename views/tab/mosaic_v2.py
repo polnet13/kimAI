@@ -48,54 +48,50 @@ class Mosaic(Ui_mosaic, QWidget):
     @getTime
     def btn6(self):
         '''숫자6 입력시 분석 실행되는 함수'''
+        device = DT.device
         obj = {0: '사람', 2: '승용차', 3: '오토바이', 5: '버스', 7: '트랙'}
         self.progressBar_mosaic.setValue(0)
         self.start = DT.start_point if DT.start_point else 0
         self.end = DT.end_point if DT.end_point else DT.total_frames
+        gap = self.end - self.start
         # 캡셋을 해서 시작점 설정
         cap_num = self.start
-        DT.cap = cv2.VideoCapture(DT.fileName)
-        DT.cap.set(cv2.CAP_PROP_POS_FRAMES, cap_num)
+        cap = cv2.VideoCapture(DT.fileName)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, cap_num)
+        ret, frame = cap.read()
         DT.detection_list.clear()
+        detector = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt'))
+        selo_size = int(640*frame.shape[0]/frame.shape[1])
+        cap.set(cv2.CAP_PROP_POS_FRAMES, self.start)
         while cap_num < self.end:
-            ret, frame = DT.cap.read()
-            if not ret:
-                fail+=1
-                continue
-            cap_num = DT.cap.get(cv2.CAP_PROP_POS_FRAMES)
-            DT.mosaic_current_frame = cap_num
-            # cap_num = cap.get(프레임) 
-            try:
-                detections = self.detector.track(frame, persist=True, device=DT.device)[0]
-            except Exception as e:
-                print(e)
-                # 욜로 트래커 초기화
-                self.detector = YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt'))
-                detections = self.detector.track(frame, persist=True, device=DT.device)[0]
+            ret, frame = cap.read()
+            cap_num = cap.get(cv2.CAP_PROP_POS_FRAMES)
+            # 프레임 가로 사이즈가 700 이상이면 가로사이즈를 640으로 줄임, 단 세로 사이즈는 가로 사이즈에 맞춰서 비율 조정
+            if frame.shape[1] > 700:
+                frame = cv2.resize(frame, (640, selo_size))
+            detections = detector.track(frame, persist=True, device=device)[0]
             for data in detections.boxes.data.tolist(): # data : [xmin, ymin, xmax, ymax, confidence_score, class_id]
                 if len(data) < 7:  # data 리스트의 길이가 7보다 작은 경우 해당 데이터를 건너뛰도록 합니다. 이를 통해 인덱스 오류를 방지
                     continue
                 xmin, ymin, xmax, ymax = int(data[0]), int(data[1]), int(data[2]), int(data[3]) # 리사이즈
                 track_id, confidence, label = int(data[4]), float(data[5]), int(data[6])
-                # 검출대상 설정
                 # (0, 'person'), (2, 'car'), (3, 'motorcycle'), (5, 'bus'), (7, 'truck'), (9, 'traffic light')
-                
                 if label not in [0,2,3,5,7]:
-                    continue
-                if confidence < 1/100:
                     continue
                 xmin, ymin, xmax, ymax = tools.abs_to_rel(frame.shape, xmin, ymin, xmax, ymax)
                 # df, temp_df 정리
                 DT.detection_add(cap_num-1, track_id, obj[label], xmin, ymin, xmax, ymax, confidence)
-            progress_var = int(cap_num / self.end * 100) +1
+            progress_var = int((cap_num-self.start) / gap * 100)
+            progress_var = 100 if progress_var > 100 else progress_var
+            print(f'cap_num, self.end, self.start', cap_num, self.end, self.start)
+            print('progress_var: ', progress_var)
             self.progressBar_mosaic.setValue(progress_var)
             QApplication.processEvents()
         DT.df = pd.DataFrame(DT.detection_list, columns=DT.columns)
         DT.detection_list.clear()
         self.progressBar_mosaic.setValue(100)
         self.df_to_tableView_mosaic_ID()
-        # ID 리스트 뷰와
-        # frame 리스트 뷰 출력
+
 
 
     def btn1(self):
@@ -128,6 +124,7 @@ class Mosaic(Ui_mosaic, QWidget):
             return
         start_point = int(DT.df['frame'].min())
         end_point = int(DT.df['frame'].max())
+        gap = end_point-start_point
         self.fileName = DT.fileName
         self.total_frames = DT.total_frames
         cap = cv2.VideoCapture(self.fileName)
@@ -138,9 +135,11 @@ class Mosaic(Ui_mosaic, QWidget):
             os.makedirs(output_path)
         outfile = os.path.join(output_path, f'{fileName}')
         self.video = cv2.VideoWriter(outfile, cv2.VideoWriter_fourcc(*'mp4v'), DT.fps, (DT.width, DT.height))
-        for frame in range(start_point, end_point+1):
+        for frame in range(start_point, end_point):
             processed_frame = frame - start_point
-            progress_var = int((processed_frame / (end_point) * 100 ) )+1
+            progress_var = int((processed_frame / (gap) * 100 ) )+1
+            progress_var = 100 if progress_var > 100 else progress_var
+            print(f'processed_frame: {progress_var}')
             self.progressBar_mosaic.setValue(progress_var)
             QApplication.processEvents()
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
@@ -148,7 +147,6 @@ class Mosaic(Ui_mosaic, QWidget):
             img = self.plot_df_to_mosaic(img, frame)
             self.video.write(img)             
         self.video.release()
-        self.progressBar_mosaic.setValue(100)
         tools.openpath(output_path)
 
     def plot_df_to_mosaic(self, img, cap_num):

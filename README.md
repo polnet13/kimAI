@@ -2,18 +2,19 @@
 - CCTV 영상 분석 및 이륜차 번호판 탐지 
 - 모델은 별도 배포 함
 
-# 패키지
+# 가상환경
+conda create -n pol_ai python=3.11
 conda install pytorch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 pytorch-cuda=12.1 -c pytorch -c nvidia
+
+# 패키지
 pip install PySide6==6.4.3
 pip install ultralytics==8.2
-pip install opencv-python==4.9.0.80
 pip3 install lapx==0.5.2 
-pip install opencv-python==4.10.0.82
-pip3 install numpy==1.26.4
-pip3 install easyocr
 pip install fuzzywuzzy
+<!-- pip3 install easyocr -->
+pip install opencv-python==4.10.0.82
 pip install python-Levenshtein  
-pip install django
+pip3 install numpy==1.26.4
 
 # 프로젝트 구조
 ```
@@ -53,8 +54,4 @@ pyside6-uic cctv.ui -o cctv_ui.py
 #### Using Pyinstaller
 python manage.py deploy
 
-## Todo
-- 해상도가 큰 영상 느려지는 것 리사이즈로 해결(640*360)
-- 탭 적절하게 자동변환되도록
-- 반응형 옵션창 
-- 안내판 지우고 모두 테이블로 대체(반응형으로 구현하기 위함)
+ 

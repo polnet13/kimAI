@@ -8,7 +8,7 @@ os.chdir(path)  # 프로젝트 디렉토리로 이동
 
 # 옵션 설정
 onefile = False
-console = False
+console = True
 
 # 제외할 파일과 폴더를 지정
 excludes = ['영상자료', '__pycache__', '.vscode', 'build', 'dist', 'test_widget']
@@ -48,7 +48,7 @@ comand = f'{target}'
 # 파일이 존재하는지 확인
  
 if not os.path.isfile(target):
-    target = os.path.join(wd, 'dist','main.exe')
+    target = os.path.join(wd, 'dist', 'main','main.exe')
 
 comand = f'{target}'
 os.system(comand) 

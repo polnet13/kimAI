@@ -27,7 +27,9 @@ class DT:
     detector = None   # 현재 선택된 디텍터 (모델로더의 드롭다운 변경시 초기화)
     roi = (0,0,1,1) # (x1, y1, x2, y2) 상대적좌표(백분율)
     # roi_point: plot_img 함수에서 매번 값을 계산하면 오버헤드 발생해서 미리 따는거임
-    roi_point = [(0,0,0,0), (0,0,0,0)] # [ orignal_roi, resized_roi ] 
+    roi_point = [(0,0,0,0), (0,0,0,0)] # 삭제 예정
+    roi_original = (0,0,0,0)  # 원본이미지와 GUI 화면용 이미지의 ROI 좌표를 생성
+    roi_resized = (0,0,0,0)
     original_shape = (0,0)
     resized_shape = (0,0)
     roi_frame_1 = None   # 움직임 감지를 위한 프레임 저장
@@ -55,6 +57,7 @@ class DT:
     height = 0
     realsizeChecked = True
     time_delay = 0
+    jump = None
     # 시작, 종료점
     start_point = None
     end_point = None
@@ -192,6 +195,15 @@ class DT:
         cls.roi_point[0] = (tools.rel_to_abs(DT.img.shape, xmin, ymin, xmax, ymax))
         cls.roi_point[1] = (tools.rel_to_abs(DT.resized_shape, xmin, ymin, xmax, ymax))
         cls.setMoveSliderScale()
+        cls.setKernalSize()
+
+    @classmethod
+    def setKernalSize(cls):
+        # roi 이미지 가우시안 커널 사이즈 정함(원본 기준으로 정함)
+        height, width = cls.roi_point[0][2] - cls.roi_point[0][0], cls.roi_point[0][3] - cls.roi_point[0][1]
+        kernel_size = (width // 20, height // 20)  # 예: 이미지 크기의 1/70
+        cls.kernel_size = (kernel_size[0] | 1, kernel_size[1] | 1) # 커널 크기는 홀수여야 함
+        print(f'커널 사이즈: {cls.kernel_size}')
 
 
     @classmethod
