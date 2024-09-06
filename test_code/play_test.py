@@ -30,6 +30,7 @@ for i in range(start, end):
         print('노 프레임: ', i)
     if no_frame == 10:
         print('노 프레임 10개 이상')
+
         break
     cap_num = cap.get(cv2.CAP_PROP_POS_FRAMES)
     print(cap_num, i, ret, type(frame), error, end)
@@ -38,15 +39,7 @@ for i in range(start, end):
 
 
 def get_video_codec(video_path):
-    """
-    주어진 영상 파일의 코덱 정보를 반환합니다.
-
-    Args:
-        video_path (str): 영상 파일 경로
-
-    Returns:
-        str: 영상 코덱 정보 (예: 'H264', 'MPEG-4', 'DivX' 등)
-    """
+ 
     # 영상 파일 열기
     cap = cv2.VideoCapture(video_path)
     # FOURCC 코드 가져오기
