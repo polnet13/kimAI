@@ -115,7 +115,13 @@ class CCTV(Ui_CCTV, QWidget):
         scroll_layout.addWidget(self.startBtn)
 
         cap = cv2.VideoCapture(fileNames[0])
-        self.img_shape = cap.read()[1].shape
+        ret, frame = cap.read()
+        # 첫프레임 오류난 파일 처리
+        if ret is False:
+            ret, frame = cap.read() 
+        if ret is True:
+            self.img_shape = frame.shape
+
         self.startBtn.clicked.connect(self.start_multi)
         
         self.len_filenames = len(fileNames)
