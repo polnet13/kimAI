@@ -522,7 +522,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             plot_img = tools.resize_img(plot_img, 680)
         self.label.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(plot_img.data, plot_img.shape[1], plot_img.shape[0], QtGui.QImage.Format_RGB888).rgbSwapped()))
         self.label.setScaledContents(True)
-        self.label_cap_num.setText(f'프레임 번호 : {DT.cap_num}')
+        self.label_cap_num.setText(f'{DT.cap_num} / {DT.total_frames}')
         frameTimer = time.strftime('%H:%M:%S', time.gmtime(DT.cap_num/DT.fps))
         self.playTimer.setText(f'{frameTimer}')
         self.label.update()
