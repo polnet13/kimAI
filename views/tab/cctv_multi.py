@@ -372,7 +372,7 @@ class MultiCCTV:
     models = {
         'model': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt')),
         'model_nbp':  YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
-        'model_face': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/model_face.pt')),
+        # 'model_face': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 self.models 로 전달함
     columns = ['객체ID', '프레임번호', 'x1', 'y1', 'x2', 'y2']
 
@@ -417,18 +417,22 @@ class MultiCCTV:
         total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
         self.percentage = 0
-        false = 0
         self.newFrameNum = 0
         outvideo = os.path.join(self.output_base, f'{self.file_name}.mp4')
         # 비디오 생성
         self.video = cv2.VideoWriter(outvideo, cv2.VideoWriter_fourcc(*'mp4v'), self.fps, (self.width, self.height))
+        fail = 0
         frame_cnt = 0
         # 루프 돌기
         while True: # 동영상이 올바로 열렸는지
+            if fail > 5:
+                print('실패 5회 이상으로 종료')
+                break
             ret, self.img = self.cap.read() 
             curent_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES) 
             if curent_frame%self.jump != 0:
                 if curent_frame >= total_frames:
+                    print('끝 프레임 초과로 종료')
                     break
                 continue
             # 상태바 업데이트를 위해 작업 진행률을 계산
@@ -439,12 +443,13 @@ class MultiCCTV:
             self.queue.put([self.percentage-2])
             # 프레임 처리
             if not ret:
-                false += 1
+                fail += 1
                 self.cap.set(cv2.CAP_PROP_POS_FRAMES, curent_frame+1)
                 if curent_frame >= total_frames:
+                    print('끝 프레임 초과로 종료')
                     break
             else:
-                false=0
+                fail=0
                 roi_img = self.img[self.y1:self.y2, self.x1:self.x2]
                 # roi 이미지 가우시안 블러 처리
                 final_img = roi_img.copy()
@@ -461,8 +466,8 @@ class MultiCCTV:
                 cv2.rectangle(img, (self.x1, self.y1),(self.x2, self.y2),(0,255,0), 1)
                 self.video.write(img) 
                 frame_cnt += 1
-            if false > 2:
-                break
+                print(fail, curent_frame, '/', total_frames, self.percentage, frame_cnt)
+            
         # total_frames/fps
         et = time.time()
         message = ['done', total_frames, frame_cnt, self.fps, self.file_name, round(et-st), self.jump]

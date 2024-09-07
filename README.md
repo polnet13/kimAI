@@ -11,7 +11,7 @@ pip install PySide6==6.4.3
 pip install ultralytics==8.2
 pip3 install lapx==0.5.2 
 pip install fuzzywuzzy
-<!-- pip3 install easyocr -->
+pip3 install easyocr
 pip install opencv-python==4.10.0.82
 pip install python-Levenshtein  
 pip3 install numpy==1.26.4

@@ -1,5 +1,5 @@
 {
-    "check_cuda": 0,
+    "check_cuda": 2,
     "index": 4,
     "btn_point_1": [
         584,
@@ -9,5 +9,5 @@
         27,
         65
     ],
-    "jump": 11
+    "jump": 1
 }
