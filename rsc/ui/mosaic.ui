@@ -22,7 +22,7 @@
      <height>571</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_7" stretch="0,0,0,6,0,0">
+   <layout class="QVBoxLayout" name="verticalLayout_7" stretch="0,0,0,0,6,0,0">
     <property name="leftMargin">
      <number>11</number>
     </property>
@@ -35,6 +35,24 @@
     <property name="bottomMargin">
      <number>11</number>
     </property>
+    <item>
+     <widget class="QPushButton" name="btn__file_open">
+      <property name="text">
+       <string>파일열기</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QCheckBox" name="checkBox_mosaic">
+        <property name="text">
+         <string>모자이크 미리보기</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
@@ -81,13 +99,6 @@
        </spacer>
       </item>
      </layout>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_mosaic">
-      <property name="text">
-       <string>모자이크 미리보기</string>
-      </property>
-     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">

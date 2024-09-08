@@ -7,6 +7,11 @@ from views.sharedData import DT
 
  
     
+def make_dir(dir_path):
+    '''입력된 경로에 폴더가 없으면 생성'''
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    return dir_path
 
 def sort_roi(x1, y1, x2, y2):
     '''

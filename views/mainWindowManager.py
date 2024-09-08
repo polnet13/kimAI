@@ -37,13 +37,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 로드 탭
         self.tab_home = Home()
         self.stackedWidget.addWidget(self.tab_home)
-        
         json_path = os.path.join(DT.BASE_DIR, 'rsc', 'json', 'options.json')
         with open(json_path, "r") as f:
             options = json.load(f)
         self.tab_settings = Settings(options)
         self.stackedWidget.addWidget(self.tab_settings)
-
         self.tab_mosaic = Mosaic() 
         self.stackedWidget.addWidget(self.tab_mosaic)   
         self.tab_bike = Bike() 
@@ -52,27 +50,18 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.stackedWidget.addWidget(self.tab_cctv)
         self.tab_singo = Chuldong() 
         self.stackedWidget.addWidget(self.tab_singo)
-
-        self.stackedWidget.setCurrentIndex(DT.index)
+        # 초기 탭 설정
+        index_home = self.stackedWidget.indexOf(self.tab_home)
+        self.stackedWidget.setCurrentIndex(index_home)
+        # 탭 시그널 정의
         self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
-
-        index_dict = {
-            0: self.tab_settings, 
-            1: self.tab_home, 
-            2: self.tab_cctv,
-            3: self.tab_mosaic, 
-            4: self.tab_bike, 
-            5: self.tab_singo
-            }
-        self.detector = index_dict[DT.index]
-        # 시그널 슬롯 연결
+        self.tab_home.playerOpenSignal.connect(self.player_fileopen)
         self.tab_mosaic.signal_frame_move.connect(self.mosaic_move_clicked)
         # 멀티 프로세싱 관련 변수
         self.statusBar().showMessage(f'스레드: {self.thread}')
         # 메시지 박스 표시 플래그
         self.message_box_shown = False  
         # qslider 설정
-        self.playSlider.valueChanged.connect(self.play_slider_moved)  # 재생구간
         # 플레이창
         self.label.setStyleSheet("background-color: black")
         # 리스트뷰 
@@ -98,17 +87,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.btn_bike.clicked.connect(self.buttonClick)
         self.btn_112.clicked.connect(self.buttonClick)
         self.slider_delay.valueChanged.connect(self.slot_delay_valueChanged)
+        self.playSlider.valueChanged.connect(self.play_slider_moved)  # 재생구간
  
 
         #################
         ## 단축키 함수 ##
         ################
-        # # 아래 화살표를 눌렀을 때 설정
-        # self.down_key = QShortcut(QKeySequence(Qt.Key_Down), self)
-        # self.down_key.activated.connect(self.tableview_df_down)
-        # # 위 화살표를 눌렀을 때 설정
-        # self.up_key = QShortcut(QKeySequence(Qt.Key_Up), self)
-        # self.up_key.activated.connect(self.tableview_df_up)
         # A키 눌렀을 때 설정
         self.s_key = QShortcut(QKeySequence(Qt.Key_A), self)
         self.s_key.activated.connect(self.slot_btn_minusOneFrame) 
@@ -171,7 +155,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # GET BUTTON CLICKED
         btn = self.sender()
         btnName = btn.objectName()
-        
         # SHOW HOME PAGE
         if btnName == "btn_home":
             DT.index = self.stackedWidget.indexOf(self.tab_home)
@@ -198,8 +181,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             self.detector = self.tab_settings
             self.change_stack(0)
         self.stackedWidget.setCurrentIndex(DT.index)
-        DT.saveOption(index=DT.index)
-        print(DT.index)
 
     ##############
     ## 슬롯함수 ##
@@ -390,6 +371,10 @@ class mainWindow(QMainWindow, Ui_MainWindow):
  
 
     def change_stack(self, index):
+        '''
+        0: 플레이어
+        1: 테이블
+        '''
         self.stackedWidget_play.setCurrentIndex(index)
         
         

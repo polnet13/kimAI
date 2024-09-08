@@ -31,6 +31,21 @@ class Ui_mosaic(object):
         self.verticalLayout_7 = QVBoxLayout(self.verticalLayoutWidget_12)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.verticalLayout_7.setContentsMargins(11, 11, 11, 11)
+        self.btn__file_open = QPushButton(self.verticalLayoutWidget_12)
+        self.btn__file_open.setObjectName(u"btn__file_open")
+
+        self.verticalLayout_7.addWidget(self.btn__file_open)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.checkBox_mosaic = QCheckBox(self.verticalLayoutWidget_12)
+        self.checkBox_mosaic.setObjectName(u"checkBox_mosaic")
+
+        self.horizontalLayout_2.addWidget(self.checkBox_mosaic)
+
+
+        self.verticalLayout_7.addLayout(self.horizontalLayout_2)
+
         self.horizontalLayout_7 = QHBoxLayout()
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.label_11 = QLabel(self.verticalLayoutWidget_12)
@@ -57,11 +72,6 @@ class Ui_mosaic(object):
 
 
         self.verticalLayout_7.addLayout(self.horizontalLayout_7)
-
-        self.checkBox_mosaic = QCheckBox(self.verticalLayoutWidget_12)
-        self.checkBox_mosaic.setObjectName(u"checkBox_mosaic")
-
-        self.verticalLayout_7.addWidget(self.checkBox_mosaic)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -145,7 +155,7 @@ class Ui_mosaic(object):
 
         self.verticalLayout_7.addLayout(self.verticalLayout_10)
 
-        self.verticalLayout_7.setStretch(3, 6)
+        self.verticalLayout_7.setStretch(4, 6)
 
         self.retranslateUi(mosaic)
 
@@ -154,9 +164,10 @@ class Ui_mosaic(object):
 
     def retranslateUi(self, mosaic):
         mosaic.setWindowTitle(QCoreApplication.translate("mosaic", u"Form", None))
+        self.btn__file_open.setText(QCoreApplication.translate("mosaic", u"\ud30c\uc77c\uc5f4\uae30", None))
+        self.checkBox_mosaic.setText(QCoreApplication.translate("mosaic", u"\ubaa8\uc790\uc774\ud06c \ubbf8\ub9ac\ubcf4\uae30", None))
         self.label_11.setText(QCoreApplication.translate("mosaic", u"\ubaa8\uc790\uc774\ud06c \uc815\ub3c4", None))
         self.label.setText(QCoreApplication.translate("mosaic", u"50", None))
-        self.checkBox_mosaic.setText(QCoreApplication.translate("mosaic", u"\ubaa8\uc790\uc774\ud06c \ubbf8\ub9ac\ubcf4\uae30", None))
         self.btn_move_start.setText(QCoreApplication.translate("mosaic", u"\uc2dc\uc791 \uc810 \ubc14\ub85c\uac00\uae30", None))
         self.btn_move_end.setText(QCoreApplication.translate("mosaic", u"\ub05d \uc810 \ubc14\ub85c\uac00\uae30", None))
 #if QT_CONFIG(tooltip)
