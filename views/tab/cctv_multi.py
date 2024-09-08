@@ -253,31 +253,28 @@ class CCTV(Ui_CCTV, QWidget):
             while not self.queues[i].empty():
                 msg = self.queues[i].get()
                 if msg[0] == 'done':
-                    # 워커 종료시
-                    # ['done', total_frames, frame_cnt, self.fps, self.file_name, round(et-st), self.jump]
+                    self.progress_bars[i].setValue(100)
+                    total_frames = msg[1]
+                    after_frames = msg[2]
+                    fps = msg[3]
                     file = os.path.basename(msg[4])
-                    before_time = round(msg[1]/msg[3],1)
-                    after_time = round(msg[2]/msg[3],1)
-                    detect_time = round(msg[2]/msg[1]*100,1)
-                    print('작업 완료')
-                    one_page_summary = (f'{file}\n{before_time}초 => {after_time}초\n관심영역에 움직임이 감지된 {detect_time}% 남김, {msg[5]}소요, jump: ({msg[6]})\n\n')
+                    time_process = msg[5]
+                    before_time = round(total_frames/fps, 1)
+                    after_time = round(after_frames/fps, 1)
+                    detect_percent = round(after_frames/total_frames*100,1)
+                    one_page_summary = (f'{file}\n{before_time}초 => {after_time}초\n관심영역에 움직임이 감지된 {detect_percent}% 남김, {time_process}소요, jump: ({msg[6]})\n\n')
                     with open(os.path.join(DT.OUT_DIR, 'summary.txt'), 'a') as f:
                         f.write(one_page_summary)
                     self.flag_dongzip_btn = False
-                    self.progress_bars[i].setValue(100)
                     self.completed_count += 1
 
                     if self.active_workers < self.len_filenames:  # 추가 작업이 있는 경우
                         self.workers[self.active_workers].start()  # 새 작업 시작
                         self.active_workers += 1
                 else:
-                    try:
-                        self.progress_bars[i].setValue(msg[0])
-                    except:
-                        return
+                    self.progress_bars[i].setValue(msg[0])
         # 모든 작업이 완료되었는지 확인하고 메시지 박스가 아직 표시되지 않았다면 표시
         if self.completed_count == self.len_filenames:
-            print(self.completed_count)
             if self.completed_count == 0:
                 return
             # 멀티 작업 종료시 작업
@@ -288,7 +285,7 @@ class CCTV(Ui_CCTV, QWidget):
             msg.exec_()
             self.slot_btn_multi_reset()
             self.et = time.time()
-            print(f'소요시간: {self.et - self.st}')
+            print(f'모든 작업시간 소요시간: {self.et - self.st }')
     
     def detect_move(self, roi_img):
         '''
@@ -411,66 +408,63 @@ class MultiCCTV:
         # 비디오 파일 열기
         st = time.time()
         self.cap = cv2.VideoCapture(self.filePath)
+        total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        # 전체 프레임 가져오기
-        total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
         self.percentage = 0
         self.newFrameNum = 0
         outvideo = os.path.join(self.output_base, f'{self.file_name}.mp4')
         # 비디오 생성
         self.video = cv2.VideoWriter(outvideo, cv2.VideoWriter_fourcc(*'mp4v'), self.fps, (self.width, self.height))
+        after_frames = 0
         fail = 0
-        frame_cnt = 0
         # 루프 돌기
         while True: # 동영상이 올바로 열렸는지
-            if fail > 5:
-                print('실패 5회 이상으로 종료')
-                break
             ret, self.img = self.cap.read() 
             curent_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES) 
+            if fail > 5:
+                break
+            if curent_frame < 0:
+                break
             if curent_frame%self.jump != 0:
-                if curent_frame >= total_frames:
-                    print('끝 프레임 초과로 종료')
-                    break
+                fail += 1
                 continue
             # 상태바 업데이트를 위해 작업 진행률을 계산
             self.percentage_1 = self.percentage
             self.percentage_2 = round(curent_frame/total_frames*100)
             if self.percentage_1 != self.percentage_2:
                 self.percentage = self.percentage_2
-            self.queue.put([self.percentage-2])
+            self.queue.put([self.percentage])
             # 프레임 처리
             if not ret:
                 fail += 1
                 self.cap.set(cv2.CAP_PROP_POS_FRAMES, curent_frame+1)
                 if curent_frame >= total_frames:
-                    print('끝 프레임 초과로 종료')
                     break
             else:
                 fail=0
+                after_frames += 1
                 roi_img = self.img[self.y1:self.y2, self.x1:self.x2]
                 # roi 이미지 가우시안 블러 처리
-                final_img = roi_img.copy()
+                # final_img = roi_img.copy()
                 # ROI 부분만 움직임 감지
                 roi_img, detect_move_bool, contours = self.detect_move(roi_img)     
                 # 움직임이 없는 경우 루프 건너뜀
                 if detect_move_bool == False:
                     continue
-                # 움직임 표시
-                final_img = tools.draw_contours(final_img, contours)        
+                # 움직임 표시 
+                # final_img = tools.draw_contours(final_img, contours)        
                 # ROI 이미지를 원본이미지에 합성
-                img = tools.merge_roi_img(self.img, final_img, self.x1, self.y1)
+                # img = tools.merge_roi_img(self.img, final_img, self.x1, self.y1)
+                img = tools.merge_roi_img(self.img, roi_img, self.x1, self.y1)
                 # 녹화 옵션
                 cv2.rectangle(img, (self.x1, self.y1),(self.x2, self.y2),(0,255,0), 1)
                 self.video.write(img) 
-                frame_cnt += 1
-                print(fail, curent_frame, '/', total_frames, self.percentage, frame_cnt)
             
         # total_frames/fps
         et = time.time()
-        message = ['done', total_frames, frame_cnt, self.fps, self.file_name, round(et-st), self.jump]
+        message = ['done', total_frames, after_frames, self.fps, self.file_name, round(et-st), self.jump]
         self.queue.put(message)
         self.cap.release()
         self.video.release()
