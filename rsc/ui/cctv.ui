@@ -136,7 +136,7 @@
          <string/>
         </property>
         <property name="text">
-         <string>건너띄기</string>
+         <string>건너뛰기</string>
         </property>
        </widget>
       </item>

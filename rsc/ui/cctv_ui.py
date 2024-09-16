@@ -154,7 +154,7 @@ class Ui_CCTV(object):
 #if QT_CONFIG(tooltip)
         self.label_3.setToolTip("")
 #endif // QT_CONFIG(tooltip)
-        self.label_3.setText(QCoreApplication.translate("CCTV", u"\uac74\ub108\ub744\uae30", None))
+        self.label_3.setText(QCoreApplication.translate("CCTV", u"\uac74\ub108\ub6f0\uae30", None))
         self.label_jump.setText(QCoreApplication.translate("CCTV", u"3", None))
 #if QT_CONFIG(tooltip)
         self.slider_jump.setToolTip("")
