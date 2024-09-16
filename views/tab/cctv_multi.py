@@ -95,6 +95,7 @@ class CCTV(Ui_CCTV, QWidget):
         self.flag_dongzip_btn = False
         self.btn_flag_multi_start = False
         self.flag_multiprocess = False
+        self.completed_count = 0
         self.terminate_workers()
         self.clear_status_bars()
         self.update()
@@ -221,6 +222,7 @@ class CCTV(Ui_CCTV, QWidget):
         프로그레스바를 업데이트하는 타이머를 실행
         '''
         self.st = time.time()
+        self.completed_count = 0
         if self.flag_multiprocess:
             return
         # 메뉴 넘버 따오는 함수 추가예정
@@ -234,7 +236,6 @@ class CCTV(Ui_CCTV, QWidget):
                 ]
         self.object_queue_to_worker()
         self.run_workers()
-        self.completed_count = 0
         # 백그라운드 워커(실질적인 영상 압축 코드)
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_progress)
@@ -247,8 +248,7 @@ class CCTV(Ui_CCTV, QWidget):
 
     def update_progress(self):
         '''진행 상태 업데이트'''
-
-        self.completed_count = 0
+        
         for i in range(self.active_workers):
             while not self.queues[i].empty():
                 msg = self.queues[i].get()
@@ -262,7 +262,7 @@ class CCTV(Ui_CCTV, QWidget):
                     before_time = round(total_frames/fps, 1)
                     after_time = round(after_frames/fps, 1)
                     detect_percent = round(after_frames/total_frames*100,1)
-                    one_page_summary = (f'{file}\n{before_time}초 => {after_time}초\n관심영역에 움직임이 감지된 {detect_percent}% 남김, {time_process}소요, jump: ({msg[6]})\n\n')
+                    one_page_summary = (f'{file}\n{before_time}초 => {after_time}초\n{detect_percent}% 남김, {time_process}초 소요, 점프 프레임: ({msg[6]})\n\n')
                     with open(os.path.join(DT.OUT_DIR, 'summary.txt'), 'a') as f:
                         f.write(one_page_summary)
                     self.flag_dongzip_btn = False
@@ -274,18 +274,21 @@ class CCTV(Ui_CCTV, QWidget):
                 else:
                     self.progress_bars[i].setValue(msg[0])
         # 모든 작업이 완료되었는지 확인하고 메시지 박스가 아직 표시되지 않았다면 표시
+        print(self.completed_count, self.len_filenames)
         if self.completed_count == self.len_filenames:
-            if self.completed_count == 0:
-                return
             # 멀티 작업 종료시 작업
+            self.et = time.time()
+            text = f'\n\n총 작업시간: {self.et - self.st }'
+            with open(os.path.join(DT.OUT_DIR, 'summary.txt'), 'a') as f:
+                f.write(text)
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
             msg.setText("모든 작업이 완료되었습니다!")
             msg.setWindowTitle("작업 완료")
             msg.exec_()
             self.slot_btn_multi_reset()
-            self.et = time.time()
-            print(f'모든 작업시간 소요시간: {self.et - self.st }')
+            self.timer.stop()
+
     
     def detect_move(self, roi_img):
         '''
@@ -381,11 +384,10 @@ class MultiCCTV:
         # 경로 설정
         self.filePath = fileName
         self.output_base = os.path.join(os.path.dirname(fileName), 'output')
+        tools.make_dir(self.output_base)
         baseName = os.path.basename(fileName)   
         self.file_name, _ = os.path.splitext(baseName)
-        # 아웃풋 경로 생성
-        if not os.path.exists(self.output_base):
-            os.makedirs(self.output_base)
+        
         # ROI 설정
         x1, y1, x2, y2 = DT.roi
         self.x1, self.y1, self.x2, self.y2 = tools.rel_to_abs(DT.img.shape, x1, y1, x2, y2)
@@ -444,7 +446,6 @@ class MultiCCTV:
                     break
             else:
                 fail=0
-                after_frames += 1
                 roi_img = self.img[self.y1:self.y2, self.x1:self.x2]
                 # roi 이미지 가우시안 블러 처리
                 # final_img = roi_img.copy()
@@ -461,7 +462,7 @@ class MultiCCTV:
                 # 녹화 옵션
                 cv2.rectangle(img, (self.x1, self.y1),(self.x2, self.y2),(0,255,0), 1)
                 self.video.write(img) 
-            
+                after_frames += 1
         # total_frames/fps
         et = time.time()
         message = ['done', total_frames, after_frames, self.fps, self.file_name, round(et-st), self.jump]

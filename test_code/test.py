@@ -1,5 +1,19 @@
-from pydub import AudioSegment
-from pydub.playback import play
+from PySide6 import QtGui
 
-sound = AudioSegment.from_wav(r'C:\Users\prude\kimAI\rsc\sound\toong.wav')
-play(sound)
+
+def df_to_tableView(self, input_df, input_tableView):
+    # df 정리
+    df = input_df[['ID','label']].copy()
+    df = df.drop_duplicates()
+    columns = df.columns
+    # tableView 정의
+    tableView = input_tableView
+    # 모델 초기화를 데터 추가 전에 수행
+    qmodel_ = QtGui.QStandardItemModel()
+    qmodel_.setColumnCount(len(columns))
+    qmodel_.setHorizontalHeaderLabels(columns)
+    for row in range(len(df)):
+        value_objs = [QtGui.QStandardItem(str(value)) for value in df.iloc[row]]
+        qmodel_.appendRow(value_objs)
+    tableView.setModel(qmodel_)
+    self.update()
