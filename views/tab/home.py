@@ -8,10 +8,10 @@ import pandas as pd
 from views.sharedData import DT
 from PySide6.QtCore import Signal, QObject, QTimer 
 from PySide6 import QtGui
-from PySide6.QtWidgets import QWidget, QFileDialog
-import time
-from multiprocessing import Process, Queue
+from PySide6.QtWidgets import QWidget, QFileDialog, QAbstractItemView
 from rsc.ui.home_ui import Ui_Form
+from multiprocessing import Process, Queue
+import time
 
  
 
@@ -22,6 +22,7 @@ class Home(Ui_Form, QWidget):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         # 시그널 슬롯 연결
         self.btn_open_file.clicked.connect(self.open_files)
         # self.pushButton_4.clicked.connect(self.btn4)
@@ -86,7 +87,6 @@ class Home(Ui_Form, QWidget):
         self.df = pd.DataFrame({'file': filenames})
         columns = self.df.columns
         # tableView 정의
-        tableView = self.tableView
         # 모델 초기화를 데터 추가 전에 수행
         qmodel_ = QtGui.QStandardItemModel()
         qmodel_.setColumnCount(len(columns))
@@ -94,13 +94,14 @@ class Home(Ui_Form, QWidget):
         for row in range(len(self.df)):
             value_objs = [QtGui.QStandardItem(str(value)) for value in self.df.iloc[row]]
             qmodel_.appendRow(value_objs)
-        tableView.setModel(qmodel_)
+        self.tableView.setModel(qmodel_)
         self.update()
         
         # 테이블뷰 클릭 시 값을 가져오도록 수정
-        tableView.clicked.connect(self.get_selected_value)
+        self.tableView.clicked.connect(self.get_selected_value)
         
     def get_selected_value(self, index):
+        '''테이블 클릭시 행동'''
         row = index.row()
         val = self.df.iloc[row, 0]
         DT.fileName = os.path.join(self.dirname, val)

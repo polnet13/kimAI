@@ -66,12 +66,13 @@ class Ui_Settings(object):
         self.textBrowser = QTextBrowser(self.verticalLayoutWidget_12)
         self.textBrowser.setObjectName(u"textBrowser")
         self.textBrowser.setEnabled(True)
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(50)
+        sizePolicy2.setVerticalStretch(100)
         sizePolicy2.setHeightForWidth(self.textBrowser.sizePolicy().hasHeightForWidth())
         self.textBrowser.setSizePolicy(sizePolicy2)
-        self.textBrowser.setMaximumSize(QSize(340, 100))
+        self.textBrowser.setMaximumSize(QSize(340, 170))
+        self.textBrowser.setInputMethodHints(Qt.ImhNone)
 
         self.verticalLayout_7.addWidget(self.textBrowser)
 
@@ -97,6 +98,8 @@ class Ui_Settings(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">prudent13@naver.com</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">\ubcf8 \ud504\ub85c\uadf8\ub7a8\uc740 \ub525\ub7ec\ub2dd"
-                        "\uc744 \uc774\uc6a9\ud574\uc11c \uac1d\uccb4(\uc0ac\ub78c, \uc790\ub3d9\ucc28 \ub4f1)\ub97c \uc778\uc2dd\ud558\uace0 \uc601\uc0c1\ubd84\uc11d\uc744 \ud569\ub2c8\ub2e4</p></body></html>", None))
+                        "\uc744 \ud65c\uc6a9\ud574\uc11c \uac1d\uccb4(\uc0ac\ub78c, \uc790\ub3d9\ucc28 \ub4f1)\ub97c \uc778\uc2dd\ud560 \uc218 \uc788\uace0 </p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">\uc6c0\uc9c1\uc784 \uac10\uc9c0 \uc54c\uace0\ub9ac\uc998\uc744 \uc801\uc6a9\ud558\uc5ec CCTV \uc601\uc0c1\uc744 \ubd84\uc11d\uc744 \ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4. </p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">\ub610\ud55c \uc5d1\uc140\uacfc \uac19\uc740 \uc815\ud615\ub370\uc774\ud130\ub97c \ucc98\ub9ac, \uc2dc\uac01\ud654 \ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4. </p></body></html>", None))
     # retranslateUi
 

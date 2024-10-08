@@ -33,6 +33,7 @@ class PlayerClass:
             DT.setTotalFrames(_total_frames)
             DT.setFps(_fps)
             DT.setImg(original_img)
+            
             return 
         
     def cap_read(self):

@@ -370,7 +370,7 @@ class CCTV(Ui_CCTV, QWidget):
 class MultiCCTV:
     
     models = {
-        'model': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8x.pt')),
+        'model': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/yolov8m.pt')),
         'model_nbp':  YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/motobike_e300_b8_s640.pt')),
         # 'model_face': YOLO(os.path.join(DT.BASE_DIR, 'rsc/models/model_face.pt')),
     } # 어디서 읽어서 self.models 로 전달함

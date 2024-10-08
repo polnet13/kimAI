@@ -18,6 +18,7 @@ from control import tools
 from views.sharedData import DT
 from rsc.ui.singo_ui import Ui_Form
 from control.tools import getTime
+from control.singo_external import *
 
 
 

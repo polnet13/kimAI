@@ -53,6 +53,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         # 초기 탭 설정
         index_home = self.stackedWidget.indexOf(self.tab_home)
         self.stackedWidget.setCurrentIndex(index_home)
+        self.detector = self.tab_home
         # 탭 시그널 정의
         self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
         self.tab_home.playerOpenSignal.connect(self.player_fileopen)
@@ -331,6 +332,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.statusBar().showMessage(f'해상도: {DT.width}*{DT.height}   fps : {DT.fps}')
         # 영상의 전체 프레임수를 가지고 옴
         self.playSlider.setMaximum(DT.total_frames -1)
+        self.playSlider.setValue(0)
         DT.setRoiPoint()
         self.update()
         self.display_img()
