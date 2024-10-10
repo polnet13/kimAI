@@ -8,22 +8,23 @@ class HWP:
     to_hwp() -> output 파일 생성
     quit() -> 자원해제를 해줘야 함
     '''
-    def __init__(self, file_path):
-
+    def __init__(self, file_path=None):
+        self.file_path = file_path
         # 한글 파일 열기
         self.hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
-    
-        # 보안모듈은 보안성 확인후 도입예정, 그 전까지는 이미지 인식으로 자동 입력으로 해결할 예정임
-        # hwp.RegisterModule("FilePathCheckDLL", "SecurityModule")
+        if self.file_path:
+            # 보안모듈은 보안성 확인후 도입예정, 그 전까지는 이미지 인식으로 자동 입력으로 해결할 예정임
+            # hwp.RegisterModule("FilePathCheckDLL", "SecurityModule")
+            # 소스 문서 오픈
+            self._file = os.path.abspath(self.file_path)
+            self._c_dir = os.path.dirname(self._file)
+            self.src_file = os.path.join(self._c_dir, 'rsc', '예제.hwp')
+            self.out_path = os.path.join(self._c_dir, 'out', '예제_out.hwp')
+            # 한글파일 오픈
+            self.hwp.Open(self.src_file,"HWP","forceopen:true")
+        else:
+            self.hwp.XHwpWindows.Active_XHwpWindow.Visible = True  # 한글 프로그램 보이는 상태에서 편집
 
-        # 소스 문서 오픈
-        self._file = os.path.abspath(file_path)
-        self._c_dir = os.path.dirname(self._file)
-        self.src_file = os.path.join(self._c_dir, 'rsc', '예제.hwp')
-        self.out_path = os.path.join(self._c_dir, 'out', '예제_out.hwp')
-
-        # 한글파일 오픈
-        self.hwp.Open(self.src_file,"HWP","forceopen:true")
         
     # 누름틀 찾기
     def get_fields(self):
@@ -67,3 +68,4 @@ class HWP:
         print('자원 반환: ')
 
  
+hwp = HWP()
