@@ -23,10 +23,6 @@ from control.singo_external import *
 
 
 
-
-
-
-
 class Chuldong(Ui_Form, QWidget):
 
     playerOpenSignal = Signal()
@@ -40,6 +36,18 @@ class Chuldong(Ui_Form, QWidget):
         self.label_point1.setText(f'{DT.btn_point_1[0]}, {DT.btn_point_1[1]}')
         self.label_point2.setText(f'{DT.btn_point_2[0]}, {DT.btn_point_2[1]}')
         self.is_listening = False
+        # 시그널 슬롯 연결
+        self.ra_rank_1.clicked.connect(self.rank_select)
+        self.ra_rank_2.clicked.connect(self.rank_select)
+        self.ra_rank_3.clicked.connect(self.rank_select)
+        self.ra_rank_4.clicked.connect(self.rank_select)
+        self.ra_rank_5.clicked.connect(self.rank_select)
+        self.ra_team_1.clicked.connect(self.team_select)
+        self.ra_team_2.clicked.connect(self.team_select)
+        self.ra_team_3.clicked.connect(self.team_select)
+        self.ra_team_4.clicked.connect(self.team_select)
+        self.set_rank(DT.rank)
+        self.set_team(DT.team)
 
     def getInstance(self):
         '''시작시 한 번에 불러오면 대기시간이 올래 걸리므로 좌메뉴 클릭시 인스턴스 생성'''
@@ -62,6 +70,59 @@ class Chuldong(Ui_Form, QWidget):
                 self.removeEventFilter(self)
         return super().eventFilter(watched, event)
 
+    def team_select(self):
+        '''팀 선택'''
+        if self.ra_team_1.isChecked():
+            self.team = '1팀'
+        elif self.ra_team_2.isChecked():
+            self.team = '2팀'
+        elif self.ra_team_3.isChecked():
+            self.team = '3팀'
+        elif self.ra_team_4.isChecked():
+            self.team = '4팀'
+        print(f'팀 선택: {self.team}')
+        DT.team = self.team
+        DT.saveOption(team=self.team)    
+
+    def rank_select(self, btn):
+        '''랭크 선택'''
+        if self.ra_rank_1.isChecked():
+            self.rank = '순경'
+        elif self.ra_rank_2.isChecked():
+            self.rank = '경장'
+        elif self.ra_rank_3.isChecked():
+            self.rank = '경사'
+        elif self.ra_rank_4.isChecked():
+            self.rank = '경위'
+        elif self.ra_rank_5.isChecked():
+            self.rank = '경감'
+        print(f'랭크 선택: {self.rank}')
+        DT.rank = self.rank
+        DT.saveOption(rank=self.rank)
+
+    def set_rank(self, rank):
+        '''랭크 설정'''
+        if rank == '순경':
+            self.ra_rank_1.setChecked(True)
+        elif rank == '경장':
+            self.ra_rank_2.setChecked(True)
+        elif rank == '경사':
+            self.ra_rank_3.setChecked(True)
+        elif rank == '경위':
+            self.ra_rank_4.setChecked(True)
+        elif rank == '경감':
+            self.ra_rank_5.setChecked(True)
+
+    def set_team(self, team):
+        '''팀 설정'''
+        if team == '1팀':
+            self.ra_team_1.setChecked(True)
+        elif team == '2팀':
+            self.ra_team_2.setChecked(True)
+        elif team == '3팀':
+            self.ra_team_3.setChecked(True)
+        elif team == '4팀':
+            self.ra_team_4.setChecked(True)
 
     def program_exit(self):
         '''멀티 CCTV 프로그램 종료'''

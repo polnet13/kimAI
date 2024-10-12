@@ -96,21 +96,23 @@ class DT:
     
     @classmethod
     def setOption(cls, options):
+        '''프로그램 실행 초반 options.json에서 옵션값을 불러와 DT에 셋팅하는 코드임'''
         for key, value in options.items():
             setattr(cls, key, value)
 
     @classmethod
     def saveOption(cls, **args):
-
+        '''
+        기존 설정이 저장된 opsions.json 파일을 불러와 추가 후 저장하는 코드
+        '''
         json_path = os.path.join(DT.BASE_DIR, 'rsc', 'json', 'options.json')
         with open(json_path, "r") as f:
             options = json.load(f)
             for k, v in args.items():
                 options[k] = v  
-        print(options)
-
         with open(json_path, "w") as f:
             json.dump(options, f, indent=4)
+        print(options)
 
     @classmethod
     def setMoveSliderScale(cls):

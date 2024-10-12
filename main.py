@@ -27,6 +27,7 @@ def main():
     app = QApplication(sys.argv) 
     # apply_stylesheet(app, theme=theme[4])
     window = csswindow()
+    window.setGeometry(100, 100, 1179,612)
     window.show()
     sys.exit(app.exec())
  

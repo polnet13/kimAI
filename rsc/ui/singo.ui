@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>366</width>
-    <height>561</height>
+    <width>370</width>
+    <height>570</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -15,6 +15,12 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>370</width>
+    <height>570</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -24,8 +30,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>349</width>
-     <height>561</height>
+     <width>361</width>
+     <height>569</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -54,7 +60,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>출동수당 자동화 (11월 초 목표)</string>
+           <string>출동수당 자동화 (Test 버전)</string>
           </property>
          </widget>
         </item>
@@ -77,7 +83,171 @@
        </spacer>
       </item>
       <item>
+       <widget class="QGroupBox" name="groupBox_team">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>팀</string>
+        </property>
+        <widget class="QWidget" name="horizontalLayoutWidget_2">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>20</y>
+           <width>341</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QRadioButton" name="ra_team_1">
+            <property name="minimumSize">
+             <size>
+              <width>20</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>1팀</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="ra_team_2">
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>2팀</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="ra_team_3">
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>3팀</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="ra_team_4">
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>4팀</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_rank">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="title">
+         <string>계급</string>
+        </property>
+        <widget class="QWidget" name="horizontalLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>-1</x>
+           <y>20</y>
+           <width>341</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QRadioButton" name="ra_rank_1">
+            <property name="text">
+             <string>순경</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="ra_rank_2">
+            <property name="text">
+             <string>경장</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="ra_rank_3">
+            <property name="text">
+             <string>경사</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="ra_rank_4">
+            <property name="text">
+             <string>경위</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="ra_rank_5">
+            <property name="text">
+             <string>경감</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_name">
+        <property name="spacing">
+         <number>10</number>
+        </property>
         <item>
          <widget class="QLabel" name="label_name">
           <property name="text">
@@ -107,29 +277,43 @@
        </layout>
       </item>
       <item>
-       <widget class="QLabel" name="label_6">
-        <property name="text">
+       <widget class="QGroupBox" name="groupBox_files">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="title">
          <string>파일 등록(2개)</string>
         </property>
+        <widget class="QWidget" name="layoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>30</y>
+           <width>311</width>
+           <height>30</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_file">
+          <item>
+           <widget class="QPushButton" name="btn_sagun">
+            <property name="text">
+             <string>사건검색리스트</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_individual">
+            <property name="text">
+             <string>개인별 출동수당 파일</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_file">
-        <item>
-         <widget class="QPushButton" name="btn_sagun">
-          <property name="text">
-           <string>사건검색리스트</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_individual">
-          <property name="text">
-           <string>개인별 출동수당 파일</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_checkbox">
@@ -155,43 +339,68 @@
         </item>
        </layout>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_point1">
-        <item>
-         <widget class="QPushButton" name="btn_point_1">
-          <property name="text">
-           <string>?? 좌표 입력</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_point1">
-          <property name="text">
-           <string>(224, 255)</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_point2">
-        <item>
-         <widget class="QPushButton" name="btn_point_2">
-          <property name="text">
-           <string>?? 좌표 입력</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_point2">
-          <property name="text">
-           <string>(654, 255)</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_points">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>110</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>버튼 좌표 입력</string>
+      </property>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>321</width>
+         <height>80</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_point2">
+          <item>
+           <widget class="QPushButton" name="btn_point_2">
+            <property name="text">
+             <string>?? 좌표 입력</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_point2">
+            <property name="text">
+             <string>(654, 255)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_point1">
+          <item>
+           <widget class="QPushButton" name="btn_point_1">
+            <property name="text">
+             <string>?? 좌표 입력</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_point1">
+            <property name="text">
+             <string>(224, 255)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
     </item>
     <item>
      <spacer name="verticalSpacer">
@@ -208,6 +417,9 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_make_df">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
+      </property>
       <item>
        <widget class="QPushButton" name="btn_make_df">
         <property name="text">
@@ -225,7 +437,7 @@
       <item>
        <widget class="QPushButton" name="btn_run">
         <property name="text">
-         <string>엑셀 출력</string>
+         <string>hwp 출력</string>
         </property>
        </widget>
       </item>
@@ -234,7 +446,7 @@
     <item>
      <widget class="QPushButton" name="pushButton_3">
       <property name="text">
-       <string>자동화 실행</string>
+       <string>매크로 실행</string>
       </property>
      </widget>
     </item>

@@ -12,7 +12,7 @@ texts = [main, mosaic, bike, cctv, home, singo, settings]
 
 import os 
 
-parent = os.path.abspath(os.path.dirname(__file__))
+parent = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 ui_path = os.path.join(parent, 'rsc', 'ui')
 os.chdir(ui_path)
 
