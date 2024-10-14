@@ -28,6 +28,7 @@ import time, datetime
 import pyautogui
 import keyboard
 import pyperclip
+from control.hangle import Hwp
 
 
 
@@ -48,10 +49,13 @@ class Chuldong(Ui_Form, QWidget):
         self.setupUi(self)
         self.btn_point_1.clicked.connect(self.listen_start)
         self.btn_point_2.clicked.connect(self.listen_start)
-        self.label_point1.setText(f'{DT.btn_point_1[0]}, {DT.btn_point_1[1]}')
-        self.label_point2.setText(f'{DT.btn_point_2[0]}, {DT.btn_point_2[1]}')
+        self.label_point_1.setText(f'{DT.btn_point_1[0]}, {DT.btn_point_1[1]}')
+        self.label_point_2.setText(f'{DT.btn_point_2[0]}, {DT.btn_point_2[1]}')
         self.is_listening = False
+        self.btn_macro.clicked.connect(self.auto_register)
         # 시그널 슬롯 연결
+        self.btn_sagun.clicked.connect(self.file_up_112)
+        self.btn_individual.clicked.connect(self.file_up_enrolled)
         self.btn_make_df.clicked.connect(self.make_df)
         self.btn_del.clicked.connect(self.delete_row)
         self.btn_hwp.clicked.connect(self.make_hwp)
@@ -83,10 +87,10 @@ class Chuldong(Ui_Form, QWidget):
             if event.key() == Qt.Key_Return:
                 pos = QCursor.pos()
                 if self.sender_btn == self.btn_point_1:
-                    self.label_point1.setText(f'{pos.x()}, {pos.y()}')
+                    self.label_point_1.setText(f'{pos.x()}, {pos.y()}')
                     DT.saveOption(btn_point_1=(pos.x(), pos.y()))
                 elif self.sender_btn == self.btn_point_2:
-                    self.label_point2.setText(f'{pos.x()}, {pos.y()}')
+                    self.label_point_2.setText(f'{pos.x()}, {pos.y()}')
                     DT.saveOption(btn_point_2=(pos.x(), pos.y()))
                 self.removeEventFilter(self)
         return super().eventFilter(watched, event)
@@ -223,35 +227,18 @@ class Chuldong(Ui_Form, QWidget):
     ## 외부 코드 실행
     def auto_register(self):
         try:
-            print(self.result)
             print('-------auto_register 실행---------')
             # 외부 코드 실행
             print('외부코드 실행 시작')
-            if self.result is None:
+            if DT.df_main is None:
                 print(f'self.result 값이 없음')
             else:
-                self.ex_code(self.result)
+                self.ex_code()
                 print('외부코드 실행 끝')
                 
         except Exception as e:
             print(e)
  
-
-    ## tableView 생성
-    def make_table_view(self, df):
-        table_view = self.ui.tableView
-        # standard item model 생성
-        model = QStandardItemModel()
-        # 컬럼 헤더 생성
-        model.setHorizontalHeaderLabels(df.columns)
-        # 데이터를 모델로 치환
-        for row in range(df.shape[0]):
-            for column in range(df.shape[1]):
-                item = QStandardItem(str(df.iloc[row, column]))
-                model.setItem(row, column, item)
-        # tableView 에 모델 집어 넣기
-        table_view.setModel(model)
-
 
     ## 선택된 행을 삭제합니다.
     def delete_row(self):
@@ -260,13 +247,26 @@ class Chuldong(Ui_Form, QWidget):
 
 
     def make_hwp(self):
-        print('make_hwp 실행코드 만들어주세요')
+        date = datetime.datetime.now().strftime('%y. %m. %d')
+        weekday = ['월','화','수','목','금','토','일'][datetime.datetime.now().weekday()]
+        team = ['1팀','2팀','3팀','4팀'][DT.team-1]
+        rank = ['순경','경장','경사','경위','경감'][DT.rank]
+        name = self.lineEdit.text()
+        dic = dict(date=date, weekday=weekday, team=team, rank=rank, name=name)
+        path = os.path.join(DT.BASE_DIR, 'rsc', 'hwp', 'templete.hwp')
+        self.hwp = Hwp(path)
+        self.hwp.display(True)
+        self.hwp.dic_to_field(dic)
+        self.hwp.make_table(DT.df_main.shape[0], DT.df_main.shape[1])
+        self.hwp.insert_df(DT.df_main)
+        # hwp 파일을 읽음
+        # 필드 입력
+        # 루프 돌면서 df -> 표에 삽입
+        # 다른이름으로 저장
     
 
-    def ex_code(df):
-        print(df)
-        print('df 컬럼정보')
-        print(df.columns)
+    def ex_code(self):
+        df = DT.df_main
         # df.columns = ['접수번호','신고내용','종결내용','종결보고자','사건번호','지령시간','지령time','코드','종결']
         time.sleep(1)
         # 도착시간 계산
@@ -278,7 +278,6 @@ class Chuldong(Ui_Form, QWidget):
         receipt_num_list = df['접수번호'].tolist()
         arrival_time_date = df['도착date'].tolist()
         arrival_time_list = df['도착time'].tolist()
-        print(receipt_num_list, arrival_time_date, arrival_time_list)
         # 임의동록 버튼 좌표 생성
         try:
             img_path = r'module\target.jpg'
@@ -286,7 +285,7 @@ class Chuldong(Ui_Form, QWidget):
             location = pyautogui.center(location)
             print(f'임의등록 버튼: {location}')
         except TypeError:
-            location = (1660, 320)
+            location = DT.btn_point_1  # 임의등록 좌표
             pyautogui.alert(f'위치값 인식을 위해 ctrl + 0(숫자) 입력해서 익스플로러창 100%로 맞춰주삼 {location}')
         except Exception as e:
             print(e)
@@ -315,7 +314,7 @@ class Chuldong(Ui_Form, QWidget):
                         print(f'센터값2: {receipt_num_xy}')
                     except TypeError:
                         pyautogui.alert('접수번호 이미지를 인식하지 몬함 800*350')
-                        receipt_num_xy = (800, 350)
+                        receipt_num_xy = DT.btn_point_2  # 접수번호
                     except Exception as e:
                         print(e)
                 pyautogui.moveTo(receipt_num_xy, duration=0.2)

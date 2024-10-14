@@ -31,8 +31,6 @@ class Settings(Ui_Settings, QWidget):
         self.checkBox_cuda.setChecked(DT.check_cuda)
         print(options)
         # options 의 키값을 변수로 밸류를 변수의 값으로 DT에 저장
-        
-
         # 시그널 슬롯 연결
         # self.pushButton_4.clicked.connect(self.btn4)
         # self.pushButton_5.clicked.connect(self.btn5)
@@ -71,8 +69,6 @@ class Settings(Ui_Settings, QWidget):
             print(f'{DT.device} 사용')
         DT.saveOption(check_cuda=value)
 
-
-     
     def program_exit(self):
         print('Ui_Bike 프로그램 종료')
 

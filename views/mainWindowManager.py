@@ -545,7 +545,16 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''DT.df_main 을 테이블뷰에 출력'''
         if DT.df_main is None:
             import pandas as pd
-            DT.df_main = pd.DataFrame({'출동':[1,2,3,4,5],'체포':[2,2,333,344,555]})
+            DT.df_main = pd.DataFrame({
+                '접수번호':[1222222,1224542,1222222,44444444,55555555],
+                '신고내용':['안녕하세요','신고내용','김밥에 김이 없어','344','555'],
+                '종결내용':[2,2,333,344,555],
+                '종결보고자':['유비 관우 장비','보라 나은 한석','유비 유모비 라엘','나은 경미 상미','원철 영철 김훈'],
+                '사건번호':[22262,33332,33443,34554,556665],
+                '접수시간':[2,2,333,344,555],
+                '코드':[0,1,2,3,4],
+                '종결':[2,2,333,344,555]
+                })
         df = DT.df_main
         columns = df.columns
         qmodel_ = QtGui.QStandardItemModel()
@@ -558,16 +567,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.update()
 
     def delete_tableview_row(self):
-        '''tab_singo 시그널을 받고 테이블뷰에서 선택된 행 삭제'''
+        '''
+        tab_singo 시그널을 받고 테이블뷰에서 선택된 행 삭제
+        - DT_df_main 에서 삭제 하고 테이블뷰에 반영하는 코드임
+        '''
         index = self.tableView.currentIndex().row()
-        DT.df_main.drop(index).reset_index(drop=True)
-
-        self.result = pd.DataFrame([[self.tableView.model().index(row, col).data() for col in range(self.tableView.model().columnCount())] for row in range(self.tableView.model().rowCount())])
-        # self.result.columns = ['접수번호','신고내용','종결내용','종결보고자','사건번호','지령시간','신고time','코드','종결']
-        DT.df_main = self.result
-
+        DT.df_main = DT.df_main.drop(index).reset_index(drop=True)
         self.df_to_tableview()
-        self.tableView.update()
+
         
  
    

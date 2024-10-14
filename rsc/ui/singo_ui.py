@@ -207,30 +207,30 @@ class Ui_Form(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_point2 = QHBoxLayout()
         self.horizontalLayout_point2.setObjectName(u"horizontalLayout_point2")
-        self.btn_point_2 = QPushButton(self.verticalLayoutWidget)
-        self.btn_point_2.setObjectName(u"btn_point_2")
+        self.btn_point_1 = QPushButton(self.verticalLayoutWidget)
+        self.btn_point_1.setObjectName(u"btn_point_1")
 
-        self.horizontalLayout_point2.addWidget(self.btn_point_2)
+        self.horizontalLayout_point2.addWidget(self.btn_point_1)
 
-        self.label_point2 = QLabel(self.verticalLayoutWidget)
-        self.label_point2.setObjectName(u"label_point2")
+        self.label_point_1 = QLabel(self.verticalLayoutWidget)
+        self.label_point_1.setObjectName(u"label_point_1")
 
-        self.horizontalLayout_point2.addWidget(self.label_point2)
+        self.horizontalLayout_point2.addWidget(self.label_point_1)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_point2)
 
         self.horizontalLayout_point1 = QHBoxLayout()
         self.horizontalLayout_point1.setObjectName(u"horizontalLayout_point1")
-        self.btn_point_1 = QPushButton(self.verticalLayoutWidget)
-        self.btn_point_1.setObjectName(u"btn_point_1")
+        self.btn_point_2 = QPushButton(self.verticalLayoutWidget)
+        self.btn_point_2.setObjectName(u"btn_point_2")
 
-        self.horizontalLayout_point1.addWidget(self.btn_point_1)
+        self.horizontalLayout_point1.addWidget(self.btn_point_2)
 
-        self.label_point1 = QLabel(self.verticalLayoutWidget)
-        self.label_point1.setObjectName(u"label_point1")
+        self.label_point_2 = QLabel(self.verticalLayoutWidget)
+        self.label_point_2.setObjectName(u"label_point_2")
 
-        self.horizontalLayout_point1.addWidget(self.label_point1)
+        self.horizontalLayout_point1.addWidget(self.label_point_2)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_point1)
@@ -268,10 +268,10 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_make_df)
 
-        self.pushButton_3 = QPushButton(self.verticalLayoutWidget_2)
-        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.btn_macro = QPushButton(self.verticalLayoutWidget_2)
+        self.btn_macro.setObjectName(u"btn_macro")
 
-        self.verticalLayout_2.addWidget(self.pushButton_3)
+        self.verticalLayout_2.addWidget(self.btn_macro)
 
 
         self.verticalLayout_7.addWidget(self.groupBox_3)
@@ -304,14 +304,14 @@ class Ui_Form(object):
         self.checkBox_dongil.setText(QCoreApplication.translate("Form", u"\ub3d9\uc77c\uac74 \uc81c\uc678", None))
         self.checkBox_ftx.setText(QCoreApplication.translate("Form", u"FTX \uc81c\uc678", None))
         self.groupBox_points.setTitle(QCoreApplication.translate("Form", u"\ubc84\ud2bc \uc88c\ud45c \uc785\ub825", None))
-        self.btn_point_2.setText(QCoreApplication.translate("Form", u"?? \uc88c\ud45c \uc785\ub825", None))
-        self.label_point2.setText(QCoreApplication.translate("Form", u"(654, 255)", None))
-        self.btn_point_1.setText(QCoreApplication.translate("Form", u"?? \uc88c\ud45c \uc785\ub825", None))
-        self.label_point1.setText(QCoreApplication.translate("Form", u"(224, 255)", None))
+        self.btn_point_1.setText(QCoreApplication.translate("Form", u"'\uc784\uc758\ub4f1\ub85d' \uc88c\ud45c", None))
+        self.label_point_1.setText(QCoreApplication.translate("Form", u"(654, 255)", None))
+        self.btn_point_2.setText(QCoreApplication.translate("Form", u"'\uc811\uc218\ubc88\ud638' \uc88c\ud45c", None))
+        self.label_point_2.setText(QCoreApplication.translate("Form", u"(224, 255)", None))
         self.groupBox_3.setTitle(QCoreApplication.translate("Form", u"\ucee8\ud2b8\ub864", None))
         self.btn_make_df.setText(QCoreApplication.translate("Form", u"\uc815\ub9ac", None))
         self.btn_del.setText(QCoreApplication.translate("Form", u"\ud589 \uc0ad\uc81c(del)", None))
         self.btn_hwp.setText(QCoreApplication.translate("Form", u"hwp \ucd9c\ub825", None))
-        self.pushButton_3.setText(QCoreApplication.translate("Form", u"\ub9e4\ud06c\ub85c \uc2e4\ud589", None))
+        self.btn_macro.setText(QCoreApplication.translate("Form", u"\ub9e4\ud06c\ub85c \uc2e4\ud589", None))
     # retranslateUi
 

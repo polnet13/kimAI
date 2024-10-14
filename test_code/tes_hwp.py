@@ -33,8 +33,8 @@ class Hwp:
     def insert_text(self, text):
         pset = self.hwp.HParameterSet.HInsertText
         self.hwp.HParameterSet.HInsertText.Text = text
-        self.hwp.HAction.Execute("InsertText", self.hwp.HParameterSet.HInsertText.HSet)
         self.hwp.HAction.Execute("TableRightCell", pset.HSet)
+        self.hwp.HAction.Execute("InsertText", self.hwp.HParameterSet.HInsertText.HSet)
 
     def insert_df(self, df):
         df = df.transpose()

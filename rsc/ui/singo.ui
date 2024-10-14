@@ -378,14 +378,14 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_point2">
           <item>
-           <widget class="QPushButton" name="btn_point_2">
+           <widget class="QPushButton" name="btn_point_1">
             <property name="text">
-             <string>?? 좌표 입력</string>
+             <string>'임의등록' 좌표</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_point2">
+           <widget class="QLabel" name="label_point_1">
             <property name="text">
              <string>(654, 255)</string>
             </property>
@@ -396,14 +396,14 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_point1">
           <item>
-           <widget class="QPushButton" name="btn_point_1">
+           <widget class="QPushButton" name="btn_point_2">
             <property name="text">
-             <string>?? 좌표 입력</string>
+             <string>'접수번호' 좌표</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_point1">
+           <widget class="QLabel" name="label_point_2">
             <property name="text">
              <string>(224, 255)</string>
             </property>
@@ -465,7 +465,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="btn_macro">
           <property name="text">
            <string>매크로 실행</string>
           </property>
