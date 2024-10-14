@@ -17,8 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QGroupBox, QHBoxLayout,
     QLabel, QLayout, QLineEdit, QPushButton,
-    QRadioButton, QSizePolicy, QSpacerItem, QVBoxLayout,
-    QWidget)
+    QRadioButton, QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -33,7 +32,7 @@ class Ui_Form(object):
         Form.setMinimumSize(QSize(370, 570))
         self.verticalLayoutWidget_12 = QWidget(Form)
         self.verticalLayoutWidget_12.setObjectName(u"verticalLayoutWidget_12")
-        self.verticalLayoutWidget_12.setGeometry(QRect(0, 0, 361, 569))
+        self.verticalLayoutWidget_12.setGeometry(QRect(0, 0, 371, 571))
         self.verticalLayout_7 = QVBoxLayout(self.verticalLayoutWidget_12)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.verticalLayout_7.setContentsMargins(11, 11, 11, 20)
@@ -54,16 +53,12 @@ class Ui_Form(object):
 
         self.verticalLayout_10.addLayout(self.horizontalLayout_tag)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-
-        self.verticalLayout_10.addItem(self.verticalSpacer_2)
-
         self.groupBox_team = QGroupBox(self.verticalLayoutWidget_12)
         self.groupBox_team.setObjectName(u"groupBox_team")
-        self.groupBox_team.setMinimumSize(QSize(0, 60))
+        self.groupBox_team.setMinimumSize(QSize(0, 50))
         self.horizontalLayoutWidget_2 = QWidget(self.groupBox_team)
         self.horizontalLayoutWidget_2.setObjectName(u"horizontalLayoutWidget_2")
-        self.horizontalLayoutWidget_2.setGeometry(QRect(0, 20, 341, 31))
+        self.horizontalLayoutWidget_2.setGeometry(QRect(0, 20, 341, 21))
         self.horizontalLayout_3 = QHBoxLayout(self.horizontalLayoutWidget_2)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
@@ -99,7 +94,7 @@ class Ui_Form(object):
 
         self.groupBox_rank = QGroupBox(self.verticalLayoutWidget_12)
         self.groupBox_rank.setObjectName(u"groupBox_rank")
-        self.groupBox_rank.setMinimumSize(QSize(0, 60))
+        self.groupBox_rank.setMinimumSize(QSize(0, 50))
         font = QFont()
         font.setBold(False)
         self.groupBox_rank.setFont(font)
@@ -137,32 +132,21 @@ class Ui_Form(object):
 
         self.verticalLayout_10.addWidget(self.groupBox_rank)
 
-        self.horizontalLayout_name = QHBoxLayout()
-        self.horizontalLayout_name.setSpacing(10)
-        self.horizontalLayout_name.setObjectName(u"horizontalLayout_name")
-        self.label_name = QLabel(self.verticalLayoutWidget_12)
-        self.label_name.setObjectName(u"label_name")
-
-        self.horizontalLayout_name.addWidget(self.label_name)
-
-        self.horizontalSpacer = QSpacerItem(20, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_name.addItem(self.horizontalSpacer)
-
-        self.lineEdit = QLineEdit(self.verticalLayoutWidget_12)
+        self.groupBox = QGroupBox(self.verticalLayoutWidget_12)
+        self.groupBox.setObjectName(u"groupBox")
+        self.groupBox.setMinimumSize(QSize(0, 50))
+        self.lineEdit = QLineEdit(self.groupBox)
         self.lineEdit.setObjectName(u"lineEdit")
+        self.lineEdit.setGeometry(QRect(50, 20, 265, 24))
 
-        self.horizontalLayout_name.addWidget(self.lineEdit)
-
-
-        self.verticalLayout_10.addLayout(self.horizontalLayout_name)
+        self.verticalLayout_10.addWidget(self.groupBox)
 
         self.groupBox_files = QGroupBox(self.verticalLayoutWidget_12)
         self.groupBox_files.setObjectName(u"groupBox_files")
-        self.groupBox_files.setMinimumSize(QSize(0, 70))
+        self.groupBox_files.setMinimumSize(QSize(0, 60))
         self.layoutWidget = QWidget(self.groupBox_files)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(20, 30, 311, 30))
+        self.layoutWidget.setGeometry(QRect(10, 20, 331, 30))
         self.horizontalLayout_file = QHBoxLayout(self.layoutWidget)
         self.horizontalLayout_file.setObjectName(u"horizontalLayout_file")
         self.horizontalLayout_file.setContentsMargins(0, 0, 0, 0)
@@ -179,32 +163,45 @@ class Ui_Form(object):
 
         self.verticalLayout_10.addWidget(self.groupBox_files)
 
-        self.horizontalLayout_checkbox = QHBoxLayout()
-        self.horizontalLayout_checkbox.setObjectName(u"horizontalLayout_checkbox")
-        self.checkBox_dongil = QCheckBox(self.verticalLayoutWidget_12)
+        self.groupBox_2 = QGroupBox(self.verticalLayoutWidget_12)
+        self.groupBox_2.setObjectName(u"groupBox_2")
+        self.groupBox_2.setMinimumSize(QSize(0, 55))
+        self.horizontalLayoutWidget_3 = QWidget(self.groupBox_2)
+        self.horizontalLayoutWidget_3.setObjectName(u"horizontalLayoutWidget_3")
+        self.horizontalLayoutWidget_3.setGeometry(QRect(10, 20, 331, 31))
+        self.horizontalLayout = QHBoxLayout(self.horizontalLayoutWidget_3)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(10, 3, 0, 0)
+        self.checkBox_dongil = QCheckBox(self.horizontalLayoutWidget_3)
         self.checkBox_dongil.setObjectName(u"checkBox_dongil")
         self.checkBox_dongil.setChecked(True)
 
-        self.horizontalLayout_checkbox.addWidget(self.checkBox_dongil)
+        self.horizontalLayout.addWidget(self.checkBox_dongil)
 
-        self.checkBox_ftx = QCheckBox(self.verticalLayoutWidget_12)
+        self.checkBox_ftx = QCheckBox(self.horizontalLayoutWidget_3)
         self.checkBox_ftx.setObjectName(u"checkBox_ftx")
         self.checkBox_ftx.setChecked(True)
 
-        self.horizontalLayout_checkbox.addWidget(self.checkBox_ftx)
+        self.horizontalLayout.addWidget(self.checkBox_ftx)
 
 
-        self.verticalLayout_10.addLayout(self.horizontalLayout_checkbox)
+        self.verticalLayout_10.addWidget(self.groupBox_2)
 
 
         self.verticalLayout_7.addLayout(self.verticalLayout_10)
 
         self.groupBox_points = QGroupBox(self.verticalLayoutWidget_12)
         self.groupBox_points.setObjectName(u"groupBox_points")
-        self.groupBox_points.setMinimumSize(QSize(0, 110))
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Ignored)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.groupBox_points.sizePolicy().hasHeightForWidth())
+        self.groupBox_points.setSizePolicy(sizePolicy2)
+        self.groupBox_points.setMinimumSize(QSize(0, 100))
+        self.groupBox_points.setMaximumSize(QSize(16777215, 400))
         self.verticalLayoutWidget = QWidget(self.groupBox_points)
         self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(10, 20, 321, 80))
+        self.verticalLayoutWidget.setGeometry(QRect(10, 20, 331, 80))
         self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -241,35 +238,43 @@ class Ui_Form(object):
 
         self.verticalLayout_7.addWidget(self.groupBox_points)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.verticalLayout_7.addItem(self.verticalSpacer)
-
+        self.groupBox_3 = QGroupBox(self.verticalLayoutWidget_12)
+        self.groupBox_3.setObjectName(u"groupBox_3")
+        self.verticalLayoutWidget_2 = QWidget(self.groupBox_3)
+        self.verticalLayoutWidget_2.setObjectName(u"verticalLayoutWidget_2")
+        self.verticalLayoutWidget_2.setGeometry(QRect(10, 20, 331, 71))
+        self.verticalLayout_2 = QVBoxLayout(self.verticalLayoutWidget_2)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_make_df = QHBoxLayout()
         self.horizontalLayout_make_df.setObjectName(u"horizontalLayout_make_df")
         self.horizontalLayout_make_df.setSizeConstraint(QLayout.SetMinimumSize)
-        self.btn_make_df = QPushButton(self.verticalLayoutWidget_12)
+        self.horizontalLayout_make_df.setContentsMargins(10, -1, 10, -1)
+        self.btn_make_df = QPushButton(self.verticalLayoutWidget_2)
         self.btn_make_df.setObjectName(u"btn_make_df")
 
         self.horizontalLayout_make_df.addWidget(self.btn_make_df)
 
-        self.btn_del = QPushButton(self.verticalLayoutWidget_12)
+        self.btn_del = QPushButton(self.verticalLayoutWidget_2)
         self.btn_del.setObjectName(u"btn_del")
 
         self.horizontalLayout_make_df.addWidget(self.btn_del)
 
-        self.btn_run = QPushButton(self.verticalLayoutWidget_12)
-        self.btn_run.setObjectName(u"btn_run")
+        self.btn_hwp = QPushButton(self.verticalLayoutWidget_2)
+        self.btn_hwp.setObjectName(u"btn_hwp")
 
-        self.horizontalLayout_make_df.addWidget(self.btn_run)
+        self.horizontalLayout_make_df.addWidget(self.btn_hwp)
 
 
-        self.verticalLayout_7.addLayout(self.horizontalLayout_make_df)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_make_df)
 
-        self.pushButton_3 = QPushButton(self.verticalLayoutWidget_12)
+        self.pushButton_3 = QPushButton(self.verticalLayoutWidget_2)
         self.pushButton_3.setObjectName(u"pushButton_3")
 
-        self.verticalLayout_7.addWidget(self.pushButton_3)
+        self.verticalLayout_2.addWidget(self.pushButton_3)
+
+
+        self.verticalLayout_7.addWidget(self.groupBox_3)
 
 
         self.retranslateUi(Form)
@@ -291,10 +296,11 @@ class Ui_Form(object):
         self.ra_rank_3.setText(QCoreApplication.translate("Form", u"\uacbd\uc0ac", None))
         self.ra_rank_4.setText(QCoreApplication.translate("Form", u"\uacbd\uc704", None))
         self.ra_rank_5.setText(QCoreApplication.translate("Form", u"\uacbd\uac10", None))
-        self.label_name.setText(QCoreApplication.translate("Form", u"\uc774\ub984", None))
+        self.groupBox.setTitle(QCoreApplication.translate("Form", u"\uc774\ub984", None))
         self.groupBox_files.setTitle(QCoreApplication.translate("Form", u"\ud30c\uc77c \ub4f1\ub85d(2\uac1c)", None))
         self.btn_sagun.setText(QCoreApplication.translate("Form", u"\uc0ac\uac74\uac80\uc0c9\ub9ac\uc2a4\ud2b8", None))
         self.btn_individual.setText(QCoreApplication.translate("Form", u"\uac1c\uc778\ubcc4 \ucd9c\ub3d9\uc218\ub2f9 \ud30c\uc77c", None))
+        self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"\ud544\ud130\ub9c1 \uc635\uc158", None))
         self.checkBox_dongil.setText(QCoreApplication.translate("Form", u"\ub3d9\uc77c\uac74 \uc81c\uc678", None))
         self.checkBox_ftx.setText(QCoreApplication.translate("Form", u"FTX \uc81c\uc678", None))
         self.groupBox_points.setTitle(QCoreApplication.translate("Form", u"\ubc84\ud2bc \uc88c\ud45c \uc785\ub825", None))
@@ -302,9 +308,10 @@ class Ui_Form(object):
         self.label_point2.setText(QCoreApplication.translate("Form", u"(654, 255)", None))
         self.btn_point_1.setText(QCoreApplication.translate("Form", u"?? \uc88c\ud45c \uc785\ub825", None))
         self.label_point1.setText(QCoreApplication.translate("Form", u"(224, 255)", None))
+        self.groupBox_3.setTitle(QCoreApplication.translate("Form", u"\ucee8\ud2b8\ub864", None))
         self.btn_make_df.setText(QCoreApplication.translate("Form", u"\uc815\ub9ac", None))
-        self.btn_del.setText(QCoreApplication.translate("Form", u"\uc120\ud0dd \ud589 \uc0ad\uc81c(del)", None))
-        self.btn_run.setText(QCoreApplication.translate("Form", u"hwp \ucd9c\ub825", None))
+        self.btn_del.setText(QCoreApplication.translate("Form", u"\ud589 \uc0ad\uc81c(del)", None))
+        self.btn_hwp.setText(QCoreApplication.translate("Form", u"hwp \ucd9c\ub825", None))
         self.pushButton_3.setText(QCoreApplication.translate("Form", u"\ub9e4\ud06c\ub85c \uc2e4\ud589", None))
     # retranslateUi
 

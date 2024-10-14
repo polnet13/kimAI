@@ -34,7 +34,10 @@ import pyperclip
 
 class Chuldong(Ui_Form, QWidget):
 
-    playerOpenSignal = Signal()
+    signalSingo = Signal(int)
+    # 1: DT.df_main 생성
+    # 2: DT.df_main 선택행 삭제
+
 
     '''ui와 시그널 연결'''
     def __init__(self):
@@ -49,6 +52,10 @@ class Chuldong(Ui_Form, QWidget):
         self.label_point2.setText(f'{DT.btn_point_2[0]}, {DT.btn_point_2[1]}')
         self.is_listening = False
         # 시그널 슬롯 연결
+        self.btn_make_df.clicked.connect(self.make_df)
+        self.btn_del.clicked.connect(self.delete_row)
+        self.btn_hwp.clicked.connect(self.make_hwp)
+        # 시그널 라디오버튼
         self.ra_rank_1.clicked.connect(self.rank_select)
         self.ra_rank_2.clicked.connect(self.rank_select)
         self.ra_rank_3.clicked.connect(self.rank_select)
@@ -87,13 +94,13 @@ class Chuldong(Ui_Form, QWidget):
     def team_select(self):
         '''팀 선택'''
         if self.ra_team_1.isChecked():
-            self.team = '1팀'
+            self.team = 1
         elif self.ra_team_2.isChecked():
-            self.team = '2팀'
+            self.team = 2
         elif self.ra_team_3.isChecked():
-            self.team = '3팀'
+            self.team = 3
         elif self.ra_team_4.isChecked():
-            self.team = '4팀'
+            self.team = 4
         print(f'팀 선택: {self.team}')
         DT.team = self.team
         DT.saveOption(team=self.team)    
@@ -101,42 +108,28 @@ class Chuldong(Ui_Form, QWidget):
     def rank_select(self, btn):
         '''랭크 선택'''
         if self.ra_rank_1.isChecked():
-            self.rank = '순경'
+            self.rank = 0
         elif self.ra_rank_2.isChecked():
-            self.rank = '경장'
+            self.rank = 1
         elif self.ra_rank_3.isChecked():
-            self.rank = '경사'
+            self.rank = 2
         elif self.ra_rank_4.isChecked():
-            self.rank = '경위'
+            self.rank = 3
         elif self.ra_rank_5.isChecked():
-            self.rank = '경감'
+            self.rank = 4
         print(f'랭크 선택: {self.rank}')
         DT.rank = self.rank
         DT.saveOption(rank=self.rank)
 
     def set_rank(self, rank):
         '''랭크 설정'''
-        if rank == '순경':
-            self.ra_rank_1.setChecked(True)
-        elif rank == '경장':
-            self.ra_rank_2.setChecked(True)
-        elif rank == '경사':
-            self.ra_rank_3.setChecked(True)
-        elif rank == '경위':
-            self.ra_rank_4.setChecked(True)
-        elif rank == '경감':
-            self.ra_rank_5.setChecked(True)
+        rank = [self.ra_rank_1, self.ra_rank_2, self.ra_rank_3, self.ra_rank_4, self.ra_rank_5][rank]
+        rank.setChecked(True)
 
     def set_team(self, team):
         '''팀 설정'''
-        if team == '1팀':
-            self.ra_team_1.setChecked(True)
-        elif team == '2팀':
-            self.ra_team_2.setChecked(True)
-        elif team == '3팀':
-            self.ra_team_3.setChecked(True)
-        elif team == '4팀':
-            self.ra_team_4.setChecked(True)
+        team = [ self.ra_team_1, self.ra_team_2, self.ra_team_3, self.ra_team_4][team-1]
+        team.setChecked(True)
 
     ## 사건검색리스트 엑셀 파일 등록
     def file_up_112(self):
@@ -177,7 +170,8 @@ class Chuldong(Ui_Form, QWidget):
 
     
     ## 엑셀 파일 정리
-    def execute(self):
+    def make_df(self):
+        '''엑셀 파일 정리 해서 DT.df_main 생성'''
         try:
             name = self.lineEdit.text()  # 라인에딧으로 입력 받은 이름을 name 변수에 저장
             df1 = self.df1   
@@ -219,14 +213,11 @@ class Chuldong(Ui_Form, QWidget):
             
             # 출동수당 정리한거에서 이미 등록된 출동수당
             print('출동수당 정리한거에서 이미 등록된 출동수당')
-            result = result.drop(result[result['접수번호'].isin(df2_list)].index)
-            self.make_table_view(result)
-            self.result = result 
-     
+            DT.df_main = result.drop(result[result['접수번호'].isin(df2_list)].index)
         except Exception as e:
             print(e)
             QMessageBox.critical(self, "Error", str(e))
-            return
+        self.signalSingo.emit(1)
     
     
     ## 외부 코드 실행
@@ -264,18 +255,12 @@ class Chuldong(Ui_Form, QWidget):
 
     ## 선택된 행을 삭제합니다.
     def delete_row(self):
-        selected_row = self.ui.tableView.currentIndex()
-        index = selected_row.row()
-        self.ui.tableView.model().removeRow(index)
-        self.ui.textBrowser.append(f'{index+1}행 삭제')
-        # 테이블뷰에 보이는 테이블을 데이터 프레임으로 만듭니다.
-        self.result = pd.DataFrame([[self.ui.tableView.model().index(row, col).data() for col in range(self.ui.tableView.model().columnCount())] for row in range(self.ui.tableView.model().rowCount())])
-
-        self.result.columns = ['접수번호','신고내용','종결내용','종결보고자','사건번호','지령시간','신고time','코드','종결']
+        self.signalSingo.emit(2)
+        
 
 
-    def plus5min(row):
-        return row + datetime.timedelta(minutes=5)
+    def make_hwp(self):
+        print('make_hwp 실행코드 만들어주세요')
     
 
     def ex_code(df):

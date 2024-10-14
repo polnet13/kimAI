@@ -65,6 +65,7 @@ class DT:
     # 메인 윈도우 관련
     fileNames = None
     fileName = None
+    df_main = None
     # 멀티 관련
     queue = None
     flag_multiCCTV = False

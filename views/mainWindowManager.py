@@ -12,6 +12,7 @@ from rsc.ui.untitled_ui import Ui_MainWindow
 import os, time
 import cv2
 import torch
+import pandas as pd
 # 사용자
 from control import tools
 from views import generic
@@ -54,10 +55,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         index_home = self.stackedWidget.indexOf(self.tab_home)
         self.stackedWidget.setCurrentIndex(index_home)
         self.detector = self.tab_home
-        # 탭 시그널 정의
-        self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
-        self.tab_home.playerOpenSignal.connect(self.player_fileopen)
-        self.tab_mosaic.signal_frame_move.connect(self.mosaic_move_clicked)
         # 멀티 프로세싱 관련 변수
         self.statusBar().showMessage(f'스레드: {self.thread}')
         # 메시지 박스 표시 플래그
@@ -80,6 +77,11 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.btn_page_print.clicked.connect(self.slot_btn_print)
         self.btn_play.clicked.connect(self.slot_btn_play)
         self.btn_region_reset.clicked.connect(self.slot_btn_region_reset)
+        # 탭 시그널 정의
+        self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
+        self.tab_home.playerOpenSignal.connect(self.player_fileopen)
+        self.tab_mosaic.signal_frame_move.connect(self.mosaic_move_clicked)
+        self.tab_singo.signalSingo.connect(self.control_singo_signal)
         # 버튼 좌 메뉴 
         self.btn_cctv.clicked.connect(self.buttonClick)
         self.btn_mosaic.clicked.connect(self.buttonClick)
@@ -370,15 +372,12 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''delete_tableview_row'''
         self.detector.delete_key()
  
- 
-
     def change_stack(self, index):
         '''
         0: 플레이어
         1: 테이블
         '''
         self.stackedWidget_play.setCurrentIndex(index)
-        
         
     ##################    
     # 플레이 슬라이더 #
@@ -389,7 +388,6 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''
         # 공통 코드 
         if DT.play_status == False:
-            
             self.player.cap.set(cv2.CAP_PROP_POS_FRAMES, value)
             DT.cap_num = value
             self.player.cap_read()
@@ -533,33 +531,46 @@ class mainWindow(QMainWindow, Ui_MainWindow):
     #     self.progressChanged(int(value))
         
     
-    #########################
-    # 테이블뷰 선택된 행 삭제 #
-    #########################
-    # def delete_tableview_row(self):
-    #     index = self.tableview_df.currentIndex().row()
-    #     # 디텍터 마다 테이블 삭제시 작동하는 함수를 다르게 하기 위해서 detector에 위임함
-    #     DT.df.drop(index).reset_index(drop=True)
-    #     # 테이블뷰 다시 출력
-    #     self.df_to_tableview()
-    #     self.tableview_df.update()
+    ##################
+    # 테이블뷰 컨트롤 #
+    ##################
+    def control_singo_signal(self, value):
+        '''tab_singo 시그널을 받아서 분기해주는 함수'''
+        if value == 1:
+            self.df_to_tableview()
+        elif value == 2:
+            self.delete_tableview_row()
+
+    def df_to_tableview(self):
+        '''DT.df_main 을 테이블뷰에 출력'''
+        if DT.df_main is None:
+            import pandas as pd
+            DT.df_main = pd.DataFrame({'출동':[1,2,3,4,5],'체포':[2,2,333,344,555]})
+        df = DT.df_main
+        columns = df.columns
+        qmodel_ = QtGui.QStandardItemModel()
+        qmodel_.setColumnCount(len(columns))
+        qmodel_.setHorizontalHeaderLabels(columns)
+        for row in range(len(df)):
+            value_objs = [QtGui.QStandardItem(str(value)) for value in df.iloc[row]]
+            qmodel_.appendRow(value_objs)
+        self.tableView.setModel(qmodel_)
+        self.update()
+
+    def delete_tableview_row(self):
+        '''tab_singo 시그널을 받고 테이블뷰에서 선택된 행 삭제'''
+        index = self.tableView.currentIndex().row()
+        DT.df_main.drop(index).reset_index(drop=True)
+
+        self.result = pd.DataFrame([[self.tableView.model().index(row, col).data() for col in range(self.tableView.model().columnCount())] for row in range(self.tableView.model().rowCount())])
+        # self.result.columns = ['접수번호','신고내용','종결내용','종결보고자','사건번호','지령시간','신고time','코드','종결']
+        DT.df_main = self.result
+
+        self.df_to_tableview()
+        self.tableView.update()
         
  
-    # df => 리스트뷰
-    
- 
-    # def mosaic_analyze_percent(self):
-    #     start = DT.start_point
-    #     end = DT.end_point
-    #     curent_frame = DT.mosaic_current_frame
-    #     if start <= curent_frame <= end:
-    #         percent = (curent_frame - start) / (end - start) * 100
-    #         self.progressBar_mosaic.setValue(percent)
-    #     else:
-    #         self.progressBar_mosaic.setValue(100)
-    #     self.update()
-    
-
+   
 
 
 
