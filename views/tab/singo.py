@@ -280,7 +280,7 @@ class Chuldong(Ui_Form, QWidget):
         arrival_time_list = df['도착time'].tolist()
         # 임의동록 버튼 좌표 생성
         try:
-            img_path = r'module\target.jpg'
+            img_path = os.path.join(DT.BASE_DIR, 'rsc', 'singo', 'target.jpg') 
             location = pyautogui.locateOnScreen(img_path, confidence= 0.9)
             location = pyautogui.center(location)
             print(f'임의등록 버튼: {location}')
@@ -307,7 +307,7 @@ class Chuldong(Ui_Form, QWidget):
                 # 접수번호 좌표 없을 경우 좌표 생성
                 else:
                     try:
-                        img_path = r'module\1.jpg'
+                        img_path = os.path.join(DT.BASE_DIR, 'rsc', 'singo', '1.jpg')
                         receipt_num_xy = pyautogui.locateOnScreen(img_path, confidence= 0.80)
                         print(f'센터값1: {receipt_num_xy}')
                         receipt_num_xy = pyautogui.center(receipt_num_xy)
@@ -321,8 +321,8 @@ class Chuldong(Ui_Form, QWidget):
                 pyautogui.click()
                 pyautogui.typewrite(f'{receipt_num}', interval = 0.01)
                 # 이미 등록된 경우 패스하기
-                img_path4 = r'module\4.jpg'  # 이미 등록된
-                img_path6 = r'module\6.jpg'  # 등록 가능한
+                img_path4 = os.path.join(DT.BASE_DIR, 'rsc', 'singo', '4.jpg')  # 이미 등록된  
+                img_path6 = os.path.join(DT.BASE_DIR, 'rsc', 'singo', '6.jpg')  # 등록 가능한  
                 result4 = False
                 result6 = False
                 while True:
@@ -363,7 +363,7 @@ class Chuldong(Ui_Form, QWidget):
                 # 증빙구분선택 좌표 없을 경우 좌표 생성
                 else:
                     try:
-                        img_path = r'module\3.jpg'
+                        img_path = os.path.join(DT.BASE_DIR, 'rsc', 'singo', '3.jpg')  
                         jb_xy = pyautogui.locateOnScreen(img_path, confidence= 0.98)
                         print(f'센터값1: {jb_xy}')
                         jb_xy = pyautogui.center(jb_xy)
@@ -383,14 +383,14 @@ class Chuldong(Ui_Form, QWidget):
                 enter_1 = False
                 enter_2 = False
                 while True:
-                    enter_1 = pyautogui.locateOnScreen(r'module\enter_1.jpg', confidence= 0.9)
+                    enter_1 = pyautogui.locateOnScreen(os.path.join(DT.BASE_DIR, 'rsc', 'singo', 'enter_1.jpg'), confidence= 0.9)   
                     if enter_1:
                         print('임의등록을 하겠습니까? => 버튼 확인함')
                         break
                     time.sleep(0.2)
                 pyautogui.press('enter')
                 while True:
-                    enter_2 = pyautogui.locateOnScreen(r'module\enter_2.jpg', confidence= 0.9)
+                    enter_2 = pyautogui.locateOnScreen(os.path.join(DT.BASE_DIR, 'rsc', 'singo', 'enter_2.jpg'), confidence= 0.9)
                     if enter_2:
                         print('저장되었습니다. => 버튼 확인함')
                         break
