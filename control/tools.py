@@ -1,8 +1,10 @@
-import cv2
+import cv2, pyautogui
 import os, time, sys
 import inspect
 import subprocess
 from views.sharedData import DT
+import time, datetime
+
 
 
  
@@ -189,3 +191,16 @@ def getTime(method):
         print(f'{method.__name__} 실행시간: {te-ts:.3f} 초')
         return result
     return timed
+
+
+###########
+# 신고 앱 #
+###########
+
+def plus5min(row):
+    return row + datetime.timedelta(minutes=5)
+
+def tap_n(n):
+    for _ in range(n):
+        pyautogui.press('tab')
+        time.sleep(0.03)

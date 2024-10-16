@@ -1,29 +1,3 @@
-import os, sys
-import pandas as pd
-#from ui_mainwindow import UI_MainWindow
-from PySide6.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon
-from mainwindow import Ui_Form
-
-
-import time, datetime, timedelta
-import pyautogui
-import keyboard
-
-from resources_rc import qt_resource_data
-
-
-class Window(QWidget):
-    
-    
-    ## 초기화
-    def __init__(self):
-        super().__init__()
-        self.ui = Ui_Form()
-        self.ui.setupUi(self)
-        self.df1 = None     # 사건검색리스트 파일 -> df
-        self.df2 = None     # 출동수당 파일 -> df
-        self.result = None
 
     
     ## 사건검색리스트 엑셀 파일 등록
