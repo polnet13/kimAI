@@ -2,6 +2,7 @@ import subprocess
 import sys
 import json
 from PySide6.QtWidgets import QMainWindow, QFileDialog  
+from PySide6.QtWidgets import QAbstractItemView
 from PySide6.QtCore import QTimer, Qt 
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6 import QtGui
@@ -564,7 +565,16 @@ class mainWindow(QMainWindow, Ui_MainWindow):
             value_objs = [QtGui.QStandardItem(str(value)) for value in df.iloc[row]]
             qmodel_.appendRow(value_objs)
         self.tableView.setModel(qmodel_)
-        self.update()
+        for row in range(DT.df_main.shape[0]):
+            self.tableView.setRowHeight(row, 60)
+        self.tableView.setColumnWidth(0, 70)
+        self.tableView.setColumnWidth(1, 300)
+        self.tableView.setColumnWidth(2, 250)
+        self.tableView.setColumnWidth(4, 60)
+        self.tableView.setColumnWidth(5, 20)
+        # self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+
 
     def delete_tableview_row(self):
         '''
@@ -572,7 +582,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         - DT_df_main 에서 삭제 하고 테이블뷰에 반영하는 코드임
         '''
         index = self.tableView.currentIndex().row()
-        DT.df_main = DT.df_main.drop(index).reset_index(drop=True)
+        print(index)
+        DT.df_main = DT.df_main.drop(index, axis=0).reset_index(drop=True)
         self.df_to_tableview()
 
         

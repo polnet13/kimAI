@@ -327,10 +327,10 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.btn_home.setText(QCoreApplication.translate("MainWindow", u"Home", None))
-        self.btn_cctv.setText(QCoreApplication.translate("MainWindow", u"CCTV", None))
-        self.btn_mosaic.setText(QCoreApplication.translate("MainWindow", u"Mosaic", None))
-        self.btn_bike.setText(QCoreApplication.translate("MainWindow", u"Bike", None))
+        self.btn_home.setText(QCoreApplication.translate("MainWindow", u"\ud50c\ub808\uc774\uc5b4", None))
+        self.btn_cctv.setText(QCoreApplication.translate("MainWindow", u"\uc601\uc0c1\ubd84\uc11d", None))
+        self.btn_mosaic.setText(QCoreApplication.translate("MainWindow", u"\ubaa8\uc790\uc774\ud06c", None))
+        self.btn_bike.setText(QCoreApplication.translate("MainWindow", u"\uc774\ub95c\ucc28", None))
         self.btn_112.setText(QCoreApplication.translate("MainWindow", u"\ucd9c\ub3d9\uc218\ub2f9", None))
         self.btn_settings.setText(QCoreApplication.translate("MainWindow", u"\uc124\uc815", None))
         self.label_cap_num.setText(QCoreApplication.translate("MainWindow", u"\ud504\ub808\uc784 \ubc88\ud638", None))

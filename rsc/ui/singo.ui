@@ -49,20 +49,60 @@
     </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_10">
+      <property name="spacing">
+       <number>15</number>
+      </property>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_tag">
+       <layout class="QHBoxLayout" name="horizontalLayout_tag"/>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_files">
+        <property name="leftMargin">
+         <number>10</number>
+        </property>
+        <property name="rightMargin">
+         <number>10</number>
+        </property>
         <item>
-         <widget class="QLabel" name="label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+         <widget class="QPushButton" name="btn_files">
           <property name="text">
-           <string>출동수당 자동화 (Test 버전)</string>
+           <string>파일 등록</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_112">
+          <property name="text">
+           <string>112 엑셀</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_enrol">
+          <property name="text">
+           <string>출동수당 엑셀</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_name">
+        <property name="leftMargin">
+         <number>20</number>
+        </property>
+        <property name="rightMargin">
+         <number>20</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>이름</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit"/>
         </item>
        </layout>
       </item>
@@ -188,6 +228,9 @@
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
           <item>
            <widget class="QRadioButton" name="ra_rank_1">
             <property name="text">
@@ -220,68 +263,6 @@
            <widget class="QRadioButton" name="ra_rank_5">
             <property name="text">
              <string>경감</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>50</height>
-         </size>
-        </property>
-        <property name="title">
-         <string>이름</string>
-        </property>
-        <widget class="QLineEdit" name="lineEdit">
-         <property name="geometry">
-          <rect>
-           <x>50</x>
-           <y>20</y>
-           <width>265</width>
-           <height>24</height>
-          </rect>
-         </property>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox_files">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>60</height>
-         </size>
-        </property>
-        <property name="title">
-         <string>파일 등록(2개)</string>
-        </property>
-        <widget class="QWidget" name="layoutWidget">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>20</y>
-           <width>331</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_file">
-          <item>
-           <widget class="QPushButton" name="btn_sagun">
-            <property name="text">
-             <string>사건검색리스트</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btn_individual">
-            <property name="text">
-             <string>개인별 출동수당 파일</string>
             </property>
            </widget>
           </item>

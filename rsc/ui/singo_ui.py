@@ -37,21 +37,49 @@ class Ui_Form(object):
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.verticalLayout_7.setContentsMargins(11, 11, 11, 20)
         self.verticalLayout_10 = QVBoxLayout()
+        self.verticalLayout_10.setSpacing(15)
         self.verticalLayout_10.setObjectName(u"verticalLayout_10")
         self.horizontalLayout_tag = QHBoxLayout()
         self.horizontalLayout_tag.setObjectName(u"horizontalLayout_tag")
-        self.label = QLabel(self.verticalLayoutWidget_12)
-        self.label.setObjectName(u"label")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy1)
-
-        self.horizontalLayout_tag.addWidget(self.label)
-
 
         self.verticalLayout_10.addLayout(self.horizontalLayout_tag)
+
+        self.horizontalLayout_files = QHBoxLayout()
+        self.horizontalLayout_files.setObjectName(u"horizontalLayout_files")
+        self.horizontalLayout_files.setContentsMargins(10, -1, 10, -1)
+        self.btn_files = QPushButton(self.verticalLayoutWidget_12)
+        self.btn_files.setObjectName(u"btn_files")
+
+        self.horizontalLayout_files.addWidget(self.btn_files)
+
+        self.label_112 = QLabel(self.verticalLayoutWidget_12)
+        self.label_112.setObjectName(u"label_112")
+
+        self.horizontalLayout_files.addWidget(self.label_112)
+
+        self.label_enrol = QLabel(self.verticalLayoutWidget_12)
+        self.label_enrol.setObjectName(u"label_enrol")
+
+        self.horizontalLayout_files.addWidget(self.label_enrol)
+
+
+        self.verticalLayout_10.addLayout(self.horizontalLayout_files)
+
+        self.horizontalLayout_name = QHBoxLayout()
+        self.horizontalLayout_name.setObjectName(u"horizontalLayout_name")
+        self.horizontalLayout_name.setContentsMargins(20, -1, 20, -1)
+        self.label = QLabel(self.verticalLayoutWidget_12)
+        self.label.setObjectName(u"label")
+
+        self.horizontalLayout_name.addWidget(self.label)
+
+        self.lineEdit = QLineEdit(self.verticalLayoutWidget_12)
+        self.lineEdit.setObjectName(u"lineEdit")
+
+        self.horizontalLayout_name.addWidget(self.lineEdit)
+
+
+        self.verticalLayout_10.addLayout(self.horizontalLayout_name)
 
         self.groupBox_team = QGroupBox(self.verticalLayoutWidget_12)
         self.groupBox_team.setObjectName(u"groupBox_team")
@@ -103,7 +131,7 @@ class Ui_Form(object):
         self.horizontalLayoutWidget.setGeometry(QRect(-1, 20, 341, 21))
         self.horizontalLayout_2 = QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_2.setContentsMargins(10, 0, 0, 0)
         self.ra_rank_1 = QRadioButton(self.horizontalLayoutWidget)
         self.ra_rank_1.setObjectName(u"ra_rank_1")
 
@@ -131,37 +159,6 @@ class Ui_Form(object):
 
 
         self.verticalLayout_10.addWidget(self.groupBox_rank)
-
-        self.groupBox = QGroupBox(self.verticalLayoutWidget_12)
-        self.groupBox.setObjectName(u"groupBox")
-        self.groupBox.setMinimumSize(QSize(0, 50))
-        self.lineEdit = QLineEdit(self.groupBox)
-        self.lineEdit.setObjectName(u"lineEdit")
-        self.lineEdit.setGeometry(QRect(50, 20, 265, 24))
-
-        self.verticalLayout_10.addWidget(self.groupBox)
-
-        self.groupBox_files = QGroupBox(self.verticalLayoutWidget_12)
-        self.groupBox_files.setObjectName(u"groupBox_files")
-        self.groupBox_files.setMinimumSize(QSize(0, 60))
-        self.layoutWidget = QWidget(self.groupBox_files)
-        self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(10, 20, 331, 30))
-        self.horizontalLayout_file = QHBoxLayout(self.layoutWidget)
-        self.horizontalLayout_file.setObjectName(u"horizontalLayout_file")
-        self.horizontalLayout_file.setContentsMargins(0, 0, 0, 0)
-        self.btn_sagun = QPushButton(self.layoutWidget)
-        self.btn_sagun.setObjectName(u"btn_sagun")
-
-        self.horizontalLayout_file.addWidget(self.btn_sagun)
-
-        self.btn_individual = QPushButton(self.layoutWidget)
-        self.btn_individual.setObjectName(u"btn_individual")
-
-        self.horizontalLayout_file.addWidget(self.btn_individual)
-
-
-        self.verticalLayout_10.addWidget(self.groupBox_files)
 
         self.groupBox_2 = QGroupBox(self.verticalLayoutWidget_12)
         self.groupBox_2.setObjectName(u"groupBox_2")
@@ -192,11 +189,11 @@ class Ui_Form(object):
 
         self.groupBox_points = QGroupBox(self.verticalLayoutWidget_12)
         self.groupBox_points.setObjectName(u"groupBox_points")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Ignored)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.groupBox_points.sizePolicy().hasHeightForWidth())
-        self.groupBox_points.setSizePolicy(sizePolicy2)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Ignored)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.groupBox_points.sizePolicy().hasHeightForWidth())
+        self.groupBox_points.setSizePolicy(sizePolicy1)
         self.groupBox_points.setMinimumSize(QSize(0, 100))
         self.groupBox_points.setMaximumSize(QSize(16777215, 400))
         self.verticalLayoutWidget = QWidget(self.groupBox_points)
@@ -284,7 +281,10 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label.setText(QCoreApplication.translate("Form", u"\ucd9c\ub3d9\uc218\ub2f9 \uc790\ub3d9\ud654 (Test \ubc84\uc804)", None))
+        self.btn_files.setText(QCoreApplication.translate("Form", u"\ud30c\uc77c \ub4f1\ub85d", None))
+        self.label_112.setText(QCoreApplication.translate("Form", u"112 \uc5d1\uc140", None))
+        self.label_enrol.setText(QCoreApplication.translate("Form", u"\ucd9c\ub3d9\uc218\ub2f9 \uc5d1\uc140", None))
+        self.label.setText(QCoreApplication.translate("Form", u"\uc774\ub984", None))
         self.groupBox_team.setTitle(QCoreApplication.translate("Form", u"\ud300", None))
         self.ra_team_1.setText(QCoreApplication.translate("Form", u"1\ud300", None))
         self.ra_team_2.setText(QCoreApplication.translate("Form", u"2\ud300", None))
@@ -296,10 +296,6 @@ class Ui_Form(object):
         self.ra_rank_3.setText(QCoreApplication.translate("Form", u"\uacbd\uc0ac", None))
         self.ra_rank_4.setText(QCoreApplication.translate("Form", u"\uacbd\uc704", None))
         self.ra_rank_5.setText(QCoreApplication.translate("Form", u"\uacbd\uac10", None))
-        self.groupBox.setTitle(QCoreApplication.translate("Form", u"\uc774\ub984", None))
-        self.groupBox_files.setTitle(QCoreApplication.translate("Form", u"\ud30c\uc77c \ub4f1\ub85d(2\uac1c)", None))
-        self.btn_sagun.setText(QCoreApplication.translate("Form", u"\uc0ac\uac74\uac80\uc0c9\ub9ac\uc2a4\ud2b8", None))
-        self.btn_individual.setText(QCoreApplication.translate("Form", u"\uac1c\uc778\ubcc4 \ucd9c\ub3d9\uc218\ub2f9 \ud30c\uc77c", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"\ud544\ud130\ub9c1 \uc635\uc158", None))
         self.checkBox_dongil.setText(QCoreApplication.translate("Form", u"\ub3d9\uc77c\uac74 \uc81c\uc678", None))
         self.checkBox_ftx.setText(QCoreApplication.translate("Form", u"FTX \uc81c\uc678", None))

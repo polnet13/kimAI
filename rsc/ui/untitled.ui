@@ -209,7 +209,7 @@ QPushButton:hover {
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>Home</string>
+              <string>플레이어</string>
              </property>
             </widget>
            </item>
@@ -246,7 +246,7 @@ QPushButton:hover {
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>CCTV</string>
+              <string>영상분석</string>
              </property>
             </widget>
            </item>
@@ -283,7 +283,7 @@ QPushButton:hover {
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>Mosaic</string>
+              <string>모자이크</string>
              </property>
             </widget>
            </item>
@@ -320,7 +320,7 @@ QPushButton:hover {
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>Bike</string>
+              <string>이륜차</string>
              </property>
             </widget>
            </item>

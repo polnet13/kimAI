@@ -54,8 +54,7 @@ class Chuldong(Ui_Form, QWidget):
         self.is_listening = False
         self.btn_macro.clicked.connect(self.auto_register)
         # 시그널 슬롯 연결
-        self.btn_sagun.clicked.connect(self.file_up_112)
-        self.btn_individual.clicked.connect(self.file_up_enrolled)
+        self.btn_files.clicked.connect(self.file_open)
         self.btn_make_df.clicked.connect(self.make_df)
         self.btn_del.clicked.connect(self.delete_row)
         self.btn_hwp.clicked.connect(self.make_hwp)
@@ -136,43 +135,41 @@ class Chuldong(Ui_Form, QWidget):
         team.setChecked(True)
 
     ## 사건검색리스트 엑셀 파일 등록
-    def file_up_112(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, '사건검색리스트 엑셀파일', os.getcwd(), 'All files (*)')
-        if file_path:
-            try:
-                df = pd.read_excel(
-                    file_path,
-                    sheet_name='List', 
-                    usecols='A:AJ',
-                    header=0,
-                    )
-                self.df1 = df
-            except Exception as e:
-                print(e)
-                QMessageBox.critical(self, "Error", str(e))
-                return
+    def file_open(self):
+        file_paths, _ = QFileDialog.getOpenFileNames(self, '출동수당 파일 등록', os.getcwd(), 'All files (*)')
+        if not file_paths:
+            return
+        for file_path in file_paths:
+            self.sagun(file_path)
+            self.enrolled(file_path)
+
+    def sagun(self, file_path):
+        try:
+            df = pd.read_excel(
+                file_path,
+                sheet_name='List', 
+                usecols='A:AJ',
+                header=0,
+                )
+            self.df1 = df
+            self.label_112.setStyleSheet('color: #90EE90; font-weight: bold;')
+        except Exception as e:
+            print(e)
+            return
 
 
-    ## 엑셀등록(이미 등록된 리스트) => df2 생성
-    def file_up_enrolled(self):
-        # 체크여부, No, 신청부서 지역관서(전소속 부서), 타지역관서(전소속 부서)실적 가져오기, 접수 번호, 사건번호, 신고내용, 접수일시, 도착일시
-        # 사용할거는 접수 번호, 접수일시(2024-10-03 07:36:00)
-        file_path, _ = QFileDialog.getOpenFileName(self, '출동수당 등록 엑셀파일', os.getcwd(), 'All files (*)')
-        if file_path: 
-            try:
-                df = pd.read_excel(
-                    file_path, 
-                    sheet_name='sheet_1', 
-                    usecols='A:J',
-                    header=1,
-                    )
-                file_name = os.path.basename(file_path)
-                print(file_name)
-                self.df2 = df
-            except Exception as e:
-                print(e)
-                QMessageBox.critical(self, "Error", str(e))
-                return
+    def enrolled(self, file_path):
+        try:
+            self.df2 = pd.read_excel(
+                file_path, 
+                sheet_name='sheet_1', 
+                usecols='A:J',
+                header=1,
+                )
+            self.label_enrol.setStyleSheet('color: #90EE90; font-weight: bold;')
+        except Exception as e:
+            print(e)
+            return
 
     
     ## 엑셀 파일 정리
@@ -183,7 +180,7 @@ class Chuldong(Ui_Form, QWidget):
             df1 = self.df1   
             df2 = self.df2
             df1['접수시간'] = pd.to_datetime(df1['접수시간'], format='%H:%M:%S')
-            df1 = df1[['접수번호','접수일자', '접수시간', '신고내용','종결내용','종결보고자','사건번호','코드','종결']]  # 지령시간은 외부코드에서 +5분하기 위해 사용
+            df1 = df1[['접수번호','접수일자', '접수시간', '신고내용','종결내용','종결보고자','사건번호','코드','종결','종결시사건코드','도착시간']]  # 지령시간은 외부코드에서 +5분하기 위해 사용
             if self.checkBox_dongil.isChecked():
                 df1 = df1[ df1['종결']!='동일']
             if self.checkBox_ftx.isChecked():
@@ -193,17 +190,24 @@ class Chuldong(Ui_Form, QWidget):
             df1_1.reset_index(inplace=True, drop=True)
             #조건2: 코드2 중에서 21:50 - 06:00
             df1_2 = df1[ (df1['코드']=='C2') & (df1['종결보고자'].str.contains(name))]
-            df1_2 = df1_2[ (df1_2['접수시간'] >= pd.to_datetime('21:50', format='%H:%M').time())|(df1_2['접수시간'] <= pd.to_datetime('06:00', format='%H:%M').time())]
+            # df1_2 = df1_2[ (df1_2['접수시간'] >= pd.to_datetime('21:50', format='%H:%M').time())|(df1_2['접수시간'] <= pd.to_datetime('06:00', format='%H:%M').time())]
+            df1_2 = df1_2[ (df1_2['접수시간'].dt.time >= pd.to_datetime('21:50', format='%H:%M').time()) |
+               (df1_2['접수시간'].dt.time <= pd.to_datetime('06:00', format='%H:%M').time()) ]
             df1_2.reset_index(drop=True, inplace=True)
             #조건1, 조건2 결합
             result = pd.concat([df1_1, df1_2])
+            result['112신고 접수일시'] = result['접수일자'] + '\n' + result['접수시간'].dt.strftime('%H:%M')
             # df2: 이미 등록된 출동수당 리스트로 만들기
+            result = result.drop(['접수일자','접수시간'], axis=1)
+            result = result[['112신고 접수일시','신고내용','종결내용','종결보고자','사건번호','코드','종결','종결시사건코드','접수번호','도착시간']] 
             df2_list = df2['접수 번호'].tolist()
-            # 출동수당 정리한거에서 이미 등록된 출동수당
-            DT.df_main = result.drop(result[result['접수번호'].isin(df2_list)].index)
+
+            
+            DT.df_main = result.drop(result[result['접수번호'].isin(df2_list)].index).reset_index(drop=True)
+            print(DT.df_main)
         except Exception as e:
             print(e)
-            QMessageBox.critical(self, "Error", str(e))
+            QMessageBox.critical(self, "파일 오류", '엑셀 파일 2개를 업로드하세요')
         self.signalSingo.emit(1)
     
     
@@ -226,6 +230,9 @@ class Chuldong(Ui_Form, QWidget):
     ## 선택된 행을 삭제합니다.
     def delete_row(self):
         self.signalSingo.emit(2)
+
+    def delete_key(self):
+        self.delete_row()
         
 
 
@@ -237,11 +244,21 @@ class Chuldong(Ui_Form, QWidget):
         name = self.lineEdit.text()
         dic = dict(date=date, weekday=weekday, team=team, rank=rank, name=name)
         path = os.path.join(DT.BASE_DIR, 'rsc', 'hwp', 'templete.hwp')
+        df = DT.df_main
+        df['연번'] = range(1, df.shape[0]+1)
+        # df['112신고 접수일시'] = df['접수일자'] + '\n' + df['접수시간'].dt.strftime('%H:%M')
+        df['e1'] = ''
+        df['e2'] = ''
+        df['e3'] = ''
+        df['e4'] = ''
+        df['e5'] = ''
+        df['e6'] = ''
+        df = df[['연번','사건번호','112신고 접수일시','종결시사건코드','e1','e2','e3','e4','종결보고자','신고내용','e5','e6']]
         self.hwp = Hwp(path)
         self.hwp.display(True)
         self.hwp.dic_to_field(dic)
-        self.hwp.make_table(DT.df_main.shape[0], DT.df_main.shape[1])
-        self.hwp.insert_df(DT.df_main)
+        self.hwp.make_table(df.shape[0], df.shape[1])
+        self.hwp.insert_df(df)
         # hwp 파일을 읽음
         # 필드 입력
         # 루프 돌면서 df -> 표에 삽입
@@ -255,7 +272,9 @@ class Chuldong(Ui_Form, QWidget):
         # 도착시간 계산
         poi = pyautogui.position()
         print(poi)
-        df['도착시간'] = df['지령시간'].apply(tools.plus5min)
+        print(df.head())
+        # df['도착시간'] = df['접수시간'].apply(tools.plus5min)
+        df['도착시간'] = pd.to_datetime(df['도착시간'], format='%Y-%m-%d %H:%M:%S')
         df['도착date'] = df['도착시간'].dt.strftime('%Y-%m-%d')
         df['도착time'] = df['도착시간'].dt.strftime('%H:%M')
         receipt_num_list = df['접수번호'].tolist()
