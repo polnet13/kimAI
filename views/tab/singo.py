@@ -46,6 +46,7 @@ class Chuldong(Ui_Form, QWidget):
         self.df1 = None     # 사건검색리스트 파일 -> df
         self.df2 = None     # 출동수당 파일 -> df
         self.result = None
+        self.close_signal = False
         self.setupUi(self)
         self.btn_point_1.clicked.connect(self.listen_start)
         self.btn_point_2.clicked.connect(self.listen_start)
@@ -272,6 +273,8 @@ class Chuldong(Ui_Form, QWidget):
         # 접수번호 클릭
         # 입력
         # 등록
+        df_transpose = df.T
+        print(df_transpose.head())
 
         # df['도착시간'] = df['접수시간'].apply(tools.plus5min)
         df['도착시간'] = pd.to_datetime(df['도착시간'], format='%Y-%m-%d %H:%M:%S')
@@ -286,6 +289,8 @@ class Chuldong(Ui_Form, QWidget):
         jb_xy = None
         for receipt_num, arrival_date, arrival_time in zip(receipt_num_list, arrival_time_date, arrival_time_list):
             print('임의등록 버튼 클릭!!')
+            if self.close_signal:
+                break
             pyautogui.moveTo(register, duration=0.2)
             pyautogui.click()
             time.sleep(1)
@@ -303,26 +308,28 @@ class Chuldong(Ui_Form, QWidget):
             pyautogui.click()
             pyautogui.typewrite(f'{receipt_num}', interval = 0.01)
             # 이미 등록된 경우 패스하기
-            img_path4 = os.path.join(DT.BASE_DIR, 'rsc', 'singo', '4.jpg')  # 이미 등록된  
-            img_path6 = os.path.join(DT.BASE_DIR, 'rsc', 'singo', '6.jpg')  # 등록 가능한  
-            result4 = False
-            result6 = False
+            img_registered = os.path.join(DT.BASE_DIR, 'rsc', 'singo', '4.jpg')  # 이미 등록된  
+            img_unregistered = os.path.join(DT.BASE_DIR, 'rsc', 'singo', '6.jpg')  # 등록 가능한  
+            resultOfRegistered = False
+            n=0
             while True:
+                print(n, '등록된 이미지인지 확인하는 중')
+                n += 1
                 try:
-                    result4 = pyautogui.locateOnScreen(img_path4, confidence=0.8)
-                except pyautogui.ImageNotFoundException:
-                    print("화면에서 이미지를 찾을 수 없습니다.")
-                if result4:
-                    # 이미 등록된
-                    result = 'stop'
+                    resultOfRegistered = pyautogui.locateOnScreen(img_registered, confidence=0.6)
+                except:
+                    pass
+                if resultOfRegistered:
+                    gostop = 'stop'
                     break
-                result6 = pyautogui.locateOnScreen(img_path6, confidence= 0.9)
-                if result6:
-                    # 등록 가능한
-                    result = 'go'
+                try:
+                    resultOfRegistered = pyautogui.locateOnScreen(img_unregistered, confidence= 0.6)
+                except:
+                    pass
+                if resultOfRegistered:
                     break
                 time.sleep(0.1)
-            if result == 'stop':
+            if gostop == 'stop':
                 # 이미 등록된 경우 패스 하는 코드임
                 tools.tap_n(14)
                 pyautogui.press('enter')
@@ -365,14 +372,24 @@ class Chuldong(Ui_Form, QWidget):
             time.sleep(0.7)
             enter_1 = False
             enter_2 = False
+            n=0
             while True:
+                if self.close_signal:
+                    break
+                print(n, '임의등록 확인창 찾는 중')
+                n += 1
                 enter_1 = pyautogui.locateOnScreen(os.path.join(DT.BASE_DIR, 'rsc', 'singo', 'enter_1.jpg'), confidence= 0.9)   
                 if enter_1:
                     print('임의등록을 하겠습니까? => 버튼 확인함')
                     break
                 time.sleep(0.2)
             pyautogui.press('enter')
+            n=0
             while True:
+                if self.close_signal:
+                    break
+                print(n, '저장되었습니다. 확인창 찾는 중')
+                n += 1
                 enter_2 = pyautogui.locateOnScreen(os.path.join(DT.BASE_DIR, 'rsc', 'singo', 'enter_2.jpg'), confidence= 0.9)
                 if enter_2:
                     print('저장되었습니다. => 버튼 확인함')
@@ -384,8 +401,35 @@ class Chuldong(Ui_Form, QWidget):
         
 
     def program_exit(self):
-        '''멀티 CCTV 프로그램 종료'''
+        self.close_signal = True
         print('멀티 CCTV 종료')
+
+    def btn1(self):
+        '''버튼 클릭'''
+        print('버튼1 클릭')
+
+    def btn2(self):
+        '''버튼 클릭'''
+        print('버튼2 클릭')
+    
+    def btn3(self):
+        '''버튼 클릭'''
+        print('버튼3 클릭')
+
+    def btn4(self):
+        '''버튼 클릭'''
+        print('버튼4 클릭')
+
+    def btn5(self):
+        '''버튼 클릭'''
+        print('버튼5 클릭')
+
+    def btn6(self):
+        '''버튼 클릭'''
+        print('버튼6 클릭')
+
+    
+
 
     ####################     
     # 멀티프로세싱 함수 #

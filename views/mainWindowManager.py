@@ -1,7 +1,7 @@
 import subprocess
 import sys
 import json
-from PySide6.QtWidgets import QMainWindow, QFileDialog  
+from PySide6.QtWidgets import QMainWindow, QFileDialog, QApplication
 from PySide6.QtWidgets import QAbstractItemView
 from PySide6.QtCore import QTimer, Qt 
 from PySide6.QtGui import QKeySequence, QShortcut
@@ -400,6 +400,7 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         '''워커와 GUI 종료'''
         if self.detector is not None:
             self.detector.program_exit()
+            QApplication.quit()
         self.close()        
 
 
