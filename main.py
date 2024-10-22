@@ -14,7 +14,7 @@ class csswindow(mainWindow):
         super().__init__()
         self.setWindowTitle(QCoreApplication.translate(
             "MainWindow", 
-            "K-Pol AI", 
+            "HanamPol Mate", 
             None
             ))
         icon_path = os.path.join(DT.BASE_DIR, 'rsc', 'ico', 'main.jpg')

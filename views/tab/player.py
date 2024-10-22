@@ -9,13 +9,13 @@ from views.sharedData import DT
 from PySide6.QtCore import Signal, QObject, QTimer 
 from PySide6 import QtGui
 from PySide6.QtWidgets import QWidget, QFileDialog, QAbstractItemView
-from rsc.ui.home_ui import Ui_Form
+from rsc.ui.player_ui import Ui_Form
 from multiprocessing import Process, Queue
 import time
 
  
 
-class Home(Ui_Form, QWidget):
+class Player(Ui_Form, QWidget):
 
     playerOpenSignal = Signal()
 
@@ -95,6 +95,7 @@ class Home(Ui_Form, QWidget):
             value_objs = [QtGui.QStandardItem(str(value)) for value in self.df.iloc[row]]
             qmodel_.appendRow(value_objs)
         self.tableView.setModel(qmodel_)
+        self.tableView.setColumnWidth(0, 300)
         self.update()
         
         # 테이블뷰 클릭 시 값을 가져오도록 수정

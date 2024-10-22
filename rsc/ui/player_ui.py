@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'home.ui'
+## Form generated from reading UI file 'player.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.7.2
 ##
@@ -15,9 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QHeaderView, QLabel,
-    QPushButton, QSizePolicy, QSlider, QSpacerItem,
-    QTableView, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QHeaderView, QLabel, QPushButton,
+    QSizePolicy, QSlider, QTableView, QVBoxLayout,
+    QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -31,7 +31,7 @@ class Ui_Form(object):
         Form.setSizePolicy(sizePolicy)
         self.verticalLayoutWidget_12 = QWidget(Form)
         self.verticalLayoutWidget_12.setObjectName(u"verticalLayoutWidget_12")
-        self.verticalLayoutWidget_12.setGeometry(QRect(0, 0, 341, 561))
+        self.verticalLayoutWidget_12.setGeometry(QRect(0, 0, 361, 561))
         self.verticalLayout_7 = QVBoxLayout(self.verticalLayoutWidget_12)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.verticalLayout_7.setContentsMargins(11, 11, 11, 11)
@@ -52,24 +52,11 @@ class Ui_Form(object):
 
         self.verticalLayout_7.addWidget(self.btn_open_file)
 
-        self.horizontalLayout_7 = QHBoxLayout()
-        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-
-        self.verticalLayout_7.addLayout(self.horizontalLayout_7)
-
         self.tableView = QTableView(self.verticalLayoutWidget_12)
         self.tableView.setObjectName(u"tableView")
+        self.tableView.setMinimumSize(QSize(339, 0))
 
         self.verticalLayout_7.addWidget(self.tableView)
-
-        self.pushButton = QPushButton(self.verticalLayoutWidget_12)
-        self.pushButton.setObjectName(u"pushButton")
-
-        self.verticalLayout_7.addWidget(self.pushButton)
-
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.verticalLayout_7.addItem(self.verticalSpacer)
 
 
         self.retranslateUi(Form)
@@ -79,8 +66,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label_2.setText(QCoreApplication.translate("Form", u"home", None))
+        self.label_2.setText(QCoreApplication.translate("Form", u"a: -1\ud504\ub808\uc784, s:\uc815\uc9c0/\ud50c\ub808\uc774, d: +1 \ud504\ub808\uc784", None))
         self.btn_open_file.setText(QCoreApplication.translate("Form", u"\ud30c\uc77c \uc5f4\uae30", None))
-        self.pushButton.setText(QCoreApplication.translate("Form", u"\uc120\ud0dd\uc601\uc5ed \ucea1\uccd0", None))
     # retranslateUi
 

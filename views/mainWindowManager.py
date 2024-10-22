@@ -22,7 +22,7 @@ from views.tab.cctv_multi import CCTV
 from views.tab.mosaic_v2 import Mosaic 
 from views.tab.settings import Settings
 from views.tab.bike import Bike 
-from views.tab.home import Home 
+from views.tab.player import Player 
 from views.tab.singo import Chuldong 
 
 
@@ -37,8 +37,8 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.setFixedSize(1179,612)
         
         # 로드 탭
-        self.tab_home = Home()
-        self.stackedWidget.addWidget(self.tab_home)
+        self.tab_player = Player()
+        self.stackedWidget.addWidget(self.tab_player)
         json_path = os.path.join(DT.BASE_DIR, 'rsc', 'json', 'options.json')
         with open(json_path, "r") as f:
             options = json.load(f)
@@ -53,9 +53,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.tab_singo = Chuldong() 
         self.stackedWidget.addWidget(self.tab_singo)
         # 초기 탭 설정
-        index_home = self.stackedWidget.indexOf(self.tab_home)
+        index_home = self.stackedWidget.indexOf(self.tab_player)
         self.stackedWidget.setCurrentIndex(index_home)
-        self.detector = self.tab_home
+        self.detector = self.tab_player
         # 멀티 프로세싱 관련 변수
         self.statusBar().showMessage(f'스레드: {self.thread}')
         # 메시지 박스 표시 플래그
@@ -80,14 +80,14 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         self.btn_region_reset.clicked.connect(self.slot_btn_region_reset)
         # 탭 시그널 정의
         self.tab_cctv.playerOpenSignal.connect(self.player_fileopen)
-        self.tab_home.playerOpenSignal.connect(self.player_fileopen)
+        self.tab_player.playerOpenSignal.connect(self.player_fileopen)
         self.tab_mosaic.signal_frame_move.connect(self.mosaic_move_clicked)
         self.tab_singo.signalSingo.connect(self.control_singo_signal)
         # 버튼 좌 메뉴 
         self.btn_cctv.clicked.connect(self.buttonClick)
         self.btn_mosaic.clicked.connect(self.buttonClick)
         self.btn_settings.clicked.connect(self.buttonClick)
-        self.btn_home.clicked.connect(self.buttonClick)
+        self.btn_player.clicked.connect(self.buttonClick)
         self.btn_bike.clicked.connect(self.buttonClick)
         self.btn_112.clicked.connect(self.buttonClick)
         self.slider_delay.valueChanged.connect(self.slot_delay_valueChanged)
@@ -160,9 +160,9 @@ class mainWindow(QMainWindow, Ui_MainWindow):
         btn = self.sender()
         btnName = btn.objectName()
         # SHOW HOME PAGE
-        if btnName == "btn_home":
-            DT.index = self.stackedWidget.indexOf(self.tab_home)
-            self.detector = self.tab_home
+        if btnName == "btn_player":
+            DT.index = self.stackedWidget.indexOf(self.tab_player)
+            self.detector = self.tab_player
             self.change_stack(0)
         if btnName == "btn_cctv":
             DT.index = self.stackedWidget.indexOf(self.tab_cctv)

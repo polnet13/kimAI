@@ -24,7 +24,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>341</width>
+     <width>361</width>
      <height>561</height>
     </rect>
    </property>
@@ -44,7 +44,7 @@
     <item>
      <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>home</string>
+       <string>a: -1프레임, s:정지/플레이, d: +1 프레임</string>
       </property>
      </widget>
     </item>
@@ -66,30 +66,14 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_7"/>
-    </item>
-    <item>
-     <widget class="QTableView" name="tableView"/>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton">
-      <property name="text">
-       <string>선택영역 캡쳐</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
+     <widget class="QTableView" name="tableView">
+      <property name="minimumSize">
        <size>
-        <width>20</width>
-        <height>40</height>
+        <width>339</width>
+        <height>0</height>
        </size>
       </property>
-     </spacer>
+     </widget>
     </item>
    </layout>
   </widget>
