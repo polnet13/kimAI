@@ -1,3 +1,4 @@
+import os 
 #############
 # 옵션 설정 #
 #############
@@ -14,8 +15,6 @@ hidden_imports = [
 # 생성된 exe 파일 삭제 #
 #######################
 def delete():
-    import os 
-
     wd = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     deletes_dir = ['build', 'dist']
     deletes_dir = [ os.path.join(wd, item, 'main') for item in deletes_dir]
@@ -36,7 +35,6 @@ def delete():
 # 실행파일 생성 #
 ################
 def build():
-    import os
     import subprocess
 
     path = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))   
@@ -67,20 +65,12 @@ def build():
 # 생성파일 실행 #
 ################
 def exe():
-    import os 
-
     wd = os.path.abspath(os.path.dirname(__file__))
     try:
         python_path = r'C:/Users/prude/anaconda3/envs/pol/python.exe'
     except:
         python_path = r'C:/Users/prudent13/anaconda3/envs/pol_ai/python.exe'
-
     target = os.path.join(wd, 'dist', 'main','main.exe')
-    comand = f'{target}'
-    # 파일이 존재하는지 확인
-    if not os.path.isfile(target):
-        target = os.path.join(wd, 'build', 'main','main.exe')
-    # C:\Users\prude\kimAI\build\main\main.exe
     comand = f'{target}'
     print(comand)
     os.system(comand) 

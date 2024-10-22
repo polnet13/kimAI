@@ -288,6 +288,7 @@ class Chuldong(Ui_Form, QWidget):
         # 증빙구분 좌표 초기화
         jb_xy = None
         for receipt_num, arrival_date, arrival_time in zip(receipt_num_list, arrival_time_date, arrival_time_list):
+            # 임의등록 버튼 클릭
             print('임의등록 버튼 클릭!!')
             if self.close_signal:
                 break
@@ -312,6 +313,7 @@ class Chuldong(Ui_Form, QWidget):
             img_unregistered = os.path.join(DT.BASE_DIR, 'rsc', 'singo', '6.jpg')  # 등록 가능한  
             resultOfRegistered = False
             n=0
+            gostop = None
             while True:
                 print(n, '등록된 이미지인지 확인하는 중')
                 n += 1
@@ -328,14 +330,14 @@ class Chuldong(Ui_Form, QWidget):
                     pass
                 if resultOfRegistered:
                     break
-                time.sleep(0.1)
+                time.sleep(0.5)
             if gostop == 'stop':
                 # 이미 등록된 경우 패스 하는 코드임
                 tools.tap_n(14)
                 pyautogui.press('enter')
-                time.sleep(0.1)
+                time.sleep(0.3)
                 pyautogui.press('enter')
-                time.sleep(0.1)
+                time.sleep(0.3)
                 continue
             # 도착일 입력: 탭6번 후 입력
             tools.tap_n(6)
@@ -378,23 +380,23 @@ class Chuldong(Ui_Form, QWidget):
                     break
                 print(n, '임의등록 확인창 찾는 중')
                 n += 1
-                enter_1 = pyautogui.locateOnScreen(os.path.join(DT.BASE_DIR, 'rsc', 'singo', 'enter_1.jpg'), confidence= 0.9)   
+                enter_1 = pyautogui.locateOnScreen(os.path.join(DT.BASE_DIR, 'rsc', 'singo', 'enter_1.jpg'), confidence= 0.5)   
                 if enter_1:
                     print('임의등록을 하겠습니까? => 버튼 확인함')
                     break
-                time.sleep(0.2)
+                time.sleep(0.3)
             pyautogui.press('enter')
             n=0
             while True:
                 if self.close_signal:
                     break
-                print(n, '저장되었습니다. 확인창 찾는 중')
+                print(n, '저장되었습니다 확인창 찾는 중')
                 n += 1
-                enter_2 = pyautogui.locateOnScreen(os.path.join(DT.BASE_DIR, 'rsc', 'singo', 'enter_2.jpg'), confidence= 0.9)
+                enter_2 = pyautogui.locateOnScreen(os.path.join(DT.BASE_DIR, 'rsc', 'singo', 'enter_2.jpg'), confidence= 0.5)
                 if enter_2:
                     print('저장되었습니다. => 버튼 확인함')
                     break
-                time.sleep(0.2)
+                time.sleep(0.3)
             pyautogui.press('enter')
             time.sleep(0.2)                    
         pyautogui.alert('끝')
